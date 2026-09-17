@@ -418,3 +418,71 @@ button { cursor: pointer; }
   border: 1px solid var(--border);
 }
 .lampara-porta--fase { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); font-weight: 600; }
+
+/* ── Progreso en el temario ──────────────────────────────────── */
+.nav-progreso {
+  float: right;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.tema-estado--ok { color: var(--ok); font-weight: 700; }
+
+/* ── CTA al quiz debajo del simulador ────────────────────────── */
+.quiz-cta-wrap {
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.quiz-cta-wrap > span { color: var(--muted); font-size: 0.9rem; }
+.quiz-cta {
+  display: inline-block;
+  background: var(--panel-2);
+  border: 1px solid var(--accent-2);
+  color: var(--accent-2);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+.quiz-cta:hover { filter: brightness(1.12); }
+.quiz-cta--ok { border-color: var(--ok); color: var(--ok); }
+
+/* ── Quiz ────────────────────────────────────────────────────── */
+.badge-aprobado { color: var(--ok); font-weight: 600; margin-left: 0.4rem; }
+.quiz-form { display: grid; gap: 1rem; }
+.quiz-pregunta {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+  margin: 0;
+  background: var(--panel);
+}
+.quiz-pregunta legend { font-weight: 600; padding: 0 0.4rem; }
+.quiz-num { color: var(--accent); }
+.quiz-pregunta--ok { border-color: var(--ok); }
+.quiz-pregunta--mal { border-color: var(--danger); }
+.quiz-opcion {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.quiz-opcion:hover { background: var(--panel-2); }
+.quiz-opcion--correcta { background: var(--ok-bg); color: var(--ok); }
+.quiz-opcion--elegida-mal { background: var(--danger-bg); color: var(--danger); }
+.quiz-explicacion { font-size: 0.85rem; color: var(--muted); margin: 0.5rem 0 0; }
+.quiz-acciones { display: flex; gap: 0.6rem; }
+#quiz-reintentar {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+}

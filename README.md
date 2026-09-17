@@ -35,6 +35,11 @@ python3 -m http.server 8000
 
 Además:
 
+- **Quiz de cierre por tema** (spec sección 6): 4 preguntas por tema, corrección
+  con explicación, umbral de aprobación del 70 %. Al aprobar, el tema queda
+  marcado con ✔ en el temario y suma al progreso del nivel (X/6).
+- **Progreso del alumno** persistido en `localStorage` (conveniencia por
+  visitante; ver "Pendiente / producto" para la validación real).
 - **Catálogo de componentes** consultable (spec sección 4): cables, protecciones,
   tomacorrientes, herramientas y EPP, cada uno con especificación técnica, para
   qué sirve, qué pasa si se usa mal y en qué nivel del curso aparece.
@@ -60,8 +65,25 @@ data/curricula.js              Currícula y aviso educativo
 1. Crear `js/simuladores/<id>.js` que exporte `render(container)`.
 2. Registrarlo en el objeto `SIMULADORES` de `js/app.js`.
 3. En `data/curricula.js`, marcar el tema con `estado: "listo"` y `sim: "<id>"`.
+4. (Opcional) Agregar su quiz de cierre en `data/quizzes.js` bajo el id del tema.
 
 ## Pendiente (según spec)
 
-Todo intermedio (2.x) y avanzado (3.x), quiz de cierre por tema y certificado al
-completar los tres niveles.
+- Nivel Intermedio (2.x) y Avanzado (3.x): simulaciones y sus quizzes.
+- Certificado al completar los tres niveles.
+
+## Pendiente / producto
+
+El objetivo es que estos sean **cursos vendibles**, y que al de electricidad le
+sigan otros oficios (**plomería, refrigeración, mecánica**). Dos consecuencias:
+
+- **Multi-oficio.** El motor de quiz y de progreso ya es genérico: el progreso se
+  guarda con clave `oficio:tema` y el quiz se indexa por id de tema. Para sumar un
+  oficio nuevo hay que generalizar la selección de currícula (hoy `OFICIO` está
+  fijo en `js/app.js`) a un selector de oficio + su propia currícula/catálogo.
+  Conviene hacerlo al empezar el segundo oficio, no antes, para no sobre-diseñar.
+- **Venta y certificado con valor.** Login, pago/control de acceso y un
+  certificado verificable necesitan un backend: hoy el progreso vive solo en el
+  navegador del alumno (`localStorage`) y no sirve como prueba. Es una decisión de
+  producto (proveedor de pago, autenticación, emisión de certificados) a definir
+  aparte.
