@@ -18,7 +18,23 @@ python3 -m http.server 8000
 
 ## Estado actual
 
-**Nivel Básico completo** (spec sección 1), con seis simuladores:
+**Niveles Básico e Intermedio completos** (spec secciones 1 y 2), con once
+simuladores y quiz de cierre en cada tema.
+
+### Intermedio (spec sección 2)
+
+- **2.1 Serie vs. paralelo** — tres lamparitas: en serie una quemada apaga todas;
+  en paralelo son independientes. Muestra la resistencia equivalente.
+- **2.2 Cálculo de cargas por ambiente** — asignar artefactos a circuitos sin
+  sobrecargar ninguno; la falla clásica es meter toda la casa en un circuito.
+- **2.3 Disyuntor diferencial (RCD)** — fuga a tierra: con térmica sola no corta,
+  con diferencial (30 mA) corta en ms. Roles distintos, el tablero necesita ambos.
+- **2.4 Tablero completo** — armar el tablero respetando la jerarquía llave
+  general → diferencial → térmicas seccionales.
+- **2.5 Iluminación** — LED vs. incandescente y cuántas bocas entran en la térmica
+  de iluminación (10 A).
+
+### Básico (spec sección 1)
 
 - **1.1 Ley de Ohm y potencia** — circuito resistivo con multímetro virtual: el
   alumno mide V y R y calcula I = V/R y P = V·I, con verificación y casos nuevos.
@@ -69,7 +85,7 @@ data/curricula.js              Currícula y aviso educativo
 
 ## Pendiente (según spec)
 
-- Nivel Intermedio (2.x) y Avanzado (3.x): simulaciones y sus quizzes.
+- Nivel Avanzado (3.x): simulaciones y sus quizzes.
 - Certificado al completar los tres niveles.
 
 ## Pendiente / producto

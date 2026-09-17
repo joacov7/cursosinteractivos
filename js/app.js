@@ -6,6 +6,11 @@ import * as ohmPotencia from "./simuladores/ohm-potencia.js";
 import * as cortoSobrecarga from "./simuladores/corto-sobrecarga.js";
 import * as puestaTierra from "./simuladores/puesta-tierra.js";
 import * as polaridad from "./simuladores/polaridad.js";
+import * as serieParalelo from "./simuladores/serie-paralelo.js";
+import * as cargasAmbiente from "./simuladores/cargas-ambiente.js";
+import * as diferencial from "./simuladores/diferencial.js";
+import * as tablero from "./simuladores/tablero.js";
+import * as iluminacion from "./simuladores/iluminacion.js";
 import * as catalogoView from "./catalogo-view.js";
 import * as quiz from "./quiz.js";
 import { QUIZZES } from "../data/quizzes.js";
@@ -22,6 +27,11 @@ const SIMULADORES = {
   "corto-sobrecarga": cortoSobrecarga,
   "puesta-tierra": puestaTierra,
   polaridad: polaridad,
+  "serie-paralelo": serieParalelo,
+  "cargas-ambiente": cargasAmbiente,
+  diferencial: diferencial,
+  tablero: tablero,
+  iluminacion: iluminacion,
 };
 
 const vista = document.getElementById("vista");

@@ -486,3 +486,74 @@ button { cursor: pointer; }
   border-radius: 8px;
   padding: 0.5rem 0.9rem;
 }
+
+/* ── 2.1 Serie vs paralelo ───────────────────────────────────── */
+.lamparas-fila { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+.lampara-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+  min-width: 90px;
+  color: var(--text);
+}
+.lampara-item-icono { font-size: 1.8rem; filter: grayscale(1) brightness(0.6); }
+.lampara-item--on .lampara-item-icono { filter: drop-shadow(0 0 10px var(--accent)); }
+.lampara-item--on { border-color: var(--accent); }
+.lampara-item--quemada { border-color: var(--danger); opacity: 0.75; }
+.lampara-item-label { font-size: 0.8rem; }
+
+/* ── 2.2 Cargas por ambiente ─────────────────────────────────── */
+.cargas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin: 1rem 0; }
+@media (max-width: 720px) { .cargas-grid { grid-template-columns: 1fr; } }
+.cargas-artefactos h3, .cargas-circuitos h3 { margin-top: 0; }
+.carga-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.carga-nombre { font-size: 0.88rem; }
+.carga-nombre em { color: var(--muted); font-style: normal; }
+.carga-fila select { min-width: 130px; }
+.circuito-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.7rem;
+}
+.circuito-box--sobre { border-color: var(--danger); }
+.circuito-cab { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem; }
+
+/* ── 2.4 Tablero ─────────────────────────────────────────────── */
+.tablero {
+  display: grid;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.tablero-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+  flex-wrap: wrap;
+}
+.tablero-slot-info { display: flex; flex-direction: column; }
+.tablero-ayuda { font-size: 0.78rem; color: var(--muted); }
+.tablero-slot select { min-width: 210px; }

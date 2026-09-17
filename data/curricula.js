@@ -19,11 +19,11 @@ export const CURRICULA = [
     nivel: "intermedio",
     titulo: "Intermedio",
     temas: [
-      { id: "2.1", titulo: "Circuitos serie vs. paralelo", estado: "pendiente" },
-      { id: "2.2", titulo: "Cálculo de cargas por ambiente", estado: "pendiente" },
-      { id: "2.3", titulo: "Disyuntor diferencial (RCD)", estado: "pendiente" },
-      { id: "2.4", titulo: "Tablero completo", estado: "pendiente" },
-      { id: "2.5", titulo: "Iluminación", estado: "pendiente" },
+      { id: "2.1", titulo: "Circuitos serie vs. paralelo", estado: "listo", sim: "serie-paralelo" },
+      { id: "2.2", titulo: "Cálculo de cargas por ambiente", estado: "listo", sim: "cargas-ambiente" },
+      { id: "2.3", titulo: "Disyuntor diferencial (RCD)", estado: "listo", sim: "diferencial" },
+      { id: "2.4", titulo: "Tablero completo", estado: "listo", sim: "tablero" },
+      { id: "2.5", titulo: "Iluminación", estado: "listo", sim: "iluminacion" },
     ],
   },
   {
