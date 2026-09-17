@@ -417,4 +417,200 @@ export const QUIZZES = {
       },
     ],
   },
+
+  "3.1": {
+    tema: "Trifásica",
+    preguntas: [
+      {
+        q: "En una vivienda, entre fase y neutro hay…",
+        opciones: ["380 V", "220 V", "12 V", "110 V"],
+        correcta: 1,
+        explicacion: "La tensión monofásica domiciliaria es 220 V (fase-neutro).",
+      },
+      {
+        q: "La tensión entre fases en trifásica es…",
+        opciones: ["220 V", "380 V", "220 V siempre", "24 V"],
+        correcta: 1,
+        explicacion: "Entre dos fases hay 380 V.",
+      },
+      {
+        q: "¿Qué carga típicamente necesita trifásica?",
+        opciones: ["una lamparita", "un motor industrial de gran potencia", "un cargador de celular", "una heladera familiar"],
+        correcta: 1,
+        explicacion: "Los motores de mucha potencia y máquinas industriales usan trifásica.",
+      },
+      {
+        q: "La ventaja de la trifásica para motores grandes es…",
+        opciones: [
+          "que es más barata siempre",
+          "un funcionamiento más eficiente y equilibrado a alta potencia",
+          "que no necesita protección",
+          "que usa menos cables en todos los casos",
+        ],
+        correcta: 1,
+        explicacion: "La trifásica entrega potencia de forma más equilibrada y eficiente para cargas grandes.",
+      },
+    ],
+  },
+  "3.2": {
+    tema: "Motores — arranque",
+    preguntas: [
+      {
+        q: "La corriente de arranque de un motor, respecto de la nominal, es…",
+        opciones: ["igual", "varias veces mayor", "la mitad", "cero"],
+        correcta: 1,
+        explicacion: "En el arranque el motor toma varias veces (p. ej. ~6×) su corriente nominal.",
+      },
+      {
+        q: "El arranque estrella-triángulo sirve para…",
+        opciones: [
+          "aumentar el pico de arranque",
+          "reducir el pico de corriente de arranque",
+          "cambiar el sentido de giro",
+          "eliminar la protección",
+        ],
+        correcta: 1,
+        explicacion: "Reduce la corriente de arranque a aproximadamente un tercio.",
+      },
+      {
+        q: "Una térmica curva B en un motor con arranque directo…",
+        opciones: [
+          "es la ideal",
+          "tiende a disparar en cada arranque",
+          "no protege nunca",
+          "es obligatoria",
+        ],
+        correcta: 1,
+        explicacion: "La curva B dispara con múltiplos bajos: el pico de arranque la hace saltar.",
+      },
+      {
+        q: "Para tolerar el pico de arranque conviene una curva…",
+        opciones: ["B", "C o D", "ninguna", "cualquiera da igual"],
+        correcta: 1,
+        explicacion: "Las curvas C y D toleran múltiplos mayores, adecuadas para motores.",
+      },
+    ],
+  },
+  "3.3": {
+    tema: "Arranque de compresores",
+    preguntas: [
+      {
+        q: "Un compresor zumba, no arranca y salta el protector; el capacitor está hinchado. La falla más probable es…",
+        opciones: ["el capacitor de arranque", "el cable", "el termostato", "la lamparita"],
+        correcta: 0,
+        explicacion: "Sin par de arranque (capacitor fallado) el motor no gira y el protector lo saca.",
+      },
+      {
+        q: "El componente que da el impulso inicial conectando el bobinado de arranque es…",
+        opciones: ["el relé de arranque", "la térmica general", "el diferencial", "el neutro"],
+        correcta: 0,
+        explicacion: "El relé de arranque conmuta para dar el arranque y luego lo desconecta.",
+      },
+      {
+        q: "Antes de tocar un capacitor hay que…",
+        opciones: ["nada", "descargarlo (guarda energía)", "calentarlo", "mojarlo"],
+        correcta: 1,
+        explicacion: "El capacitor almacena carga y puede dar una descarga aunque esté desconectado.",
+      },
+      {
+        q: "Un compresor que corta caliente y rearranca al enfriarse, en ciclos, sugiere…",
+        opciones: [
+          "actuación del protector térmico",
+          "falla del tomacorriente",
+          "exceso de iluminación",
+          "polaridad invertida",
+        ],
+        correcta: 0,
+        explicacion: "El ciclado por temperatura es típico del protector térmico actuando.",
+      },
+    ],
+  },
+  "3.4": {
+    tema: "Mantenimiento industrial — selectividad",
+    preguntas: [
+      {
+        q: "La selectividad busca que, ante una falla, corte…",
+        opciones: [
+          "la protección general (toda la planta)",
+          "solo la protección más cercana a la falla",
+          "todas a la vez",
+          "ninguna",
+        ],
+        correcta: 1,
+        explicacion: "Debe actuar la protección aguas abajo, más cercana a la falla, y solo esa.",
+      },
+      {
+        q: "Para lograr selectividad amperométrica, la seccional debe ser…",
+        opciones: ["mayor que la general", "menor que la general", "igual a la general", "sin relación"],
+        correcta: 1,
+        explicacion: "La seccional se elige por debajo de la general para que actúe primero.",
+      },
+      {
+        q: "Si la seccional y la general son iguales, ante una falla puede…",
+        opciones: [
+          "cortar la general y parar toda la planta",
+          "no pasar nada",
+          "mejorar la selectividad",
+          "arrancar el motor",
+        ],
+        correcta: 0,
+        explicacion: "Sin margen, puede disparar la general y dejar todo sin servicio.",
+      },
+      {
+        q: "En mantenimiento, para entender un tablero conviene leer…",
+        opciones: ["el plano unifilar", "el manual del microondas", "la factura de luz", "nada"],
+        correcta: 0,
+        explicacion: "El unifilar muestra la estructura de circuitos y protecciones de la instalación.",
+      },
+    ],
+  },
+  "3.5": {
+    tema: "Normativa (AEA)",
+    preguntas: [
+      {
+        q: "La AEA es…",
+        opciones: [
+          "una marca de cables",
+          "la Asociación Electrotécnica Argentina, que publica la reglamentación de referencia",
+          "un tipo de térmica",
+          "un impuesto",
+        ],
+        correcta: 1,
+        explicacion: "La AEA edita la reglamentación de instalaciones eléctricas usada como referencia.",
+      },
+      {
+        q: "El enfoque correcto frente a la normativa es…",
+        opciones: [
+          "memorizar todo el articulado",
+          "saber cuándo consultarla y usarla como referencia",
+          "ignorarla",
+          "inventar criterios propios",
+        ],
+        correcta: 1,
+        explicacion: "No hace falta memorizarla; sí saber cuándo y para qué consultarla.",
+      },
+      {
+        q: "¿Cuál de estas decisiones se consulta en la reglamentación?",
+        opciones: [
+          "el color de la pared",
+          "la sección mínima de un cable y la puesta a tierra",
+          "la música de fondo",
+          "la marca del destornillador",
+        ],
+        correcta: 1,
+        explicacion: "Todo lo que hace a la seguridad de la instalación está reglamentado.",
+      },
+      {
+        q: "La reglamentación existe principalmente para…",
+        opciones: [
+          "complicar el trabajo",
+          "que las instalaciones sean seguras",
+          "vender más cable",
+          "decorar el tablero",
+        ],
+        correcta: 1,
+        explicacion: "Su objetivo es la seguridad de las personas y los bienes.",
+      },
+    ],
+  },
 };

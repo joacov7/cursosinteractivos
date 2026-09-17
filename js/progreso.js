@@ -44,3 +44,26 @@ export function resumenNivel(oficio, temaIds) {
   const aprobados = temaIds.filter((id) => todo[claveTema(oficio, id)]).length;
   return { aprobados, total: temaIds.length };
 }
+
+// True si TODOS los temas del oficio están aprobados (habilita el certificado).
+export function cursoCompleto(oficio, temaIds) {
+  const { aprobados, total } = resumenNivel(oficio, temaIds);
+  return total > 0 && aprobados === total;
+}
+
+// Nombre del alumno para el certificado (persistido como conveniencia).
+const KEY_NOMBRE = "cursos-interactivos:nombre";
+export function getNombre() {
+  try {
+    return localStorage.getItem(KEY_NOMBRE) || "";
+  } catch {
+    return "";
+  }
+}
+export function setNombre(nombre) {
+  try {
+    localStorage.setItem(KEY_NOMBRE, nombre);
+  } catch {
+    /* storage bloqueado: el nombre no persiste */
+  }
+}

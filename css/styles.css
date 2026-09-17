@@ -557,3 +557,95 @@ button { cursor: pointer; }
 .tablero-slot-info { display: flex; flex-direction: column; }
 .tablero-ayuda { font-size: 0.78rem; color: var(--muted); }
 .tablero-slot select { min-width: 210px; }
+
+/* ── 3.1 Clasificación mono/tri ──────────────────────────────── */
+.clasif-lista { display: grid; gap: 0.5rem; margin: 1rem 0; }
+.clasif-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  flex-wrap: wrap;
+}
+.clasif-botones { display: flex; gap: 0.4rem; }
+.clasif-botones button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82rem;
+}
+.clasif-botones button.clasif-sel { background: var(--accent-2); color: #06121f; border-color: var(--accent-2); }
+
+/* ── 3.3 / 3.5 Diagnóstico y decisión ────────────────────────── */
+.diag-sintoma {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0;
+}
+.diag-pregunta { font-weight: 600; }
+.diag-opciones { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+.diag-btn {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+.diag-btn--correcta { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.diag-btn--mal { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+.aea-progreso { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.4rem; }
+
+/* ── Certificado ─────────────────────────────────────────────── */
+.cert-controles { align-items: flex-end; }
+.cert-controles input {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.6rem;
+  font-size: 1rem;
+}
+.certificado {
+  background: #fdfcf7;
+  color: #1a212b;
+  border-radius: var(--radius);
+  padding: 0.6rem;
+  margin: 1.2rem 0;
+}
+.cert-borde {
+  border: 3px double #b8892b;
+  border-radius: 8px;
+  padding: 2rem 1.6rem;
+  text-align: center;
+}
+.cert-encabezado { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.8rem; color: #b8892b; margin: 0 0 1rem; }
+.cert-titulo { font-size: 1.8rem; font-weight: 700; margin: 0.3rem 0 1.2rem; }
+.cert-otorga { margin: 0; color: #555; }
+.cert-alumno {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0.4rem 0;
+  border-bottom: 1px solid #ddd;
+  display: inline-block;
+  padding: 0 1rem 0.3rem;
+  min-width: 260px;
+}
+.cert-detalle { max-width: 520px; margin: 1rem auto; }
+.cert-fecha { color: #555; margin: 1rem 0 0; }
+.cert-disclaimer { font-size: 0.75rem; color: #777; max-width: 520px; margin: 1.4rem auto 0; }
+
+@media print {
+  .app-header, .app-footer, .sidebar, .cert-controles, .sim-intro, .cierre-educativo, h2 { display: none !important; }
+  body, .vista, .layout { background: #fff !important; }
+  .certificado { margin: 0; }
+}

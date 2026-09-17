@@ -30,11 +30,11 @@ export const CURRICULA = [
     nivel: "avanzado",
     titulo: "Avanzado",
     temas: [
-      { id: "3.1", titulo: "Trifásica", estado: "pendiente" },
-      { id: "3.2", titulo: "Motores — arranque", estado: "pendiente" },
-      { id: "3.3", titulo: "Arranque de compresores", estado: "pendiente" },
-      { id: "3.4", titulo: "Mantenimiento industrial básico", estado: "pendiente" },
-      { id: "3.5", titulo: "Normativa (introducción a AEA)", estado: "pendiente" },
+      { id: "3.1", titulo: "Trifásica", estado: "listo", sim: "trifasica" },
+      { id: "3.2", titulo: "Motores — arranque", estado: "listo", sim: "motores-arranque" },
+      { id: "3.3", titulo: "Arranque de compresores", estado: "listo", sim: "compresor-diagnostico" },
+      { id: "3.4", titulo: "Mantenimiento industrial básico", estado: "listo", sim: "selectividad" },
+      { id: "3.5", titulo: "Normativa (introducción a AEA)", estado: "listo", sim: "normativa-aea" },
     ],
   },
 ];

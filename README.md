@@ -18,8 +18,28 @@ python3 -m http.server 8000
 
 ## Estado actual
 
-**Niveles Básico e Intermedio completos** (spec secciones 1 y 2), con once
-simuladores y quiz de cierre en cada tema.
+**Curso de Electricidad completo** (spec secciones 1, 2 y 3): los tres niveles con
+dieciséis simuladores, quiz de cierre en cada tema y certificado de finalización.
+
+### Avanzado (spec sección 3)
+
+- **3.1 Trifásica** — 220 V (fase-neutro) vs. 380 V (fase-fase); clasificar qué
+  cargas requieren trifásica vs. monofásica.
+- **3.2 Motores — arranque** — pico de arranque vs. corriente nominal; arranque
+  directo vs. estrella-triángulo y curva de térmica para que no salte al arrancar.
+- **3.3 Arranque de compresores** — diagnóstico entre capacitor, relé, protector
+  térmico o motor según los síntomas (puente con Refrigeración).
+- **3.4 Mantenimiento industrial — selectividad** — dimensionar protecciones para
+  que una falla corte solo su máquina y no toda la planta.
+- **3.5 Normativa (AEA)** — qué es la AEA y cuándo consultarla como referencia
+  (sin memorizar articulado).
+
+### Certificado
+
+Al aprobar los quizzes de los tres niveles se habilita un **certificado de
+finalización** con el nombre del alumno, imprimible / guardable como PDF. Es un
+certificado **educativo, no una matrícula habilitante** (así lo aclara el propio
+certificado).
 
 ### Intermedio (spec sección 2)
 
@@ -85,8 +105,8 @@ data/curricula.js              Currícula y aviso educativo
 
 ## Pendiente (según spec)
 
-- Nivel Avanzado (3.x): simulaciones y sus quizzes.
-- Certificado al completar los tres niveles.
+El curso de Electricidad de la spec está completo. Lo que sigue es producto:
+nuevos oficios (plomería, refrigeración, mecánica) y la parte de venta —ver abajo.
 
 ## Pendiente / producto
 
