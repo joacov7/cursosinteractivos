@@ -233,3 +233,188 @@ select {
 .pill--basico { color: var(--ok); border-color: var(--ok); }
 .pill--intermedio { color: var(--accent-2); border-color: var(--accent-2); }
 .pill--avanzado { color: var(--accent); border-color: var(--accent); }
+
+/* ── Comunes a simuladores ───────────────────────────────────── */
+.btn-primario, button.btn-primario {
+  background: var(--accent-2);
+  color: #06121f;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.btn-primario:hover { filter: brightness(1.08); }
+button { cursor: pointer; }
+.comparacion {
+  margin-top: 1.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+}
+.comparacion h3 { margin-top: 0; }
+
+/* ── 1.1 Ley de Ohm ──────────────────────────────────────────── */
+.ohm-circuito {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.ohm-fuente, .ohm-resistor {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  white-space: nowrap;
+}
+.ohm-cable { flex: 1; height: 2px; background: var(--accent); min-width: 24px; }
+
+.multimetro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+.mm-display {
+  background: #0a1a0a;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  min-width: 170px;
+}
+.mm-label { display: block; font-size: 0.7rem; color: var(--muted); }
+.mm-lectura {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 1.5rem;
+  color: #7CFC7C;
+}
+.mm-botones { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.mm-botones button, .corr-btn, .btn-switch, #btn-nuevo {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+}
+.ohm-medidos { display: flex; flex-wrap: wrap; gap: 1.2rem; color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+.ohm-medidos strong { color: var(--text); }
+.ohm-form { display: grid; gap: 0.9rem; max-width: 360px; }
+.ohm-form label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; }
+.ohm-form .hint { color: var(--muted); font-size: 0.8rem; }
+.ohm-form input {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  font-size: 1rem;
+}
+.ohm-acciones { display: flex; gap: 0.6rem; }
+.ohm-ref { margin-top: 1.2rem; color: var(--muted); }
+.ohm-ref summary { cursor: pointer; }
+.ohm-ref code { background: var(--panel-2); padding: 0.05rem 0.3rem; border-radius: 4px; }
+
+/* ── 1.4 Corto vs sobrecarga ─────────────────────────────────── */
+.dos-escenarios { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+@media (max-width: 640px) { .dos-escenarios { grid-template-columns: 1fr; } }
+.escenario {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.escenario h3 { margin-top: 0; }
+.escenario-desc { color: var(--muted); font-size: 0.88rem; min-height: 3.6em; }
+.corr-medida { display: flex; justify-content: space-between; font-family: ui-monospace, monospace; margin-bottom: 0.4rem; }
+.corr-valor { font-size: 1.3rem; color: var(--accent); }
+.corr-cron { color: var(--muted); }
+.corr-barra { height: 14px; background: var(--panel-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
+.corr-fill { height: 100%; width: 0; background: var(--accent-2); transition: width 0.1s linear; }
+.corr-fill--trip { background: var(--danger); transition: none; }
+.corr-estado { font-size: 0.88rem; margin: 0.6rem 0; color: var(--muted); }
+.corr-estado--activo { color: var(--warn); }
+.corr-estado--trip { color: var(--danger); font-weight: 600; }
+.corr-btn { width: 100%; }
+
+/* ── 1.5 Puesta a tierra ─────────────────────────────────────── */
+.switch-tierra { display: flex; align-items: center; gap: 0.6rem; margin: 1rem 0; font-size: 0.95rem; }
+.switch-tierra input { width: 1.1rem; height: 1.1rem; }
+.tierra-escena {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+}
+.tierra-artefacto { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.tierra-icono { font-size: 1.8rem; }
+.tierra-carcasa {
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  font-size: 0.9rem;
+}
+.tierra-carcasa--energizada { border-color: var(--danger); background: var(--danger-bg); }
+.tierra-carcasa--segura { border-color: var(--ok); background: var(--ok-bg); }
+.tierra-tension { font-family: ui-monospace, monospace; font-size: 1.2rem; }
+.tierra-camino { font-size: 0.88rem; padding: 0.5rem 0.8rem; border-radius: 8px; }
+.tierra-camino--peligro { background: var(--danger-bg); color: var(--danger); }
+.tierra-camino--ok { background: var(--ok-bg); color: var(--ok); }
+
+/* ── 1.6 Polaridad ───────────────────────────────────────────── */
+.switch-interruptor { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; color: var(--muted); }
+.btn-switch--on { background: var(--ok); color: #06210f; border-color: var(--ok); font-weight: 600; }
+.polaridad-escena {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  margin: 1rem 0;
+}
+.toma {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  background: #eceff3;
+  color: #1a212b;
+  border-radius: 12px;
+  padding: 1rem 1.4rem;
+}
+.toma-inferior { display: flex; gap: 1.2rem; }
+.toma-borne {
+  width: 2.2rem; height: 2.2rem;
+  display: grid; place-items: center;
+  border-radius: 6px;
+  background: #cfd6de;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.toma-tierra { background: #b7c47a; }
+.lampara { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.lampara-bulbo { font-size: 2.4rem; filter: grayscale(1) brightness(0.6); transition: filter 0.15s; }
+.lampara-bulbo--on { filter: drop-shadow(0 0 12px var(--accent)); }
+.lampara-porta {
+  font-size: 0.82rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.lampara-porta--fase { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); font-weight: 600; }

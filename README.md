@@ -18,12 +18,23 @@ python3 -m http.server 8000
 
 ## Estado actual
 
-Primer piso funcional del módulo:
+**Nivel Básico completo** (spec sección 1), con seis simuladores:
 
-- **Simulador Cable + Térmica** (spec 1.2 y 1.3) con las tres reglas de falla:
+- **1.1 Ley de Ohm y potencia** — circuito resistivo con multímetro virtual: el
+  alumno mide V y R y calcula I = V/R y P = V·I, con verificación y casos nuevos.
+- **1.2 / 1.3 Cable + Térmica** — las tres reglas de falla:
   - la carga supera la capacidad del cable → el cable se sobrecalienta;
   - la térmica es menor que la carga → corta apenas se usa el circuito;
   - la térmica supera la capacidad del cable → no protege al cable.
+- **1.4 Cortocircuito vs. sobrecarga** — dos escenarios animados lado a lado:
+  disparo térmico (lento, curva térmica) vs. disparo magnético (instantáneo).
+- **1.5 Puesta a tierra** — artefacto con falla de aislación, con y sin tierra;
+  la tierra no evita la falla, da camino seguro para que la protección actúe.
+- **1.6 Tomacorrientes y polaridad** — toma 2P+T (IRAM 2073); muestra que con
+  fase y neutro invertidos el artefacto anda igual pero queda fase en reposo.
+
+Además:
+
 - **Catálogo de componentes** consultable (spec sección 4): cables, protecciones,
   tomacorrientes, herramientas y EPP, cada uno con especificación técnica, para
   qué sirve, qué pasa si se usa mal y en qué nivel del curso aparece.
@@ -52,5 +63,5 @@ data/curricula.js              Currícula y aviso educativo
 
 ## Pendiente (según spec)
 
-Resto de básico (1.1, 1.4, 1.5, 1.6), todo intermedio y avanzado, quiz de cierre
-por tema y certificado al completar los tres niveles.
+Todo intermedio (2.x) y avanzado (3.x), quiz de cierre por tema y certificado al
+completar los tres niveles.

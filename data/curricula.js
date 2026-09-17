@@ -7,12 +7,12 @@ export const CURRICULA = [
     nivel: "basico",
     titulo: "Básico",
     temas: [
-      { id: "1.1", titulo: "Ley de Ohm y potencia", estado: "pendiente" },
+      { id: "1.1", titulo: "Ley de Ohm y potencia", estado: "listo", sim: "ohm-potencia" },
       { id: "1.2", titulo: "Cables y secciones (mm²)", estado: "listo", sim: "cable-termica" },
       { id: "1.3", titulo: "Térmicas (breakers) — protección del cable", estado: "listo", sim: "cable-termica" },
-      { id: "1.4", titulo: "Cortocircuito vs. sobrecarga", estado: "pendiente" },
-      { id: "1.5", titulo: "Puesta a tierra", estado: "pendiente" },
-      { id: "1.6", titulo: "Tomacorrientes y polaridad", estado: "pendiente" },
+      { id: "1.4", titulo: "Cortocircuito vs. sobrecarga", estado: "listo", sim: "corto-sobrecarga" },
+      { id: "1.5", titulo: "Puesta a tierra", estado: "listo", sim: "puesta-tierra" },
+      { id: "1.6", titulo: "Tomacorrientes y polaridad", estado: "listo", sim: "polaridad" },
     ],
   },
   {

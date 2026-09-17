@@ -2,11 +2,19 @@
 
 import { CURRICULA } from "../data/curricula.js";
 import * as cableTermica from "./simuladores/cable-termica.js";
+import * as ohmPotencia from "./simuladores/ohm-potencia.js";
+import * as cortoSobrecarga from "./simuladores/corto-sobrecarga.js";
+import * as puestaTierra from "./simuladores/puesta-tierra.js";
+import * as polaridad from "./simuladores/polaridad.js";
 import * as catalogoView from "./catalogo-view.js";
 
 // Registro de simuladores disponibles por id.
 const SIMULADORES = {
   "cable-termica": cableTermica,
+  "ohm-potencia": ohmPotencia,
+  "corto-sobrecarga": cortoSobrecarga,
+  "puesta-tierra": puestaTierra,
+  polaridad: polaridad,
 };
 
 const vista = document.getElementById("vista");
@@ -67,8 +75,8 @@ function renderPendiente() {
   vista.innerHTML = `
     <section class="pendiente">
       <h2>En construcción</h2>
-      <p>Esta simulación todavía no está disponible. Ya podés usar el
-      <a href="#/sim/cable-termica">simulador de Cable + Térmica</a> y consultar el
+      <p>Esta simulación todavía no está disponible. Todo el nivel <strong>Básico</strong> ya está
+      construido: elegí cualquier tema 1.x del temario, o consultá el
       <a href="#/catalogo">catálogo de componentes</a>.</p>
     </section>`;
 }
