@@ -9,9 +9,11 @@ import { CURRICULA } from "../data/curricula.js";
 
 const CONFIG = {
   // Precio del curso completo. Editá moneda y montos según el momento.
+  // Público principiante: precio accesible + cuotas (clave en Argentina).
   moneda: "$",
-  precioLista: "39.900", // precio "regular" (anclaje, aparece tachado)
-  precioLanzamiento: "24.900", // precio de lanzamiento destacado
+  precioLista: "24.900", // precio "regular" (anclaje, aparece tachado)
+  precioLanzamiento: "14.900", // precio de lanzamiento destacado
+  cuotas: "3 cuotas sin interés", // financiación (Mercado Pago)
   // Primer tema gratis para enganchar (ruta del simulador).
   ctaGratis: "#/sim/cable-termica",
   // A dónde manda "Comprar" (por ahora, ancla a planes; luego, checkout real).
@@ -19,10 +21,10 @@ const CONFIG = {
 };
 
 const DIFERENCIALES = [
-  { icono: "🧪", titulo: "Aprendés simulando", texto: "Probás combinaciones y ves qué falla en la pantalla, no en una instalación real." },
+  { icono: "🌱", titulo: "Desde cero", texto: "No necesitás saber nada de electricidad. Arrancás por lo más simple y avanzás de a poco." },
+  { icono: "🧪", titulo: "Aprendés haciendo", texto: "Probás combinaciones y ves qué falla en la pantalla, no en una instalación real." },
   { icono: "⚠️", titulo: "Seguridad primero", texto: "Cada simulación arranca con la regla de seguridad real y cierra recordando que la obra la hace un matriculado." },
-  { icono: "🇦🇷", titulo: "Norma argentina", texto: "Cables, tomas y protecciones según IRAM y referencias de la AEA. Nada genérico." },
-  { icono: "📈", titulo: "De cero a avanzado", texto: "Tres niveles progresivos: Ley de Ohm hasta tableros, motores y mantenimiento industrial." },
+  { icono: "📱", titulo: "A tu ritmo, desde el celu", texto: "100% online, sin horarios. Entrás cuando quieras desde el teléfono o la compu." },
 ];
 
 const FAQS = [
@@ -32,11 +34,15 @@ const FAQS = [
   },
   {
     q: "¿Necesito conocimientos previos?",
-    a: "No. El nivel Básico arranca desde la Ley de Ohm. Si ya trabajás en el rubro, podés ir directo al Intermedio y Avanzado para actualizarte y formalizar lo que ya sabés.",
+    a: "No, ninguno. El curso está pensado para quien nunca tocó electricidad: arranca desde lo más básico (la Ley de Ohm) y va subiendo de a poco, con explicaciones simples y simulaciones en cada tema.",
+  },
+  {
+    q: "¿Para qué me sirve al terminar?",
+    a: "Para entender de verdad cómo funciona una instalación eléctrica: dimensionar cables y protecciones, armar un tablero y trabajar con seguridad. Es una base sólida para seguir formándote en el oficio (la habilitación para ejercer la da la matrícula, aparte).",
   },
   {
     q: "¿Cómo se cursa?",
-    a: "Es 100% online y a tu ritmo. Entrás desde cualquier dispositivo, hacés las simulaciones y rendís el quiz de cierre de cada tema. Al aprobar los tres niveles, obtenés el certificado.",
+    a: "Es 100% online y a tu ritmo, sin horarios. Entrás desde el celular o la compu, hacés las simulaciones y rendís el quiz de cierre de cada tema. Al aprobar los tres niveles, obtenés el certificado.",
   },
   {
     q: "¿Puedo probar antes de pagar?",
@@ -55,18 +61,18 @@ export function render(container) {
     <section class="landing">
       <!-- HERO -->
       <div class="hero">
-        <span class="hero-badge">Curso online · Norma argentina (IRAM / AEA)</span>
-        <h1 class="hero-titulo">Aprendé electricidad de verdad, sin arriesgarte</h1>
+        <span class="hero-badge">Curso online · Para principiantes · Norma argentina</span>
+        <h1 class="hero-titulo">Aprendé electricidad desde cero, sin arriesgarte</h1>
         <p class="hero-sub">
-          Un curso con <strong>${totalTemas} simulaciones interactivas</strong>: equivocarte en la
-          pantalla en vez de en una instalación real. De la Ley de Ohm al tablero completo, con
-          seguridad en cada paso y certificado al terminar.
+          Sin saber nada de antes. Un curso con <strong>${totalTemas} simulaciones interactivas</strong>
+          donde te equivocás en la pantalla, no en una instalación real. Empezás por lo más simple y
+          terminás armando un tablero, con seguridad en cada paso y certificado al final.
         </p>
         <div class="hero-cta">
           <button type="button" class="btn-grande" data-scroll="planes">Ver planes y precios</button>
           <a class="btn-grande btn-grande--sec" href="${CONFIG.ctaGratis}">Probar gratis una simulación</a>
         </div>
-        <p class="hero-nota">Sin instalar nada · Acceso desde cualquier dispositivo</p>
+        <p class="hero-nota">Sin conocimientos previos · A tu ritmo · Desde el celular</p>
       </div>
 
       <!-- DIFERENCIALES -->
@@ -131,7 +137,7 @@ export function render(container) {
               <span class="plan-tachado">${CONFIG.moneda}${CONFIG.precioLista}</span>
               ${CONFIG.moneda}${CONFIG.precioLanzamiento}
             </p>
-            <p class="plan-precio-nota">Pago único · acceso de por vida</p>
+            <p class="plan-precio-nota">Pago único · ${CONFIG.cuotas} · acceso de por vida</p>
             <ul class="plan-items">
               <li>✔ Los ${totalTemas} simuladores (3 niveles)</li>
               <li>✔ Quiz de cierre por tema</li>
