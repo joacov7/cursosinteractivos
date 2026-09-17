@@ -19,6 +19,7 @@ import * as normativaAea from "./simuladores/normativa-aea.js";
 import * as catalogoView from "./catalogo-view.js";
 import * as quiz from "./quiz.js";
 import * as certificado from "./certificado.js";
+import * as landing from "./landing.js";
 import { QUIZZES } from "../data/quizzes.js";
 import { estaAprobado, resumenNivel, cursoCompleto } from "./progreso.js";
 
@@ -101,21 +102,7 @@ function renderNav() {
 }
 
 function renderInicio() {
-  vista.innerHTML = `
-    <section class="inicio">
-      <h2>Módulo Electricidad</h2>
-      <p>
-        Curso con simulaciones para aprender instalaciones eléctricas de forma segura.
-        Cada tema sigue el mismo patrón: magnitud requerida, capacidad del componente,
-        elemento de protección y reglas de falla.
-      </p>
-      <div class="aviso-seguridad" role="note">
-        <strong>La seguridad es transversal.</strong> Todo simulador es una herramienta
-        educativa; una instalación real la hace o supervisa un electricista matriculado.
-      </div>
-      <p>Elegí un tema del temario para empezar. Cada tema tiene su simulación y un
-      <strong>quiz de cierre</strong>; al aprobarlo queda marcado con ✔.</p>
-    </section>`;
+  landing.render(vista);
 }
 
 function renderPendiente() {
