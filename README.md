@@ -21,6 +21,22 @@ python3 -m http.server 8000
 **Curso de Electricidad completo** (spec secciones 1, 2 y 3): los tres niveles con
 dieciséis simuladores, quiz de cierre en cada tema y certificado de finalización.
 
+### Banco de trabajo (destacado)
+
+Lienzo interactivo tipo "banco de pruebas" para **armar un circuito arrastrando
+componentes** (fuente, térmica, carga) y cablearlos borne a borne. Motor de
+cálculo en vivo (I = P/V, ampacidad del cable, dimensionamiento de la térmica)
+que determina **Seguro / Sobrecarga / Salta la térmica**, con efectos: cable al
+rojo, humo por partículas y la palanca de la térmica saltando.
+
+- **Stack:** SVG + pointer events en vanilla JS (sin build, mobile-first). Se
+  eligió SVG sobre PixiJS/WebGL por peso y compatibilidad en celulares de gama
+  baja; el circuito 2D no justifica WebGL a esta escala.
+- **Modelo de datos** `Node` / `Port` / `Edge` en `js/workbench/modelo.js`.
+- **Motor** puro y testeable en `js/workbench/motor.js` (reutiliza las reglas del
+  simulador Cable + Térmica).
+- **Lienzo e interacción** en `js/workbench/workbench.js`.
+
 ### Avanzado (spec sección 3)
 
 - **3.1 Trifásica** — 220 V (fase-neutro) vs. 380 V (fase-fase); clasificar qué

@@ -763,3 +763,74 @@ button { cursor: pointer; }
 
 .cta-final { text-align: center; padding: 2.4rem 0 1rem; }
 .cta-final p { color: var(--muted); margin-bottom: 1.2rem; }
+
+/* ── Banco de trabajo (workbench) ────────────────────────────── */
+.nav-tema--destacado { background: linear-gradient(90deg, rgba(245,166,35,0.14), transparent); }
+.tema-estado--nuevo { color: var(--accent); font-weight: 700; font-size: 0.68rem; }
+
+.wb-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+.wb-toolbar button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.88rem;
+}
+.wb-toolbar button:hover { border-color: var(--accent-2); }
+
+.wb-lienzo-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--panel);
+}
+.wb-svg { display: block; width: 100%; height: 440px; touch-action: none; user-select: none; }
+
+/* Nodos */
+.wb-node { cursor: grab; }
+.wb-node-box { fill: var(--panel-2); stroke: var(--border); stroke-width: 1.5; }
+.wb-node--fuente .wb-node-box { stroke: var(--accent); }
+.wb-node--carga .wb-node-box { stroke: var(--accent-2); }
+.wb-node--sel .wb-node-box { stroke: #fff; stroke-width: 2.5; }
+.wb-node--tripped .wb-node-box { stroke: var(--danger); }
+.wb-node-t { fill: var(--text); font-size: 13px; font-weight: 600; text-anchor: middle; }
+.wb-node-s { fill: var(--muted); font-size: 12px; text-anchor: middle; }
+.wb-lever { stroke: var(--ok); stroke-width: 3; stroke-linecap: round; }
+.wb-lever--off { stroke: var(--danger); }
+
+/* Bornes */
+.wb-port { stroke: #0b1016; stroke-width: 2; cursor: crosshair; }
+.wb-port--F { fill: var(--danger); }
+.wb-port--N { fill: var(--accent-2); }
+.wb-port:hover { r: 9; }
+
+/* Cables */
+.wb-edge { stroke: var(--accent-2); stroke-width: 3.5; }
+.wb-edge--sel { stroke: #fff; stroke-width: 4.5; }
+.wb-edge--temp { stroke: var(--muted); stroke-dasharray: 5 4; }
+.wb-edge--hot { stroke: var(--danger); animation: wb-pulso 0.8s ease-in-out infinite; }
+@keyframes wb-pulso { 0%,100% { stroke: var(--danger); } 50% { stroke: #ff8a3d; } }
+.wb-edge-lbl { fill: var(--muted); font-size: 11px; text-anchor: middle; pointer-events: none; }
+
+/* Humo */
+.wb-humo { fill: rgba(200,200,200,0.5); animation: wb-humo 1.6s ease-out infinite; pointer-events: none; }
+@keyframes wb-humo {
+  0% { opacity: 0.6; transform: translateY(0) scale(0.6); }
+  100% { opacity: 0; transform: translateY(-34px) scale(1.6); }
+}
+
+.wb-abajo { margin-top: 1rem; display: grid; gap: 0.8rem; }
+.wb-props {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+}
+.wb-hint { color: var(--muted); font-size: 0.85rem; margin: 0; }
+.wb-props-fila { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.8rem; }
+.wb-props-fila label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; color: var(--muted); }
+.wb-props-fila #wb-eliminar {
+  background: var(--danger-bg); color: var(--danger);
+  border: 1px solid var(--danger); border-radius: 8px; padding: 0.5rem 0.8rem;
+}

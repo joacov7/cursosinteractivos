@@ -20,6 +20,7 @@ import * as catalogoView from "./catalogo-view.js";
 import * as quiz from "./quiz.js";
 import * as certificado from "./certificado.js";
 import * as landing from "./landing.js";
+import * as workbench from "./workbench/workbench.js";
 import { QUIZZES } from "../data/quizzes.js";
 import { estaAprobado, resumenNivel, cursoCompleto } from "./progreso.js";
 
@@ -52,7 +53,14 @@ const nav = document.getElementById("nav-temario");
 const todosLosTemas = CURRICULA.flatMap((b) => b.temas);
 
 function renderNav() {
-  nav.innerHTML = CURRICULA.map((bloque) => {
+  nav.innerHTML = `
+    <div class="nav-bloque">
+      <h4>Destacado</h4>
+      <ul><li><a href="#/banco" class="nav-tema nav-tema--destacado">
+        <span class="tema-titulo">⚡ Banco de trabajo</span>
+        <span class="tema-estado tema-estado--nuevo">nuevo</span>
+      </a></li></ul>
+    </div>` + CURRICULA.map((bloque) => {
     const ids = bloque.temas.map((t) => t.id);
     const { aprobados, total } = resumenNivel(OFICIO, ids);
     return `
@@ -156,6 +164,8 @@ function router() {
     anexarQuizCTA(partes[1]);
   } else if (partes[0] === "quiz" && partes[1]) {
     quiz.render(vista, { oficio: OFICIO, temaId: partes[1], onCambioProgreso: refrescarProgreso });
+  } else if (partes[0] === "banco") {
+    workbench.render(vista);
   } else if (partes[0] === "certificado") {
     certificado.render(vista, { onCambioProgreso: refrescarProgreso });
   } else if (partes[0] === "catalogo") {
