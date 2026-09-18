@@ -794,10 +794,20 @@ button { cursor: pointer; }
 .wb-node--carga .wb-node-box { stroke: var(--accent-2); }
 .wb-node--sel .wb-node-box { stroke: #fff; stroke-width: 2.5; }
 .wb-node--tripped .wb-node-box { stroke: var(--danger); }
-.wb-node-t { fill: var(--text); font-size: 13px; font-weight: 600; text-anchor: middle; }
-.wb-node-s { fill: var(--muted); font-size: 12px; text-anchor: middle; }
-.wb-lever { stroke: var(--ok); stroke-width: 3; stroke-linecap: round; }
-.wb-lever--off { stroke: var(--danger); }
+.wb-node-s { fill: var(--muted); font-size: 11px; text-anchor: middle; font-weight: 600; }
+.wb-node-cap { fill: var(--text); font-size: 12px; font-weight: 600; text-anchor: middle; }
+
+/* Arte de componentes */
+.wb-art-line { stroke: var(--text); stroke-width: 2; stroke-linecap: round; fill: none; }
+.wb-art-fill { fill: var(--panel); stroke: var(--text); stroke-width: 1.5; }
+.wb-art-rail { fill: rgba(255,255,255,0.18); }
+.wb-node--fuente .wb-art-line { stroke: var(--accent); }
+.wb-node--carga .wb-art-line { stroke: var(--accent-2); }
+/* Palanca de la térmica */
+.wb-lever { fill: var(--ok); stroke: #06210f; stroke-width: 1; }
+.wb-lever--off { fill: var(--danger); }
+.wb-lever-mark { stroke: rgba(0,0,0,0.5); stroke-width: 1.5; }
+.wb-node--tripped .wb-art-fill { stroke: var(--danger); }
 
 /* Bornes */
 .wb-port { stroke: #0b1016; stroke-width: 2; cursor: crosshair; }
@@ -811,6 +821,9 @@ button { cursor: pointer; }
 .wb-edge--temp { stroke: var(--muted); stroke-dasharray: 5 4; }
 .wb-edge--hot { stroke: var(--danger); animation: wb-pulso 0.8s ease-in-out infinite; }
 @keyframes wb-pulso { 0%,100% { stroke: var(--danger); } 50% { stroke: #ff8a3d; } }
+/* Corriente circulando (circuito seguro) */
+.wb-edge--flow { stroke: var(--ok); stroke-dasharray: 8 6; animation: wb-flow 0.6s linear infinite; }
+@keyframes wb-flow { to { stroke-dashoffset: -14; } }
 .wb-edge-lbl { fill: var(--muted); font-size: 11px; text-anchor: middle; pointer-events: none; }
 
 /* Humo */

@@ -26,7 +26,7 @@ export const TENSION = 220;
 export const GRID = 20;
 
 export const NODO_W = 104;
-export const NODO_H = 64;
+export const NODO_H = 68;
 
 // Secciones de cable disponibles para los tramos (edges).
 export const CABLES = [

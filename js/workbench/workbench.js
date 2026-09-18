@@ -127,6 +127,7 @@ export function render(container) {
         const b = posGlobal(e.hasta);
         const clase = ["wb-edge"];
         if (hot && activos.has(e.id)) clase.push("wb-edge--hot");
+        else if (r.estado === "seguro" && activos.has(e.id)) clase.push("wb-edge--flow");
         if (seleccion && seleccion.clase === "edge" && seleccion.id === e.id) clase.push("wb-edge--sel");
         return `<path d="${pathCable(a.x, a.y, b.x, b.y)}" class="${clase.join(" ")}"
                   data-edge="${e.id}" fill="none" />
@@ -175,11 +176,9 @@ export function render(container) {
   function nodoSvg(n, r) {
     const sel = seleccion && seleccion.clase === "node" && seleccion.id === n.id;
     const tripped = r.estado === "salta" && r.termicasActivas.includes(n.id);
-    let titulo = "";
-    let sub = "";
-    if (n.tipo === "fuente") { titulo = "⎓ Fuente"; sub = "220 V"; }
-    if (n.tipo === "termica") { titulo = "Térmica"; sub = `${n.props.corriente} A`; }
-    if (n.tipo === "carga") { titulo = n.props.nombre || "Carga"; sub = `${n.props.potencia} W`; }
+    const nombre =
+      n.tipo === "fuente" ? "Fuente 220 V" :
+      n.tipo === "termica" ? "Térmica" : (n.props.nombre || "Carga");
 
     const ports = n.ports
       .map((p) => {
@@ -189,22 +188,54 @@ export function render(container) {
       })
       .join("");
 
-    const lever =
-      n.tipo === "termica"
-        ? `<line class="wb-lever ${tripped ? "wb-lever--off" : ""}"
-             x1="${n.x + NODO_W / 2}" y1="${n.y + 12}"
-             x2="${n.x + NODO_W / 2 + (tripped ? 12 : 0)}" y2="${n.y + (tripped ? 26 : 4)}"></line>`
-        : "";
-
     return `
       <g class="wb-node wb-node--${n.tipo} ${sel ? "wb-node--sel" : ""} ${tripped ? "wb-node--tripped" : ""}"
          data-node="${n.id}">
-        <rect x="${n.x}" y="${n.y}" width="${NODO_W}" height="${NODO_H}" rx="8" class="wb-node-box"></rect>
-        <text class="wb-node-t" x="${n.x + NODO_W / 2}" y="${n.y + 26}">${titulo}</text>
-        <text class="wb-node-s" x="${n.x + NODO_W / 2}" y="${n.y + 45}">${sub}</text>
-        ${lever}
+        <rect x="${n.x}" y="${n.y}" width="${NODO_W}" height="${NODO_H}" rx="9" class="wb-node-box"></rect>
+        ${arteComponente(n, tripped)}
+        <text class="wb-node-cap" x="${n.x + NODO_W / 2}" y="${n.y + NODO_H + 15}">${nombre}</text>
         ${ports}
       </g>`;
+  }
+
+  // Ilustración SVG a medida de cada componente (coordenadas relativas al nodo).
+  function arteComponente(n, tripped) {
+    const cx = n.x + NODO_W / 2;
+    const top = n.y;
+
+    if (n.tipo === "fuente") {
+      // Fuente AC: círculo con onda senoidal (símbolo de fuente alterna).
+      const cyc = top + NODO_H / 2 - 4;
+      return `
+        <circle class="wb-art-line" cx="${cx}" cy="${cyc}" r="15" fill="none"></circle>
+        <path class="wb-art-line" fill="none"
+          d="M ${cx - 9} ${cyc} q 4.5 -9 9 0 t 9 0"></path>
+        <text class="wb-node-s" x="${cx}" y="${top + NODO_H - 8}">220 V ~</text>`;
+    }
+
+    if (n.tipo === "termica") {
+      // Interruptor DIN: cuerpo, ventana con palanca (arriba=ON verde, abajo=OFF rojo)
+      // y clip de riel abajo.
+      const bx = cx - 12, by = top + 8;
+      const leverOn = `<rect class="wb-lever" x="${cx - 5}" y="${by + 3}" width="10" height="12" rx="2"></rect>
+                       <line class="wb-lever-mark" x1="${cx}" y1="${by + 5}" x2="${cx}" y2="${by + 12}"></line>`;
+      const leverOff = `<rect class="wb-lever wb-lever--off" x="${cx - 5}" y="${by + 12}" width="10" height="12" rx="2"></rect>
+                        <line class="wb-lever-mark" x1="${cx}" y1="${by + 15}" x2="${cx}" y2="${by + 22}"></line>`;
+      return `
+        <rect class="wb-art-fill" x="${bx}" y="${by}" width="24" height="30" rx="3"></rect>
+        ${tripped ? leverOff : leverOn}
+        <rect class="wb-art-rail" x="${n.x + 14}" y="${top + NODO_H - 10}" width="${NODO_W - 28}" height="4" rx="2"></rect>
+        <text class="wb-node-s" x="${cx}" y="${top + NODO_H - 14}">${n.props.corriente} A</text>`;
+    }
+
+    // Carga: enchufe (ficha) con dos patas.
+    const px = cx - 11, py = top + 10;
+    return `
+      <line class="wb-art-line" x1="${cx - 6}" y1="${py}" x2="${cx - 6}" y2="${py + 6}"></line>
+      <line class="wb-art-line" x1="${cx + 6}" y1="${py}" x2="${cx + 6}" y2="${py + 6}"></line>
+      <rect class="wb-art-fill" x="${px}" y="${py + 6}" width="22" height="16" rx="4"></rect>
+      <path class="wb-art-line" fill="none" d="M ${cx} ${py + 22} q 0 8 10 8"></path>
+      <text class="wb-node-s" x="${cx}" y="${top + NODO_H - 8}">${(n.props.potencia / 220).toFixed(1)} A</text>`;
   }
 
   function pintarProps() {
