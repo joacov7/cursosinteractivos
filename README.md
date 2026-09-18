@@ -36,6 +36,10 @@ rojo, humo por partículas y la palanca de la térmica saltando.
 - **Motor** puro y testeable en `js/workbench/motor.js` (reutiliza las reglas del
   simulador Cable + Térmica).
 - **Lienzo e interacción** en `js/workbench/workbench.js`.
+- **Retos guiados** (`js/workbench/retos.js`): objetivos con validación automática
+  ("cerrá el circuito", "hacé saltar la térmica", "protegé un horno de 6600 W",
+  etc.), pista, navegación entre retos y progreso persistido. Convive con el modo
+  libre.
 
 ### Avanzado (spec sección 3)
 

@@ -9,6 +9,7 @@ import {
   crearNodo, crearEdge, idGlobalPuerto, posPuerto, snap,
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
+import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Este es un banco de pruebas virtual. En una instalación real, cada tramo se " +
@@ -19,6 +20,9 @@ export function render(container) {
   const estado = { nodes: [], edges: [] };
   let seleccion = null; // { clase:"node"|"edge", id }
   let inter = null; // interacción en curso
+  let modo = "libre"; // "libre" | "retos"
+  let retoIdx = 0;
+  const completados = leerCompletados();
 
   container.innerHTML = `
     <section class="sim wb">
@@ -32,6 +36,8 @@ export function render(container) {
         arrastralos y uní los bornes (rojo = fase, azul = neutro) para cerrar el circuito.
         El resultado se calcula solo.
       </p>
+
+      <div id="wb-retos" class="wb-retos"></div>
 
       <div class="wb-toolbar">
         <button type="button" data-add="fuente">+ Fuente 220V</button>
@@ -171,6 +177,73 @@ export function render(container) {
 
     pintarProps();
     pintarEstado(r);
+    pintarRetos(r);
+  }
+
+  // ── Retos guiados ─────────────────────────────────────────────────
+  const panelRetos = container.querySelector("#wb-retos");
+
+  function entrarReto(idx) {
+    modo = "retos";
+    retoIdx = Math.max(0, Math.min(idx, RETOS.length - 1));
+    const reto = RETOS[retoIdx];
+    if (reto.inicio === "vacio") { estado.nodes = []; estado.edges = []; }
+    else cargarEjemplo();
+    seleccion = null;
+    pintar();
+  }
+
+  function pintarRetos(r) {
+    const total = RETOS.length;
+    const hechos = completados.size;
+
+    if (modo === "libre") {
+      panelRetos.innerHTML = `
+        <div class="wb-retos-libre">
+          <span>Modo libre — experimentá sin objetivos.</span>
+          <button type="button" id="wb-empezar-retos">Hacer los retos (${hechos}/${total} ✔)</button>
+        </div>`;
+      panelRetos.querySelector("#wb-empezar-retos").addEventListener("click", () => {
+        const prox = RETOS.findIndex((x) => !completados.has(x.id));
+        entrarReto(prox === -1 ? 0 : prox);
+      });
+      return;
+    }
+
+    const reto = RETOS[retoIdx];
+    const cumplido = reto.validar(r, estado.nodes, estado.edges);
+    let recienHecho = false;
+    if (cumplido && !completados.has(reto.id)) {
+      completados.add(reto.id);
+      guardarCompletados(completados);
+      recienHecho = true;
+    }
+    const yaHecho = completados.has(reto.id);
+
+    panelRetos.innerHTML = `
+      <div class="wb-reto ${cumplido ? "wb-reto--ok" : ""}">
+        <div class="wb-reto-cab">
+          <span class="wb-reto-n">Reto ${retoIdx + 1}/${total}</span>
+          <strong>${reto.titulo}</strong>
+          <span class="wb-reto-prog">${completados.size}/${total} ✔</span>
+        </div>
+        <p class="wb-reto-txt">${reto.enunciado}</p>
+        <div class="wb-reto-estado ${cumplido ? "ok" : ""}">
+          ${cumplido ? "✔ ¡Reto cumplido!" + (recienHecho ? " Bien ahí." : "") : "◻ En progreso"}
+        </div>
+        <details class="wb-reto-pista"><summary>Ver pista</summary><p>${reto.pista}</p></details>
+        <div class="wb-reto-nav">
+          <button type="button" id="wb-reto-prev" ${retoIdx === 0 ? "disabled" : ""}>← Anterior</button>
+          <button type="button" id="wb-reto-reset">Reiniciar reto</button>
+          <button type="button" id="wb-reto-next" ${retoIdx === total - 1 ? "disabled" : ""}>Siguiente →</button>
+          <button type="button" id="wb-reto-libre">Salir a modo libre</button>
+        </div>
+      </div>`;
+
+    panelRetos.querySelector("#wb-reto-prev").addEventListener("click", () => entrarReto(retoIdx - 1));
+    panelRetos.querySelector("#wb-reto-next").addEventListener("click", () => entrarReto(retoIdx + 1));
+    panelRetos.querySelector("#wb-reto-reset").addEventListener("click", () => entrarReto(retoIdx));
+    panelRetos.querySelector("#wb-reto-libre").addEventListener("click", () => { modo = "libre"; pintar(); });
   }
 
   function nodoSvg(n, r) {

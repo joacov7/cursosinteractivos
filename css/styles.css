@@ -768,6 +768,39 @@ button { cursor: pointer; }
 .nav-tema--destacado { background: linear-gradient(90deg, rgba(245,166,35,0.14), transparent); }
 .tema-estado--nuevo { color: var(--accent); font-weight: 700; font-size: 0.68rem; }
 
+/* Retos guiados */
+.wb-retos { margin: 1rem 0 0; }
+.wb-retos-libre {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem;
+  color: var(--muted); font-size: 0.9rem;
+}
+.wb-retos-libre button {
+  background: var(--accent-2); color: #06121f; border: none;
+  border-radius: 8px; padding: 0.5rem 0.9rem; font-weight: 600;
+}
+.wb-reto {
+  background: var(--panel);
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+}
+.wb-reto--ok { border-color: var(--ok); background: var(--ok-bg); }
+.wb-reto-cab { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; }
+.wb-reto-n { color: var(--accent-2); font-size: 0.8rem; font-weight: 700; }
+.wb-reto-prog { margin-left: auto; color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.wb-reto-txt { margin: 0.5rem 0; }
+.wb-reto-estado { font-weight: 600; color: var(--muted); font-size: 0.9rem; }
+.wb-reto-estado.ok { color: var(--ok); }
+.wb-reto-pista { margin: 0.5rem 0; color: var(--muted); font-size: 0.88rem; }
+.wb-reto-pista summary { cursor: pointer; }
+.wb-reto-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.7rem; }
+.wb-reto-nav button {
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.7rem; font-size: 0.85rem;
+}
+.wb-reto-nav button:disabled { opacity: 0.4; }
+#wb-reto-libre { margin-left: auto; }
+
 .wb-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
 .wb-toolbar button {
   background: var(--panel-2);
