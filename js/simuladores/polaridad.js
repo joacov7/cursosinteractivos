@@ -94,8 +94,7 @@ export function render(container) {
       resultado.innerHTML = `
         <div class="resultado-cabecera">
           <span class="badge">✔ Polaridad correcta</span>
-          <p>El interruptor corta la <strong>fase</strong>. Con la lámpara apagada, el
-          portalámparas queda del lado del neutro: sin tensión. Cambiar la lámpara es seguro.</p>
+          <p>El interruptor corta la <strong>fase</strong>. En el modelo, al apagarlo no queda fase en el portalámparas. Antes de cambiar una lámpara real, cortá la alimentación del circuito y verificá ausencia de tensión.</p>
         </div>`;
     } else if (invertida && !encendido) {
       resultado.className = "resultado resultado--falla";
