@@ -1,4 +1,10 @@
 // Lecturas del multímetro virtual. Modelo ideal y exclusivamente didáctico.
+export function evaluarBloqueoMedicion(modo, fuenteEncendida) {
+  if (fuenteEncendida && modo === "continuidad") {
+    return "Desconectá la fuente antes de medir continuidad. La prueba queda bloqueada mientras el circuito está energizado.";
+  }
+  return "";
+}
 export function calcularLectura(resultado, modo, punto, nodes = []) {
   const fuente = nodes.some((n) => n.tipo === "fuente");
   const carga = nodes.some((n) => n.tipo === "carga");
@@ -74,7 +80,7 @@ export function crearEscenarioFalla(nodes, edges, falla, evaluar) {
  * Multímetro entre dos bornes. La topología se reduce a nodos conectados
  * idealmente; no modela impedancia, caída de tensión ni instrumentos reales.
  */
-export function medirEntreBornes(nodes, edges, borneA, borneB) {
+export function medirEntreBornes(nodes, edges, borneA, borneB, { energizada = true } = {}) {
   if (!borneA || !borneB) return { tension: "—", continuidad: "—", detalle: "Elegí los dos bornes de prueba." };
   const parent = new Map();
   const find = (x) => {
@@ -93,12 +99,14 @@ export function medirEntreBornes(nodes, edges, borneA, borneB) {
   const fase = find(`${fuente.id}:F`), neutro = find(`${fuente.id}:N`);
   const potencial = (grupo) => grupo === fase ? 220 : grupo === neutro ? 0 : null;
   const va = potencial(a), vb = potencial(b);
-  const tension = va === null || vb === null ? "OL" : `${Math.abs(va-vb).toFixed(1).replace(".", ",")} V~`;
+  const tension = !energizada ? "0,0 V~" : va === null || vb === null ? "OL" : `${Math.abs(va-vb).toFixed(1).replace(".", ",")} V~`;
   const continuidad = a === b ? "CONTINUIDAD" : "ABIERTO";
   return {
     tension, continuidad,
-    detalle: tension === "OL"
-      ? "Al menos una punta está en un nodo flotante o sin referencia en este modelo."
-      : "Lectura ideal entre los bornes seleccionados; no contempla impedancias ni caída de tensión.",
+    detalle: !energizada
+      ? "Fuente desconectada: no hay tensión de alimentación en el modelo. La continuidad se evalúa por separado."
+      : tension === "OL"
+        ? "Al menos una punta está en un nodo flotante o sin referencia en este modelo."
+        : "Lectura ideal entre los bornes seleccionados; no contempla impedancias ni caída de tensión.",
   };
 }
