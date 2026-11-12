@@ -118,3 +118,7 @@ export function evaluarRespuestaDiagnostico(falla, paso, opcion) {
   const correcta = Number(opcion) === pregunta.correcta;
   return { valida: true, correcta, explicacion: correcta ? pregunta.explicacion : "Todavía no. Revisá el síntoma y la condición de seguridad antes de elegir." };
 }
+
+export function permiteEnergizarConFalla(falla) {
+  return falla !== "corto-fase-neutro";
+}
