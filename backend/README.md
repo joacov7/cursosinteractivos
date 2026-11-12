@@ -68,3 +68,13 @@ It prompts for the first administrator's details and password, refuses to run if
 - Configure Neon and deployment secrets only after the owner selects/provisions the external services.
 
 Never commit `.env` or real credentials. Keep separate databases for development, CI and production. Do not expose database credentials to the browser. Payment status and course access must only be changed by trusted backend workflows.
+
+
+## Course catalog and learner access
+
+- `GET /api/v1/courses`: lists published courses.
+- `GET /api/v1/courses/{slug}`: returns course structure. Preview lesson content is public; paid lesson content is omitted unless the user has an active, non-expired enrollment. A zero-price course is accessible as free.
+- `GET /api/v1/me/courses`: lists published free courses and courses with an active enrollment.
+- `PUT /api/v1/lessons/{lesson_id}/progress`: stores progress only for a published course the authenticated user can access. Completion is normalized to 100%.
+
+Access is enforced in the API, not by hiding frontend controls. Do not add paid lesson content to public responses or frontend bundles as a substitute for server-side authorization. Enrollment creation and payment-provider integration are separate trusted workflows and are not yet implemented.
