@@ -26,11 +26,11 @@ async def send_action_email(to_email: str, purpose: str, raw_token: str) -> None
     settings = get_settings()
     if purpose == "verify_email":
         subject = "Verificá tu correo"
-        path = "/verificar-email"
+        path = "/#/verificar-email"
         intro = "Para confirmar tu dirección de correo, abrí este enlace:"
     elif purpose == "password_reset":
         subject = "Restablecé tu contraseña"
-        path = "/restablecer-contrasena"
+        path = "/#/restablecer-contrasena"
         intro = "Para elegir una nueva contraseña, abrí este enlace:"
     else:
         raise ValueError("Unsupported email action")
