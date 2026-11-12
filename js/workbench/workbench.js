@@ -11,6 +11,7 @@ import {
 import { evaluarCircuito } from "./motor.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
 import { calcularLectura, crearEscenarioFalla, medirEntreBornes, evaluarBloqueoMedicion } from "./instrumentos.js";
+import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico } from "./diagnostico.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Este es un banco de pruebas virtual. En una instalación real, cada tramo se " +
@@ -25,6 +26,9 @@ export function render(container) {
   let retoIdx = 0;
   let fallaActiva = "ninguna";
   let fuenteEncendida = true;
+  let diagnosticoPaso = 0;
+  let diagnosticoOpcion = null;
+  let diagnosticoFeedback = "";
   let modoMedicion = "tension";
   let puntaA = "";
   let puntaB = "";
@@ -78,6 +82,7 @@ export function render(container) {
         </div>
         <p id="wb-medida-ayuda" class="wb-hint">Lecturas ideales del modelo didáctico. No son mediciones de una instalación real.</p>
       </section>
+      <section id="wb-diagnostico" class="wb-diagnostico" aria-label="Diagnóstico guiado de fallas" aria-live="polite"></section>
 
       <div class="wb-lienzo-wrap">
         <svg id="wb-svg" class="wb-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Banco de trabajo eléctrico interactivo"></svg>
@@ -95,6 +100,7 @@ export function render(container) {
   const svg = container.querySelector("#wb-svg");
   const panelProps = container.querySelector("#wb-props");
   const panelEstado = container.querySelector("#wb-estado");
+  const panelDiagnostico = container.querySelector("#wb-diagnostico");
 
   // ── Helpers de geometría ──────────────────────────────────────────
   const nodo = (id) => estado.nodes.find((n) => n.id === id);
@@ -310,6 +316,7 @@ export function render(container) {
     pintarProps();
     pintarEstado(r);
     pintarRetos(r);
+    pintarDiagnostico();
   }
 
   // ── Retos guiados ─────────────────────────────────────────────────
@@ -376,6 +383,66 @@ export function render(container) {
     panelRetos.querySelector("#wb-reto-next").addEventListener("click", () => entrarReto(retoIdx + 1));
     panelRetos.querySelector("#wb-reto-reset").addEventListener("click", () => entrarReto(retoIdx));
     panelRetos.querySelector("#wb-reto-libre").addEventListener("click", () => { modo = "libre"; pintar(); });
+  }
+
+  function pintarDiagnostico() {
+    const caso = CASOS_DIAGNOSTICO[fallaActiva];
+    if (!caso) {
+      panelDiagnostico.innerHTML = `
+        <div class="wb-diagnostico-vacio">
+          <strong>Diagnóstico guiado</strong>
+          <p>Elegí una falla en “Inyectar una falla” para iniciar una práctica de diagnóstico paso a paso.</p>
+        </div>`;
+      return;
+    }
+    if (diagnosticoPaso >= caso.pasos.length) {
+      panelDiagnostico.innerHTML = `
+        <div class="wb-diagnostico wb-diagnostico--ok">
+          <div class="wb-diagnostico-cab"><span class="wb-kicker">Práctica completada</span><span class="wb-diagnostico-progreso">3/3</span></div>
+          <h3>${caso.titulo}</h3>
+          <p>Resolviste el caso. Recordá: esta práctica enseña razonamiento y límites del modelo; no habilita a intervenir una instalación real.</p>
+          <button type="button" id="wb-diag-reiniciar">Repetir diagnóstico</button>
+        </div>`;
+      panelDiagnostico.querySelector("#wb-diag-reiniciar").addEventListener("click", () => {
+        diagnosticoPaso = 0; diagnosticoOpcion = null; diagnosticoFeedback = ""; pintarDiagnostico();
+      });
+      return;
+    }
+    const paso = caso.pasos[diagnosticoPaso];
+    panelDiagnostico.innerHTML = `
+      <div class="wb-diagnostico">
+        <div class="wb-diagnostico-cab"><span class="wb-kicker">Diagnóstico guiado · ${diagnosticoPaso + 1}/${caso.pasos.length}</span><span class="wb-diagnostico-progreso">${Math.round(diagnosticoPaso / caso.pasos.length * 100)}%</span></div>
+        <h3>${caso.titulo}</h3>
+        <p class="wb-diagnostico-contexto">${caso.contexto}</p>
+        <p class="wb-diagnostico-pregunta">${paso.pregunta}</p>
+        <div class="wb-diagnostico-opciones">
+          ${paso.opciones.map((opcion, i) => `<button type="button" class="wb-diag-opcion ${diagnosticoOpcion === i ? "is-selected" : ""}" data-diag-opcion="${i}" aria-pressed="${diagnosticoOpcion === i}">${opcion}</button>`).join("")}
+        </div>
+        ${diagnosticoFeedback ? `<p class="wb-diagnostico-feedback" role="status">${diagnosticoFeedback}</p>` : ""}
+        <div class="wb-diagnostico-acciones">
+          <button type="button" id="wb-diag-comprobar" ${diagnosticoOpcion === null ? "disabled" : ""}>Comprobar respuesta</button>
+          <button type="button" id="wb-diag-reiniciar" class="wb-diag-secundario">Reiniciar caso</button>
+        </div>
+      </div>`;
+    panelDiagnostico.querySelectorAll("[data-diag-opcion]").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        diagnosticoOpcion = Number(boton.dataset.diagOpcion);
+        diagnosticoFeedback = "";
+        pintarDiagnostico();
+      });
+    });
+    panelDiagnostico.querySelector("#wb-diag-comprobar").addEventListener("click", () => {
+      const resultado = evaluarRespuestaDiagnostico(fallaActiva, diagnosticoPaso, diagnosticoOpcion);
+      diagnosticoFeedback = resultado.correcta ? resultado.explicacion : resultado.explicacion;
+      if (resultado.correcta) {
+        diagnosticoPaso += 1;
+        diagnosticoOpcion = null;
+      }
+      pintarDiagnostico();
+    });
+    panelDiagnostico.querySelector("#wb-diag-reiniciar").addEventListener("click", () => {
+      diagnosticoPaso = 0; diagnosticoOpcion = null; diagnosticoFeedback = ""; pintarDiagnostico();
+    });
   }
 
   function nodoSvg(n, r, fuenteActiva = true) {
@@ -592,7 +659,9 @@ export function render(container) {
   container.querySelector("#wb-modo-medicion").addEventListener("change", (ev) => { modoMedicion = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-a").addEventListener("change", (ev) => { puntaA = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-b").addEventListener("change", (ev) => { puntaB = ev.target.value; pintar(); });
-  container.querySelector("#wb-falla").addEventListener("change", (ev) => { fallaActiva = ev.target.value; pintar(); });
+  container.querySelector("#wb-falla").addEventListener("change", (ev) => {
+    fallaActiva = ev.target.value; diagnosticoPaso = 0; diagnosticoOpcion = null; diagnosticoFeedback = ""; pintar();
+  });
   container.querySelector("#wb-conectar").addEventListener("click", () => {
     const mensaje = conectar(container.querySelector("#wb-desde").value, container.querySelector("#wb-hasta").value);
     container.querySelector("#wb-conexion-msg").textContent = mensaje || "Conexión agregada.";
