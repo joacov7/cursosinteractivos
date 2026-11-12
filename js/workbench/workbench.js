@@ -10,7 +10,7 @@ import {
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
-import { calcularLectura, crearEscenarioFalla, medirEntreBornes, evaluarBloqueoMedicion } from "./instrumentos.js";
+import { calcularLectura, crearEscenarioFalla, medirEntreBornes, medirResistenciaEntreBornes, evaluarBloqueoMedicion } from "./instrumentos.js";
 import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico, permiteEnergizarConFalla } from "./diagnostico.js";
 
 const RECORDATORIO_SEGURIDAD =
@@ -72,7 +72,7 @@ export function render(container) {
         </div>
         <div class="wb-instrumentos-controles">
           <label>Medición<select id="wb-modo-medicion">
-            <option value="tension">Tensión (V~)</option><option value="corriente">Corriente (A)</option><option value="continuidad">Continuidad (solo sin tensión)</option>
+            <option value="tension">Tensión (V~)</option><option value="corriente">Corriente (A)</option><option value="resistencia">Resistencia (Ω · solo sin tensión)</option><option value="continuidad">Continuidad (solo sin tensión)</option>
           </select></label>
           <label>Punta roja<select id="wb-punta-a" aria-label="Borne de punta roja"></select></label>
           <label>Punta negra<select id="wb-punta-b" aria-label="Borne de punta negra"></select></label>
@@ -237,7 +237,9 @@ export function render(container) {
         ? { valor: puntas.tension, detalle: puntas.detalle }
         : modoMedicion === "continuidad"
           ? { valor: puntas.continuidad, detalle: "Continuidad lógica entre las puntas seleccionadas. Solo se habilita con la fuente desconectada; no equivale a una prueba reglamentaria del conductor de protección." }
-          : !fuenteEncendida
+          : modoMedicion === "resistencia"
+            ? medirResistenciaEntreBornes(escenario.nodes, escenario.edges, puntaA, puntaB, { energizada: fuenteEncendida })
+            : !fuenteEncendida
             ? { valor: "0,0 A", detalle: "Fuente desconectada: no circula corriente en el modelo." }
             : lecturaBase;
     const botonFuente = container.querySelector("#wb-fuente");
