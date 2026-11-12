@@ -918,3 +918,37 @@ button { cursor: pointer; }
     transition-duration: 0.01ms !important;
   }
 }
+
+.wb-conexion-teclado {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 0.9rem 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+.wb-conexion-teclado strong { flex-basis: 100%; }
+.wb-conexion-teclado label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.wb-conexion-teclado select { min-width: 150px; min-height: 42px; }
+.wb-conexion-teclado button {
+  min-height: 42px;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--accent-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+}
+.wb-conexion-teclado .wb-hint { flex-basis: 100%; margin: 0; }
+@media (max-width: 560px) {
+  .wb-conexion-teclado { display: grid; grid-template-columns: 1fr; align-items: stretch; }
+  .wb-conexion-teclado select, .wb-conexion-teclado button { width: 100%; }
+}
