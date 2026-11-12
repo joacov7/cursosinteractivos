@@ -2,7 +2,8 @@
 export function calcularLectura(resultado, modo, punto, nodes = []) {
   const fuente = nodes.some((n) => n.tipo === "fuente");
   const carga = nodes.some((n) => n.tipo === "carga");
-  const energizado = ["seguro", "inseguro", "sobrecarga"].includes(resultado.estado);\n  if (resultado.estado === "corto" && modo === "corriente") return { valor: "Icc: no modelada", detalle: "El ejercicio detecta el cortocircuito, pero no calcula corriente de falla: faltan impedancia de fuente y lazo, características del dispositivo y datos de instalación." };
+  const energizado = ["seguro", "inseguro", "sobrecarga"].includes(resultado.estado);
+  if (resultado.estado === "corto" && modo === "corriente") return { valor: "Icc: no modelada", detalle: "El ejercicio detecta el cortocircuito, pero no calcula corriente de falla: faltan impedancia de fuente y lazo, características del dispositivo y datos de instalación." };
   const disparada = resultado.estado === "salta";
 
   if (modo === "tension") {
@@ -46,12 +47,19 @@ export function calcularLectura(resultado, modo, punto, nodes = []) {
 export function crearEscenarioFalla(nodes, edges, falla, evaluar) {
   const copiaNodos = nodes.map((n) => ({ ...n, props: { ...n.props }, ports: (n.ports || []).map((p) => ({ ...p })) }));
   let copiaEdges = edges.map((e) => ({ ...e }));
-  let edgeAbierto = null;\n  let cortoDetectado = false;
+  let edgeAbierto = null;
+  let cortoDetectado = false;
   if (falla === "conductor-abierto") {
     const base = evaluar(copiaNodos, copiaEdges);
     edgeAbierto = base.edgesActivos[0] || null;
     if (edgeAbierto) copiaEdges = copiaEdges.filter((e) => e.id !== edgeAbierto);
-  } else if (falla === "corto-fase-neutro") {\n    const fuente = copiaNodos.find((n) => n.tipo === "fuente");\n    if (fuente) {\n      copiaEdges.push({ id: "falla-corto-fn", desde: `${fuente.id}:F`, hasta: `${fuente.id}:N`, mm2: 6, capacidadA: 32 });\n      cortoDetectado = true;\n    }\n  } else if (falla === "puente-termica") {
+  } else if (falla === "corto-fase-neutro") {
+    const fuente = copiaNodos.find((n) => n.tipo === "fuente");
+    if (fuente) {
+      copiaEdges.push({ id: "falla-corto-fn", desde: `${fuente.id}:F`, hasta: `${fuente.id}:N`, mm2: 6, capacidadA: 32 });
+      cortoDetectado = true;
+    }
+  } else if (falla === "puente-termica") {
     const fuente = copiaNodos.find((n) => n.tipo === "fuente");
     const carga = copiaNodos.find((n) => n.tipo === "carga");
     if (fuente && carga) copiaEdges.push({
