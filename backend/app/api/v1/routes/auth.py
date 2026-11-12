@@ -1,9 +1,11 @@
+import hashlib
 import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import func, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,7 +21,7 @@ from app.core.security import (
     new_refresh_token,
     verify_password,
 )
-from app.db.models import AuthActionToken, User, UserSession
+from app.db.models import AuthActionToken, AuthRateLimit, User, UserSession
 from app.db.session import get_db_session
 from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserResponse
 
@@ -76,6 +78,41 @@ def _issue_session(user: User, db: AsyncSession, response: Response) -> TokenRes
         access_token=create_access_token(user.id, user.role),
         user=UserResponse.model_validate(user),
     )
+
+
+async def _enforce_rate_limit(
+    db: AsyncSession,
+    request: Request,
+    scope: str,
+    limit: int,
+    window_seconds: int,
+    identity: str = "",
+) -> None:
+    """Atomic fixed-window limiter shared by all API instances through PostgreSQL."""
+    now = datetime.now(timezone.utc)
+    client_ip = request.client.host if request.client else "unknown"
+    window_id = int(now.timestamp()) // window_seconds
+    raw_key = f"{scope}:{client_ip}:{identity.strip().lower()}:{window_id}"
+    bucket_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+    expires_at = datetime.fromtimestamp((window_id + 1) * window_seconds + 86400, timezone.utc)
+    statement = (
+        pg_insert(AuthRateLimit)
+        .values(bucket_key=bucket_key, attempts=1, expires_at=expires_at)
+        .on_conflict_do_update(
+            index_elements=[AuthRateLimit.bucket_key],
+            set_={"attempts": AuthRateLimit.attempts + 1},
+        )
+        .returning(AuthRateLimit.attempts)
+    )
+    attempts = await db.scalar(statement)
+    await db.commit()
+    if attempts and attempts > limit:
+        retry_after = max(1, int((window_id + 1) * window_seconds - now.timestamp()))
+        raise HTTPException(
+            status_code=429,
+            detail="Too many attempts. Try again later.",
+            headers={"Retry-After": str(retry_after)},
+        )
 
 
 async def _create_action_token(
@@ -141,6 +178,7 @@ async def register(
 ) -> UserResponse:
     _validate_origin(request)
     email = payload.email.strip().lower()
+    await _enforce_rate_limit(db, request, "register", 5, 3600)
     existing = await db.scalar(select(User.id).where(func.lower(User.email) == email))
     if existing:
         raise HTTPException(status_code=409, detail="An account with this email already exists")
@@ -181,9 +219,11 @@ async def verify_email(
 @router.post("/resend-verification", status_code=status.HTTP_202_ACCEPTED)
 async def resend_verification(
     payload: EmailRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db_session),
 ) -> dict[str, str]:
     email = payload.email.strip().lower()
+    await _enforce_rate_limit(db, request, "resend-verification", 3, 3600, email)
     user = await db.scalar(select(User).where(func.lower(User.email) == email))
     if user and user.is_active and user.email_verified_at is None:
         token = await _create_action_token(
@@ -196,9 +236,11 @@ async def resend_verification(
 @router.post("/request-password-reset", status_code=status.HTTP_202_ACCEPTED)
 async def request_password_reset(
     payload: EmailRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db_session),
 ) -> dict[str, str]:
     email = payload.email.strip().lower()
+    await _enforce_rate_limit(db, request, "password-reset-request", 3, 3600, email)
     user = await db.scalar(select(User).where(func.lower(User.email) == email))
     if user and user.is_active:
         token = await _create_action_token(
@@ -211,8 +253,10 @@ async def request_password_reset(
 @router.post("/reset-password")
 async def reset_password(
     payload: PasswordResetRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db_session),
 ) -> dict[str, str]:
+    await _enforce_rate_limit(db, request, "password-reset", 5, 3600)
     _, user = await _consume_action_token(payload.token, "password_reset", db)
     user.password_hash = hash_password(payload.new_password)
     await db.execute(
@@ -233,6 +277,7 @@ async def login(
 ) -> TokenResponse:
     _validate_origin(request)
     email = payload.email.strip().lower()
+    await _enforce_rate_limit(db, request, "login", 10, 300, email)
     user = await db.scalar(select(User).where(func.lower(User.email) == email))
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -253,6 +298,7 @@ async def refresh(
     db: AsyncSession = Depends(get_db_session),
 ) -> TokenResponse:
     _validate_origin(request)
+    await _enforce_rate_limit(db, request, "refresh", 30, 60)
     raw_token = request.cookies.get(_REFRESH_COOKIE)
     if not raw_token:
         raise HTTPException(status_code=401, detail="Refresh session is missing")
