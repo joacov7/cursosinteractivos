@@ -43,7 +43,7 @@ CI applies, rolls back and reapplies migrations against an ephemeral PostgreSQL 
 - `POST /api/v1/auth/logout`: revokes the refresh session and clears its cookie.
 - `GET /api/v1/auth/me`: returns the authenticated user's profile.
 
-Passwords use Argon2id. Refresh tokens and account-action tokens are random opaque values; only SHA-256 hashes are stored in PostgreSQL. Verification and reset tokens are single-use and expire. PostgreSQL-backed fixed-window limits are shared across API instances: login 10/5 minutes, registration 5/hour, verification resend and reset request 3/hour per account/IP key, password reset 5/hour, and refresh 30/minute. The rate-limit table has an expiry index; schedule periodic deletion of expired buckets as part of database maintenance. Access tokens use HS256 and require a `JWT_SECRET` of at least 32 characters. Set `ENVIRONMENT=production` to enable the Secure cookie flag. Browser origins are restricted through `ALLOWED_ORIGINS`.
+Passwords use Argon2id. Refresh tokens and account-action tokens are random opaque values; only SHA-256 hashes are stored in PostgreSQL. Verification and reset tokens are single-use and expire. PostgreSQL-backed fixed-window limits are shared across API instances: login 10/5 minutes, registration 5/hour, verification resend and reset request 3/hour per account/IP key, password reset 5/hour, and refresh 30/minute. The rate-limit table has an expiry index; schedule periodic deletion of expired buckets as part of database maintenance. Access tokens use HS256 and require a `JWT_SECRET` of at least 32 characters. Set `ENVIRONMENT=production` to enable Secure cookies and `SameSite=None` for a cross-origin frontend/API. Browser origins are restricted through `ALLOWED_ORIGINS`; include the exact deployed frontend origin. CORS permits GET, POST and PUT.
 
 ## Email delivery
 
@@ -78,3 +78,10 @@ Never commit `.env` or real credentials. Keep separate databases for development
 - `PUT /api/v1/lessons/{lesson_id}/progress`: stores progress only for a published course the authenticated user can access. Completion is normalized to 100%.
 
 Access is enforced in the API, not by hiding frontend controls. Do not add paid lesson content to public responses or frontend bundles as a substitute for server-side authorization. Enrollment creation and payment-provider integration are separate trusted workflows and are not yet implemented.
+
+
+## Frontend integration
+
+The frontend remains a static vanilla-JavaScript application (no Vite build is required). Its account screen uses the API client in `js/api-client.js` and the learner interface in `js/cuenta.js`. Set the `api-base-url` meta tag in the root `index.html` to the deployed API origin before publishing. The browser never receives database credentials.
+
+For local development, run the frontend on `http://localhost:5173` and the API on `http://localhost:8000`; configure `ALLOWED_ORIGINS=["http://localhost:5173"]` and `FRONTEND_URL=http://localhost:5173`. Keep the frontend and API on the same registrable domain in production when possible so browser cookie policies do not block refresh cookies.
