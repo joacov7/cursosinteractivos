@@ -43,7 +43,7 @@ CI applies, rolls back and reapplies migrations against an ephemeral PostgreSQL 
 - `POST /api/v1/auth/logout`: revokes the refresh session and clears its cookie.
 - `GET /api/v1/auth/me`: returns the authenticated user's profile.
 
-Passwords use Argon2id. Refresh tokens and account-action tokens are random opaque values; only SHA-256 hashes are stored in PostgreSQL. Verification and reset tokens are single-use and expire. Access tokens use HS256 and require a `JWT_SECRET` of at least 32 characters. Set `ENVIRONMENT=production` to enable the Secure cookie flag. Browser origins are restricted through `ALLOWED_ORIGINS`.
+Passwords use Argon2id. Refresh tokens and account-action tokens are random opaque values; only SHA-256 hashes are stored in PostgreSQL. Verification and reset tokens are single-use and expire. PostgreSQL-backed fixed-window limits are shared across API instances: login 10/5 minutes, registration 5/hour, verification resend and reset request 3/hour per account/IP key, password reset 5/hour, and refresh 30/minute. The rate-limit table has an expiry index; schedule periodic deletion of expired buckets as part of database maintenance. Access tokens use HS256 and require a `JWT_SECRET` of at least 32 characters. Set `ENVIRONMENT=production` to enable the Secure cookie flag. Browser origins are restricted through `ALLOWED_ORIGINS`.
 
 ## Email delivery
 
