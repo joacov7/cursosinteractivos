@@ -9,7 +9,7 @@ import {
   crearNodo, crearEdge, idGlobalPuerto, posPuerto, snap,
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
-import { calcularCaidaTension, calcularConsumoEnergia, diagnosticarCargasConectadas } from "./analisis.js";
+import { calcularCaidaTension, calcularConsumoEnergia, diagnosticarCargasConectadas, calcularDemandaSimultanea, compararSecciones } from "./analisis.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
 import { calcularLectura, crearEscenarioFalla, medirEntreBornes, medirResistenciaEntreBornes, evaluarBloqueoMedicion } from "./instrumentos.js";
 import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico, permiteEnergizarConFalla } from "./diagnostico.js";
@@ -95,12 +95,12 @@ export function render(container) {
               <label>Corriente (A)<input id="wb-caida-corriente" type="number" min="0" step="0.1" value="10"></label>
               <label>Material<select id="wb-caida-material"><option value="cobre">Cobre</option><option value="aluminio">Aluminio</option></select></label>
             </div>
-            <div id="wb-caida-resultado" class="wb-analisis-resultado" aria-live="polite"></div>
+            <div id="wb-caida-resultado" class="wb-analisis-resultado" aria-live="polite"></div><div id="wb-caida-comparativa" class="wb-comparativa" aria-live="polite"></div>
           </div>
           <div class="wb-analisis-card">
             <h4>Potencia y energía de las cargas</h4>
             <p>Se cuentan únicamente las cargas con camino completo desde la fuente.</p>
-            <label>Horas de uso estimadas por día<input id="wb-consumo-horas" type="number" min="0" max="24" step="0.5" value="5"></label>
+            <div class="wb-analisis-controles"><label>Horas de uso estimadas por día<input id="wb-consumo-horas" type="number" min="0" max="24" step="0.5" value="5"></label><label>Simultaneidad supuesta (%)<input id="wb-consumo-simultaneidad" type="number" min="0" max="100" step="5" value="100"></label></div>
             <div id="wb-consumo-resultado" class="wb-analisis-resultado" aria-live="polite"></div>
           </div>
         </div>
@@ -595,22 +595,31 @@ export function render(container) {
 
   function pintarAnalisis(r) {
     const leer = (id) => container.querySelector(id)?.value;
-    const caida = calcularCaidaTension({
-      longitudM: leer("#wb-caida-longitud"),
-      seccionMm2: leer("#wb-caida-seccion"),
-      corrienteA: leer("#wb-caida-corriente"),
-      material: leer("#wb-caida-material"),
-    });
+    const longitud = leer("#wb-caida-longitud");
+    const corriente = leer("#wb-caida-corriente");
+    const seccion = leer("#wb-caida-seccion");
+    const material = leer("#wb-caida-material");
+    const caida = calcularCaidaTension({ longitudM: longitud, seccionMm2: seccion, corrienteA: corriente, material });
     const panelCaida = container.querySelector("#wb-caida-resultado");
     if (panelCaida) panelCaida.innerHTML = !caida.valida
       ? `<p class="wb-analisis-error">${caida.error}</p>`
       : `<div class="wb-analisis-metricas"><span>Caída estimada<strong>${caida.caidaV.toFixed(2).replace(".", ",")} V</strong></span><span>Porcentaje<strong>${caida.porcentaje.toFixed(2).replace(".", ",")} %</strong></span><span>Tensión al final<strong>${caida.tensionEstimadaV.toFixed(1).replace(".", ",")} V</strong></span></div><p class="wb-analisis-nota">${caida.advertencia}</p>`;
+    const panelComparativa = container.querySelector("#wb-caida-comparativa");
+    if (panelComparativa) {
+      const comparacion = compararSecciones({ longitudM: longitud, corrienteA: corriente, material });
+      panelComparativa.innerHTML = caida.valida
+        ? `<h5>Comparación de secciones para este escenario</h5><div class="wb-tabla-scroll"><table class="wb-tabla"><thead><tr><th>Sección</th><th>Caída</th><th>%</th><th>Resultado orientativo</th></tr></thead><tbody>${comparacion.map(x => `<tr class="${Number(seccion) === x.seccionMm2 ? "is-selected" : ""}"><td>${x.seccionMm2} mm²</td><td>${x.caidaV.toFixed(2).replace(".", ",")} V</td><td>${x.porcentaje.toFixed(2).replace(".", ",")} %</td><td>${x.porcentaje >= 3 ? "Revisar caída" : "Menor al 3 %*"}</td></tr>`).join("")}</tbody></table></div><p class="wb-analisis-nota">* No significa que la sección esté correctamente dimensionada. La tabla compara únicamente caída de tensión.</p>`
+        : "";
+    }
     const cargas = r.cargasConectadas || diagnosticarCargasConectadas(estado.nodes, escenarioActual().edges).cargas;
     const potencia = Number(r.potenciaTotalW) || 0;
+    const simultaneidad = leer("#wb-consumo-simultaneidad");
+    const demanda = calcularDemandaSimultanea(potencia, simultaneidad);
     const horas = Number(leer("#wb-consumo-horas"));
-    const energia = calcularConsumoEnergia(potencia, horas);
+    const energia = demanda === null ? null : calcularConsumoEnergia(demanda, horas);
+    const corrienteDemanda = demanda === null ? null : demanda / 220;
     const panelConsumo = container.querySelector("#wb-consumo-resultado");
-    if (panelConsumo) panelConsumo.innerHTML = `<div class="wb-analisis-metricas"><span>Cargas conectadas<strong>${cargas.length}</strong></span><span>Potencia estimada<strong>${potencia.toLocaleString("es-AR")} W</strong></span><span>Corriente ideal<strong>${(potencia / 220).toFixed(2).replace(".", ",")} A</strong></span><span>Energía diaria<strong>${energia === null ? "—" : energia.toFixed(2).replace(".", ",") + " kWh"}</strong></span></div><ul class="wb-cargas-lista">${cargas.length ? cargas.map(c => `<li>${c.nombre}: ${Number(c.potenciaW).toLocaleString("es-AR")} W</li>`).join("") : "<li>No hay cargas con circuito completo.</li>"}</ul><p class="wb-analisis-nota">Potencia nominal del modelo; la energía es una proyección simple (kW × horas), no una lectura de medidor. No incluye factor de potencia ni corrientes de arranque.</p>`;
+    if (panelConsumo) panelConsumo.innerHTML = `<div class="wb-analisis-metricas"><span>Cargas conectadas<strong>${cargas.length}</strong></span><span>Potencia instalada<strong>${potencia.toLocaleString("es-AR")} W</strong></span><span>Demanda simultánea supuesta<strong>${demanda === null ? "—" : Math.round(demanda).toLocaleString("es-AR") + " W"}</strong></span><span>Corriente estimada<strong>${corrienteDemanda === null ? "—" : corrienteDemanda.toFixed(2).replace(".", ",") + " A"}</strong></span><span>Energía diaria proyectada<strong>${energia === null ? "—" : energia.toFixed(2).replace(".", ",") + " kWh"}</strong></span></div>${demanda === null ? '<p class="wb-analisis-error">La simultaneidad debe estar entre 0 y 100 %.</p>' : ""}<ul class="wb-cargas-lista">${cargas.length ? cargas.map(c => `<li>${c.nombre}: ${Number(c.potenciaW).toLocaleString("es-AR")} W</li>`).join("") : "<li>No hay cargas con circuito completo.</li>"}</ul><p class="wb-analisis-nota">La simultaneidad es un supuesto editable, no una medición ni un factor reglamentario recomendado. Energía = demanda supuesta × horas. No modela factor de potencia, ciclos de trabajo ni arranques.</p>`;
   }
 
   function pintarEstado(r) {
@@ -711,7 +720,7 @@ export function render(container) {
     if (!fuenteEncendida && !permiteEnergizarConFalla(fallaActiva)) { pintar(); return; }
     fuenteEncendida = !fuenteEncendida; pintar();
   });
-  ["#wb-caida-longitud", "#wb-caida-seccion", "#wb-caida-corriente", "#wb-caida-material", "#wb-consumo-horas"].forEach((id) => {
+  ["#wb-caida-longitud", "#wb-caida-seccion", "#wb-caida-corriente", "#wb-caida-material", "#wb-consumo-horas", "#wb-consumo-simultaneidad"].forEach((id) => {
     container.querySelector(id).addEventListener("input", () => pintar());
     container.querySelector(id).addEventListener("change", () => pintar());
   });
