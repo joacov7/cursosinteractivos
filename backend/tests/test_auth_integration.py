@@ -22,6 +22,7 @@ def client(monkeypatch):
     monkeypatch.setenv("JWT_SECRET", "integration-test-secret-" + "x" * 32)
     monkeypatch.setenv("ENVIRONMENT", "test")
     monkeypatch.setenv("REQUIRE_VERIFIED_EMAIL", "false")
+    monkeypatch.setenv("REQUIRE_VERIFIED_EMAIL", "false")
     get_settings.cache_clear()
 
     engine = create_async_engine(_async_database_url(database_url), poolclass=NullPool)
@@ -97,6 +98,68 @@ def test_login_rejects_invalid_password(client):
         json={"email": email, "password": "incorrect-password"},
     )
     assert response.status_code == 401
+
+
+def test_email_verification_is_required_and_single_use(client, monkeypatch):
+    import app.api.v1.routes.auth as auth_routes
+
+    monkeypatch.setenv("REQUIRE_VERIFIED_EMAIL", "true")
+    get_settings.cache_clear()
+    delivered = {}
+
+    async def capture_email(email, purpose, token):
+        delivered.update(email=email, purpose=purpose, token=token)
+
+    monkeypatch.setattr(auth_routes, "send_action_email", capture_email)
+    email = f"verify-{uuid4().hex}@example.com"
+    password = "correct-horse-battery-staple-2026"
+    registered = client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": password, "full_name": "Verify Student"},
+    )
+    assert registered.status_code == 201
+    assert delivered["purpose"] == "verify_email"
+
+    blocked = client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    assert blocked.status_code == 403
+
+    verified = client.post("/api/v1/auth/verify-email", json={"token": delivered["token"]})
+    assert verified.status_code == 200
+    assert client.post("/api/v1/auth/verify-email", json={"token": delivered["token"]}).status_code == 400
+    assert client.post("/api/v1/auth/login", json={"email": email, "password": password}).status_code == 200
+    get_settings.cache_clear()
+
+
+def test_password_reset_revokes_existing_sessions(client, monkeypatch):
+    import app.api.v1.routes.auth as auth_routes
+
+    delivered = {}
+
+    async def capture_email(email, purpose, token):
+        delivered.update(email=email, purpose=purpose, token=token)
+
+    monkeypatch.setattr(auth_routes, "send_action_email", capture_email)
+    email = f"reset-{uuid4().hex}@example.com"
+    old_password = "correct-horse-battery-staple-2026"
+    new_password = "new-correct-horse-battery-2027"
+    client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": old_password, "full_name": "Reset Student"},
+    )
+    login = client.post("/api/v1/auth/login", json={"email": email, "password": old_password})
+    assert login.status_code == 200
+
+    requested = client.post("/api/v1/auth/request-password-reset", json={"email": email})
+    assert requested.status_code == 202
+    assert delivered["purpose"] == "password_reset"
+    changed = client.post(
+        "/api/v1/auth/reset-password",
+        json={"token": delivered["token"], "new_password": new_password},
+    )
+    assert changed.status_code == 200
+    assert client.post("/api/v1/auth/refresh").status_code == 401
+    assert client.post("/api/v1/auth/login", json={"email": email, "password": old_password}).status_code == 401
+    assert client.post("/api/v1/auth/login", json={"email": email, "password": new_password}).status_code == 200
 
 
 def test_email_verification_is_required_and_single_use(client, monkeypatch):
