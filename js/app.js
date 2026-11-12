@@ -20,6 +20,7 @@ import * as catalogoView from "./catalogo-view.js";
 import * as quiz from "./quiz.js";
 import * as certificado from "./certificado.js";
 import * as landing from "./landing.js";
+import * as cuenta from "./cuenta.js";
 import * as workbench from "./workbench/workbench.js";
 import { QUIZZES } from "../data/quizzes.js";
 import { estaAprobado, resumenNivel, cursoCompleto } from "./progreso.js";
