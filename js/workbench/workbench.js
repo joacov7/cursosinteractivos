@@ -25,7 +25,6 @@ export function render(container) {
   let retoIdx = 0;
   let fallaActiva = "ninguna";
   let modoMedicion = "tension";
-  let puntoMedicion = "carga";
   let puntaA = "";
   let puntaB = "";
   const completados = leerCompletados();
@@ -68,9 +67,6 @@ export function render(container) {
         <div class="wb-instrumentos-controles">
           <label>Medición<select id="wb-modo-medicion">
             <option value="tension">Tensión (V~)</option><option value="corriente">Corriente (A)</option><option value="continuidad">Continuidad</option>
-          </select></label>
-          <label>Puntos de prueba<select id="wb-punto-medicion">
-            <option value="carga">En la carga</option><option value="fuente">En la fuente</option><option value="circuito">En el circuito</option>
           </select></label>
           <label>Punta roja<select id="wb-punta-a" aria-label="Borne de punta roja"></select></label>
           <label>Punta negra<select id="wb-punta-b" aria-label="Borne de punta negra"></select></label>
@@ -216,7 +212,7 @@ export function render(container) {
     const escenario = escenarioActual();
     const r = evaluarCircuito(escenario.nodes, escenario.edges);
     r.falla = fallaActiva;
-    const lecturaBase = calcularLectura(r, modoMedicion, puntoMedicion, escenario.nodes);
+    const lecturaBase = calcularLectura(r, modoMedicion, "circuito", escenario.nodes);
     const puntas = medirEntreBornes(escenario.nodes, escenario.edges, puntaA, puntaB);
     const lectura = modoMedicion === "tension"
       ? { valor: puntas.tension, detalle: puntas.detalle }
@@ -575,7 +571,6 @@ export function render(container) {
   container.querySelector("#wb-modo-medicion").addEventListener("change", (ev) => { modoMedicion = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-a").addEventListener("change", (ev) => { puntaA = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-b").addEventListener("change", (ev) => { puntaB = ev.target.value; pintar(); });
-  container.querySelector("#wb-punto-medicion").addEventListener("change", (ev) => { puntoMedicion = ev.target.value; pintar(); });
   container.querySelector("#wb-falla").addEventListener("change", (ev) => { fallaActiva = ev.target.value; pintar(); });
   container.querySelector("#wb-conectar").addEventListener("click", () => {
     const mensaje = conectar(container.querySelector("#wb-desde").value, container.querySelector("#wb-hasta").value);
