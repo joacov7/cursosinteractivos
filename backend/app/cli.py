@@ -1,6 +1,7 @@
 """Interactive, one-time administrator bootstrap. Run: python -m app.cli create-admin"""
 import asyncio
 import getpass
+from datetime import datetime, timezone
 
 from sqlalchemy import func, select, text
 
@@ -14,6 +15,7 @@ async def create_admin() -> None:
     if factory is None:
         raise RuntimeError("DATABASE_URL must be configured")
     async with factory() as db:
+        await db.execute(text("SELECT pg_advisory_xact_lock(734921805)"))
         count = await db.scalar(select(func.count()).select_from(User).where(User.role == "admin"))
         if count:
             raise RuntimeError("An administrator already exists; bootstrap is disabled")
@@ -27,7 +29,7 @@ async def create_admin() -> None:
         if existing:
             raise RuntimeError("Ya existe una cuenta con ese correo")
         db.add(User(email=email, full_name=full_name, password_hash=hash_password(password),
-                    role="admin", email_verified_at=__import__("datetime").datetime.now(__import__("datetime").timezone.utc)))
+                    role="admin", email_verified_at=datetime.now(timezone.utc)))
         await db.commit()
         print("Administrador creado.")
 
