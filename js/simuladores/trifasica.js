@@ -1,24 +1,24 @@
 // Simulador Trifásica (spec 3.1).
-// 220 V (fase-neutro) vs 380 V (fase-fase): cuándo hace falta trifásica. El
-// alumno clasifica artefactos como monofásicos o trifásicos.
+// Clasificación según la alimentación indicada en la placa de cada ejemplo.
+// Los valores de tensión son nominales de referencia, no mediciones de red.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
 import { svgTrifasica } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
-  "En trifásica hay 380 V entre fases: el riesgo es mayor. Verificá secuencia de " +
-  "fases y ausencia de tensión en las tres antes de trabajar.";
+  "Los valores de tensión del ejercicio son nominales y simplificados. Antes de intervenir, " +
+  "identificá el sistema, verificá ausencia de tensión en todos los conductores activos " +
+  "y aplicá el procedimiento seguro.";
 
-// Artefactos y su alimentación correcta.
 const ARTEFACTOS = [
-  { id: "lampara", nombre: "Iluminación LED del hogar", tipo: "mono" },
-  { id: "heladera", nombre: "Heladera familiar", tipo: "mono" },
-  { id: "aire_hogar", nombre: "Aire acondicionado split hogareño", tipo: "mono" },
+  { id: "lampara", nombre: "Iluminación LED del hogar — placa: 1~ 220 V", tipo: "mono" },
+  { id: "heladera", nombre: "Heladera familiar — placa: 1~ 220 V", tipo: "mono" },
+  { id: "aire_hogar", nombre: "Aire acondicionado split — placa: 1~ 220 V", tipo: "mono" },
   { id: "motor_industrial", nombre: "Motor 10 HP — placa: 3~ 380 V", tipo: "tri" },
   { id: "ascensor", nombre: "Accionamiento de ascensor — placa: 3~ 380 V", tipo: "tri" },
   { id: "soldadora_grande", nombre: "Soldadora industrial — placa: 3~ 380 V", tipo: "tri" },
   { id: "bomba_grande", nombre: "Bomba — motor indicado en placa: 3~ 380 V", tipo: "tri" },
-  { id: "microondas", nombre: "Microondas", tipo: "mono" },
+  { id: "microondas", nombre: "Microondas — placa: 1~ 220 V", tipo: "mono" },
 ];
 
 export function render(container) {
@@ -32,9 +32,10 @@ export function render(container) {
 
       <h2>Simulador: Trifásica</h2>
       <p class="sim-intro">
-        En una vivienda hay <strong>220 V</strong> entre fase y neutro (monofásica). La
-        <strong>trifásica</strong> usa tres fases (<strong>380 V</strong> entre fases) y se necesita para
-        cargas grandes, sobre todo motores de mucha potencia. Clasificá cada artefacto.
+        En esta actividad usamos valores nominales de referencia de <strong>220 V</strong>
+        fase-neutro y <strong>380 V</strong> entre fases. La alimentación correcta de un equipo
+        se determina por su placa y el sistema disponible, no solo por el tipo de artefacto.
+        Clasificá cada caso.
       </p>
 
       ${svgTrifasica()}
@@ -55,7 +56,12 @@ export function render(container) {
       <button type="button" id="btn-verificar" class="btn-primario">Verificar</button>
       <div id="tri-resultado" class="resultado" aria-live="polite" hidden></div>
 
-      <p class="nota-modelo">La clasificación se basa en la placa indicada en cada caso. No se puede inferir la alimentación solo por la categoría del equipo: existen modelos monofásicos y trifásicos. Los valores 220/380 V son referencias nominales usadas por esta actividad.</p>\n\n      <p class="cierre-educativo">${AVISO_EDUCATIVO}</p>
+      <p class="nota-modelo">
+        La clasificación se basa en la placa indicada en cada caso. No se puede inferir la
+        alimentación solo por la categoría del equipo: existen modelos monofásicos y trifásicos.
+        Los valores 220/380 V son referencias nominales usadas por esta actividad.
+      </p>
+      <p class="cierre-educativo">${AVISO_EDUCATIVO}</p>
     </section>
   `;
 
@@ -91,7 +97,7 @@ export function render(container) {
         <span class="badge">${ok ? "✔ Todo correcto" : `✖ ${errores.length} error(es)`}</span>
         <p>${ok
           ? "En estos ejemplos, la placa indica el tipo de alimentación. En equipos reales, verificá siempre la placa, el esquema de conexión y la tensión de red disponible."
-          : "Revisá: " + errores.map((a) => `${a.nombre} es ${a.tipo === "tri" ? "trifásica" : "monofásica"}`).join("; ") + "."}</p>
+          : "Revisá: " + errores.map((a) => `${a.nombre} corresponde a alimentación ${a.tipo === "tri" ? "trifásica" : "monofásica"}`).join("; ") + "."}</p>
       </div>`;
   });
 }
