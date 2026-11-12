@@ -4,6 +4,7 @@
 // presente en partes que en reposo no deberían tenerla.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgPolaridad } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "En un tomacorriente 2P+T (IRAM 2073) mirándolo de frente: la tierra es el " +
@@ -22,6 +23,8 @@ export function render(container) {
         Una lámpara con su interruptor, conectada a un toma 2P+T. Cambiá la conexión y el
         interruptor, y mirá dónde queda presente la fase.
       </p>
+
+      ${svgPolaridad()}
 
       <div class="controles">
         <label>
