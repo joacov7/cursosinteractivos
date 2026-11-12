@@ -144,17 +144,8 @@ export function activarGuia(container, id) {
       });
       ayuda.hidden = true;
       explicacion.hidden = true;
-      estado.textContent = "Respuesta seleccionada. Volvé a tocarla para comprobar.";
-      if (btn.dataset.confirmada === "si") {
-        btn.dataset.confirmada = "no";
-        estado.textContent = "Respuesta cambiada. Volvé a tocar para comprobar.";
-      } else {
-        btn.dataset.confirmada = "si";
-      }
+      estado.textContent = "Respuesta seleccionada. Ahora comprobá tu elección.";
     });
-  });
-  panel.querySelectorAll(".mision-opcion").forEach((btn) => {
-    btn.addEventListener("dblclick", () => comprobar());
   });
   function comprobar() {
     if (seleccion === null) {
