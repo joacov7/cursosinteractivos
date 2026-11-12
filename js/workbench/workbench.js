@@ -10,7 +10,7 @@ import {
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
-import { calcularLectura, crearEscenarioFalla } from "./instrumentos.js";
+import { calcularLectura, crearEscenarioFalla, medirEntreBornes } from "./instrumentos.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Este es un banco de pruebas virtual. En una instalación real, cada tramo se " +
@@ -26,6 +26,8 @@ export function render(container) {
   let fallaActiva = "ninguna";
   let modoMedicion = "tension";
   let puntoMedicion = "carga";
+  let puntaA = "";
+  let puntaB = "";
   const completados = leerCompletados();
 
   container.innerHTML = `
@@ -70,6 +72,8 @@ export function render(container) {
           <label>Puntos de prueba<select id="wb-punto-medicion">
             <option value="carga">En la carga</option><option value="fuente">En la fuente</option><option value="circuito">En el circuito</option>
           </select></label>
+          <label>Punta roja<select id="wb-punta-a" aria-label="Borne de punta roja"></select></label>
+          <label>Punta negra<select id="wb-punta-b" aria-label="Borne de punta negra"></select></label>
           <label>Inyectar una falla<select id="wb-falla">
             <option value="ninguna">Sin falla</option><option value="conductor-abierto">Conductor abierto</option><option value="puente-termica">Puente sobre la térmica</option>
           </select></label>
@@ -148,6 +152,18 @@ export function render(container) {
     const html = opciones.map((o) => '<option value="' + o.value + '">' + o.label + '</option>').join("");
     desde.innerHTML = html;
     hasta.innerHTML = html;
+    const puntaRoja = container.querySelector("#wb-punta-a");
+    const puntaNegra = container.querySelector("#wb-punta-b");
+    if (puntaRoja && puntaNegra) {
+      const anteriorA = puntaA || puntaRoja.value;
+      const anteriorB = puntaB || puntaNegra.value;
+      puntaRoja.innerHTML = html;
+      puntaNegra.innerHTML = html;
+      puntaA = opciones.some((o) => o.value === anteriorA) ? anteriorA : (opciones[0]?.value || "");
+      puntaB = opciones.some((o) => o.value === anteriorB) ? anteriorB : (opciones[1]?.value || opciones[0]?.value || "");
+      puntaRoja.value = puntaA;
+      puntaNegra.value = puntaB;
+    }
     if (opciones.some((o) => o.value === anteriorDesde)) desde.value = anteriorDesde;
     if (opciones.some((o) => o.value === anteriorHasta)) hasta.value = anteriorHasta;
   }
@@ -200,7 +216,13 @@ export function render(container) {
     const escenario = escenarioActual();
     const r = evaluarCircuito(escenario.nodes, escenario.edges);
     r.falla = fallaActiva;
-    const lectura = calcularLectura(r, modoMedicion, puntoMedicion, escenario.nodes);
+    const lecturaBase = calcularLectura(r, modoMedicion, puntoMedicion, escenario.nodes);
+    const puntas = medirEntreBornes(escenario.nodes, escenario.edges, puntaA, puntaB);
+    const lectura = modoMedicion === "tension"
+      ? { valor: puntas.tension, detalle: puntas.detalle }
+      : modoMedicion === "continuidad"
+        ? { valor: puntas.continuidad, detalle: "Continuidad lógica entre las puntas seleccionadas. No equivale a una prueba reglamentaria del conductor de protección." }
+        : lecturaBase;
     const display = container.querySelector("#wb-medida");
     if (display) display.textContent = lectura.valor;
     const ayuda = container.querySelector("#wb-medida-ayuda");
@@ -208,14 +230,20 @@ export function render(container) {
     const hot = r.estado === "sobrecarga";
     const activos = new Set(r.edgesActivos);
 
-    const edgesSvg = estado.edges
+    const edgesParaDibujar = [
+      ...escenario.edges,
+      ...estado.edges.filter((e) => e.id === escenario.edgeAbierto),
+    ];
+    const edgesSvg = edgesParaDibujar
       .map((e) => {
         const a = posGlobal(e.desde);
         const b = posGlobal(e.hasta);
         const clase = ["wb-edge"];
         if (e.id === escenario.edgeAbierto) clase.push("wb-edge--open");
+        if (e.id === "falla-puente-termica") clase.push("wb-edge--fault");
         if (hot && activos.has(e.id)) clase.push("wb-edge--hot");
         else if (r.estado === "seguro" && activos.has(e.id)) clase.push("wb-edge--flow");
+        else if (["inseguro"].includes(r.estado) && activos.has(e.id)) clase.push("wb-edge--energized");
         if (seleccion && seleccion.clase === "edge" && seleccion.id === e.id) clase.push("wb-edge--sel");
         return `<path d="${pathCable(a.x, a.y, b.x, b.y)}" class="${clase.join(" ")}"
                   data-edge="${e.id}" fill="none" />
@@ -543,6 +571,8 @@ export function render(container) {
   );
   container.querySelector("#wb-ejemplo").addEventListener("click", cargarEjemplo);
   container.querySelector("#wb-modo-medicion").addEventListener("change", (ev) => { modoMedicion = ev.target.value; pintar(); });
+  container.querySelector("#wb-punta-a").addEventListener("change", (ev) => { puntaA = ev.target.value; pintar(); });
+  container.querySelector("#wb-punta-b").addEventListener("change", (ev) => { puntaB = ev.target.value; pintar(); });
   container.querySelector("#wb-punto-medicion").addEventListener("change", (ev) => { puntoMedicion = ev.target.value; pintar(); });
   container.querySelector("#wb-falla").addEventListener("change", (ev) => { fallaActiva = ev.target.value; pintar(); });
   container.querySelector("#wb-conectar").addEventListener("click", () => {
