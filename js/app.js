@@ -23,6 +23,7 @@ import * as landing from "./landing.js";
 import * as workbench from "./workbench/workbench.js";
 import { QUIZZES } from "../data/quizzes.js";
 import { estaAprobado, resumenNivel, cursoCompleto } from "./progreso.js";
+import { activarGuia } from "./guia-interactiva.js";
 
 // Oficio actual. Al sumar plomería / refrigeración / mecánica, este valor y la
 // currícula pasan a seleccionarse por oficio; el resto del motor ya es genérico.
@@ -49,6 +50,14 @@ const SIMULADORES = {
 
 const vista = document.getElementById("vista");
 const nav = document.getElementById("nav-temario");
+const sidebar = document.querySelector(".sidebar");
+const navToggle = document.getElementById("nav-toggle");
+
+navToggle?.addEventListener("click", () => {
+  const collapsed = sidebar.classList.toggle("sidebar--collapsed");
+  navToggle.setAttribute("aria-expanded", String(!collapsed));
+  navToggle.textContent = collapsed ? "Mostrar temario" : "Ocultar temario";
+});
 
 const todosLosTemas = CURRICULA.flatMap((b) => b.temas);
 
@@ -161,6 +170,7 @@ function router() {
 
   if (partes[0] === "sim" && partes[1] && SIMULADORES[partes[1]]) {
     SIMULADORES[partes[1]].render(vista);
+    activarGuia(vista, partes[1]);
     anexarQuizCTA(partes[1]);
   } else if (partes[0] === "quiz" && partes[1]) {
     quiz.render(vista, { oficio: OFICIO, temaId: partes[1], onCambioProgreso: refrescarProgreso });
