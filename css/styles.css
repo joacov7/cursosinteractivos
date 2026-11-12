@@ -1354,3 +1354,12 @@ body {
   .account-course-card { align-items:flex-start; flex-direction:column; }
   .account-course-card button { width:100%; }
 }
+
+
+.access-wall {
+  max-width:620px; margin:2rem auto; padding:1.5rem;
+  border:1px solid var(--border); border-radius:14px; background:var(--panel);
+}
+.access-wall h2 { margin:.45rem 0; }
+.access-wall p { color:var(--muted); }
+.access-wall .btn-primario { display:inline-flex; padding:.65rem .9rem; border-radius:8px; text-decoration:none; margin:.5rem .7rem .5rem 0; }
