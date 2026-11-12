@@ -77,4 +77,21 @@ test("abrir conductor elimina la lectura de tensión a través del corte", () =>
   assert.equal(m.tension, "OL");
   assert.equal(m.continuidad, "ABIERTO");
 });
-\n\ntest("cortocircuito fase-neutro se inyecta en una copia y queda identificado", () => {\n  const nodes = [{ id: "f1", tipo: "fuente", props: {}, ports: [] }, { id: "c1", tipo: "carga", props: {}, ports: [] }];\n  const edges = [];\n  const escenario = crearEscenarioFalla(nodes, edges, "corto-fase-neutro", () => ({}));\n  assert.equal(escenario.cortoDetectado, true);\n  assert.equal(escenario.edges[0].id, "falla-corto-fn");\n  assert.equal(escenario.edges[0].desde, "f1:F");\n  assert.equal(escenario.edges[0].hasta, "f1:N");\n  assert.equal(edges.length, 0);\n});\n\ntest("el multímetro no inventa corriente de cortocircuito", () => {\n  const lectura = calcularLectura({ estado: "corto", I: 14 }, "corriente", "circuito", nodes);\n  assert.equal(lectura.valor, "Icc: no modelada");\n  assert.match(lectura.detalle, /impedancia/);\n});\n
+
+
+test("cortocircuito fase-neutro se inyecta en una copia y queda identificado", () => {
+  const nodes = [{ id: "f1", tipo: "fuente", props: {}, ports: [] }, { id: "c1", tipo: "carga", props: {}, ports: [] }];
+  const edges = [];
+  const escenario = crearEscenarioFalla(nodes, edges, "corto-fase-neutro", () => ({}));
+  assert.equal(escenario.cortoDetectado, true);
+  assert.equal(escenario.edges[0].id, "falla-corto-fn");
+  assert.equal(escenario.edges[0].desde, "f1:F");
+  assert.equal(escenario.edges[0].hasta, "f1:N");
+  assert.equal(edges.length, 0);
+});
+
+test("el multímetro no inventa corriente de cortocircuito", () => {
+  const lectura = calcularLectura({ estado: "corto", I: 14 }, "corriente", "circuito", nodes);
+  assert.equal(lectura.valor, "Icc: no modelada");
+  assert.match(lectura.detalle, /impedancia/);
+});
