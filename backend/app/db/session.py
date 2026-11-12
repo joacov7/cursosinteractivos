@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+from functools import lru_cache
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -18,6 +19,7 @@ def _async_database_url(url: str) -> str:
     return url
 
 
+@lru_cache
 def build_session_factory():
     database_url = get_settings().database_url
     if not database_url:
