@@ -222,3 +222,21 @@ class UserSession(Base):
 
 
 sa.Index("ix_user_sessions_user_expiry", UserSession.user_id, UserSession.expires_at)
+
+
+class AuthActionToken(Base):
+    __tablename__ = "auth_action_tokens"
+    __table_args__ = (
+        sa.CheckConstraint("purpose IN ('verify_email', 'password_reset')", name="valid_purpose"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    purpose: Mapped[str] = mapped_column(sa.String(30), nullable=False)
+    token_hash: Mapped[str] = mapped_column(sa.String(64), nullable=False, unique=True)
+    expires_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now())
+
+
+sa.Index("ix_auth_action_tokens_user_purpose", AuthActionToken.user_id, AuthActionToken.purpose)
