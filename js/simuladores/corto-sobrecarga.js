@@ -26,6 +26,7 @@ export function render(container) {
         Son <strong>dos fallas distintas</strong>, no "la misma pero más fuerte". Provocá cada
         una y observá cómo y cuándo corta la térmica (nominal ${NOMINAL_A} A).
       </p>
+      <p class="nota-modelo">Animación ilustrativa: los tiempos y corrientes no representan una curva real de disparo ni sustituyen los datos del fabricante.</p>
 
       ${svgFalla()}
 
