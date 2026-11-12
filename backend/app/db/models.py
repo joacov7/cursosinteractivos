@@ -240,3 +240,17 @@ class AuthActionToken(Base):
 
 
 sa.Index("ix_auth_action_tokens_user_purpose", AuthActionToken.user_id, AuthActionToken.purpose)
+
+
+class AuthRateLimit(Base):
+    __tablename__ = "auth_rate_limits"
+    __table_args__ = (
+        sa.CheckConstraint("attempts > 0", name="positive_attempts"),
+    )
+
+    bucket_key: Mapped[str] = mapped_column(sa.String(64), primary_key=True)
+    attempts: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
+
+
+sa.Index("ix_auth_rate_limits_expires_at", AuthRateLimit.expires_at)
