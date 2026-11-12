@@ -55,6 +55,7 @@ export function render(container) {
           En <strong>paralelo</strong> cada lamparita tiene su propio camino a ${V} V: son independientes
           y R<sub>eq</sub> = 1 / (1/R₁+1/R₂+1/R₃).
         </p>
+        <p class="nota-modelo">Modelo resistivo ideal: mantiene R constante y no representa el cambio de resistencia de una lámpara incandescente al calentarse. En una instalación real, cortá la alimentación y verificá ausencia de tensión antes de intervenir.</p>
       </div>
 
       <p class="cierre-educativo">${AVISO_EDUCATIVO}</p>
@@ -70,7 +71,7 @@ export function render(container) {
     if (config === "serie") {
       // Si hay al menos una quemada, el circuito se abre: no circula corriente.
       const abierto = quemadas.size > 0;
-      const Req = N * R; // equivalente con todas sanas
+      const Req = abierto ? Infinity : N * R;
       const I = abierto ? 0 : V / Req;
       return { abierto, Req, I, encendidas: abierto ? [] : [0, 1, 2] };
     }
