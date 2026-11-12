@@ -212,7 +212,11 @@ export function render(container) {
     const escenario = escenarioActual();
     const r = evaluarCircuito(escenario.nodes, escenario.edges);
     r.falla = fallaActiva;
-    if (fallaActiva === "corto-fase-neutro" && escenario.cortoDetectado) {\n      r.estado = "corto";\n      r.warnings = [...r.warnings, "Cortocircuito fase-neutro detectado. La corriente de cortocircuito y la actuación de la protección no se calculan en este modelo."];\n    }\n    const lecturaBase = calcularLectura(r, modoMedicion, "circuito", escenario.nodes);
+    if (fallaActiva === "corto-fase-neutro" && escenario.cortoDetectado) {
+      r.estado = "corto";
+      r.warnings = [...r.warnings, "Cortocircuito fase-neutro detectado. La corriente de cortocircuito y la actuación de la protección no se calculan en este modelo."];
+    }
+    const lecturaBase = calcularLectura(r, modoMedicion, "circuito", escenario.nodes);
     const puntas = medirEntreBornes(escenario.nodes, escenario.edges, puntaA, puntaB);
     const lectura = modoMedicion === "tension"
       ? { valor: puntas.tension, detalle: puntas.detalle }
@@ -481,7 +485,8 @@ export function render(container) {
       inseguro: ["⚠ Protección insuficiente", "Hay corriente, pero no existe una térmica correctamente conectada en serie o su valor no protege el cable."],
       seguro: ["✔ Seguro en este modelo", "La carga queda dentro de la capacidad del cable y la térmica está en serie. Es una comprobación didáctica simplificada."],
       sobrecarga: ["✖ Sobrecarga", "La corriente supera la capacidad del cable: se calienta y humea. Faltó una protección adecuada."],
-      salta: ["⚡ Salta la térmica", "La térmica corta porque la corriente supera su valor: protege el circuito."],\n      corto: ["✖ Cortocircuito fase-neutro", "Se detectó una unión directa entre fase y neutro. No se calcula la corriente de falla ni se afirma que una protección real vaya a abrir."],
+      salta: ["⚡ Salta la térmica", "La térmica corta porque la corriente supera su valor: protege el circuito."],
+      corto: ["✖ Cortocircuito fase-neutro", "Se detectó una unión directa entre fase y neutro. No se calcula la corriente de falla ni se afirma que una protección real vaya a abrir."],
     };
     const [badge, msg] = map[r.estado] || map.incompleto;
     const clase =
