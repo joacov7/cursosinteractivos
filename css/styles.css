@@ -1241,3 +1241,27 @@ body {
 }
 .wb-diagnostico--ok { border-color:var(--ok); background:var(--ok-bg); }
 .wb-diagnostico--ok p { color:var(--muted); line-height:1.6; }
+
+
+/* Panel de análisis eléctrico: resultados comparables y adaptables. */
+.wb-analisis { margin:1rem 0; padding:1rem; border:1px solid var(--border); border-radius:14px; background:var(--panel); }
+.wb-analisis-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.wb-analisis-head h3 { margin:.15rem 0 .8rem; font-size:1.08rem; }
+.wb-model-tag { border:1px solid var(--border); border-radius:999px; padding:.25rem .6rem; color:var(--muted); font-size:.72rem; }
+.wb-analisis-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.9rem; }
+.wb-analisis-card { min-width:0; padding:.9rem; border:1px solid var(--border); border-radius:11px; background:var(--panel-2); }
+.wb-analisis-card h4 { margin:0 0 .35rem; }
+.wb-analisis-card>p { color:var(--muted); font-size:.82rem; margin:.25rem 0 .8rem; }
+.wb-analisis-controles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; }
+.wb-analisis-card label { display:flex; flex-direction:column; gap:.3rem; color:var(--muted); font-size:.8rem; min-width:0; }
+.wb-analisis-card input,.wb-analisis-card select { width:100%; min-width:0; min-height:42px; padding:.55rem; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); }
+.wb-analisis-resultado { margin-top:.85rem; }
+.wb-analisis-metricas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.55rem; }
+.wb-analisis-metricas span { display:flex; flex-direction:column; gap:.2rem; padding:.65rem; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:.75rem; }
+.wb-analisis-metricas strong { color:var(--text); font-size:1.05rem; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.wb-analisis-nota,.wb-analisis-disclaimer { color:var(--muted); font-size:.78rem; line-height:1.55; }
+.wb-analisis-disclaimer { margin:.85rem 0 0; padding:.7rem; border-left:3px solid var(--warn); background:var(--warn-bg); }
+.wb-analisis-error { color:var(--danger); }
+.wb-cargas-lista { margin:.6rem 0; padding-left:1.2rem; color:var(--muted); font-size:.8rem; }
+@media(max-width:650px) { .wb-analisis-grid { grid-template-columns:1fr; } .wb-analisis-controles { grid-template-columns:1fr 1fr; } .wb-analisis-metricas { grid-template-columns:1fr 1fr; } }
+@media(max-width:380px) { .wb-analisis-controles,.wb-analisis-metricas { grid-template-columns:1fr; } }
