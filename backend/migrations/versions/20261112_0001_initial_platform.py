@@ -12,8 +12,15 @@ branch_labels = None
 depends_on = None
 
 
+def _execute_sql_batch(sql: str) -> None:
+    connection = op.get_bind()
+    for statement in sql.split(";"):
+        if statement.strip():
+            connection.exec_driver_sql(statement)
+
+
 def upgrade() -> None:
-    op.execute("""
+    _execute_sql_batch("""
     CREATE TABLE users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         email VARCHAR(320) NOT NULL,
@@ -174,7 +181,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute("""
+    _execute_sql_batch("""
     DROP TABLE IF EXISTS admin_audit_log;
     DROP TABLE IF EXISTS certificates;
     DROP TABLE IF EXISTS payment_events;
