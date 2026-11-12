@@ -6,6 +6,7 @@
 // Idea a evitar: pensar que son "lo mismo pero más fuerte".
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgFalla } from "../visuales.js";
 
 const NOMINAL_A = 10; // corriente nominal de la térmica del ejemplo
 
@@ -25,6 +26,8 @@ export function render(container) {
         Son <strong>dos fallas distintas</strong>, no "la misma pero más fuerte". Provocá cada
         una y observá cómo y cuándo corta la térmica (nominal ${NOMINAL_A} A).
       </p>
+
+      ${svgFalla()}
 
       <div class="dos-escenarios">
         ${escenarioHTML("sobrecarga", "Sobrecarga", "Se conectan demasiadas cargas al mismo circuito. La corriente sube por encima de lo normal, de a poco.")}
