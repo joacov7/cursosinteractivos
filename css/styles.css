@@ -990,3 +990,167 @@ button { cursor: pointer; }
 }
 .dv-flow { animation: dv-march 1.2s linear infinite; }
 @keyframes dv-march { to { stroke-dashoffset: -32; } }
+
+
+/* ── Capa visual: laboratorio de aprendizaje ─────────────────── */
+:root {
+  --bg: #0b1220;
+  --panel: #121d2c;
+  --panel-2: #19283a;
+  --border: #2b3c50;
+  --text: #edf4fb;
+  --muted: #a7b7c8;
+  --accent: #ffc247;
+  --accent-2: #69b7ff;
+  --ok: #35c78a;
+  --ok-bg: #102b27;
+  --danger: #ff6b68;
+  --danger-bg: #351d27;
+  --warn: #f4bd55;
+  --warn-bg: #302817;
+  --radius: 14px;
+}
+body {
+  background:
+    radial-gradient(ellipse at 75% -15%, rgba(45, 103, 158, 0.18), transparent 42rem),
+    var(--bg);
+}
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(13, 23, 37, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom-color: rgba(111, 151, 190, 0.2);
+}
+.brand-mark { box-shadow: 0 8px 24px rgba(255,194,71,.18); }
+.vista { max-width: 1080px; width: 100%; }
+.sim > h2 { font-size: clamp(1.55rem, 3vw, 2.25rem); letter-spacing: -0.035em; }
+.sim-intro { max-width: 76ch; font-size: 1.02rem; line-height: 1.75; }
+.sim > .aviso-seguridad { box-shadow: inset 4px 0 0 var(--warn); }
+.sim .controles {
+  padding: 1rem;
+  background: linear-gradient(145deg, var(--panel), rgba(25,40,58,.72));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.sim input, .sim select {
+  min-height: 46px;
+  border-radius: 10px;
+  border-color: #40546b;
+}
+.sim button { min-height: 44px; cursor: pointer; }
+.sim button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.sim button:active { transform: translateY(0); }
+.diagrama-card {
+  border-color: #344a61;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(73,143,205,.12), transparent 60%),
+    linear-gradient(145deg, #142338, #101a29);
+  box-shadow: 0 16px 42px rgba(0,0,0,.22);
+}
+.diagrama-svg { min-height: 170px; }
+.dv-label { font-size: 17px; }
+.diagrama-caption { letter-spacing: .02em; }
+
+/* Misión de aprendizaje integrada a cada simulación */
+.mision-aprendizaje {
+  margin: 1.2rem 0 1.5rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid #3a5671;
+  border-radius: 18px;
+  background:
+    linear-gradient(125deg, rgba(36,91,137,.22), transparent 58%),
+    var(--panel);
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+}
+.mision-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  color: var(--accent);
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.mision-duracion {
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.mision-aprendizaje h3 {
+  margin: .55rem 0 .35rem;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+}
+.mision-pregunta { max-width: 78ch; margin: 0 0 1rem; color: var(--muted); }
+.mision-opciones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; }
+.mision-opcion {
+  min-height: 68px !important;
+  padding: .8rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--text);
+  text-align: left;
+  line-height: 1.45;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+.mision-opcion.is-selected { border-color: var(--accent-2); background: rgba(58,132,192,.18); }
+.mision-opcion.is-correcta { border-color: var(--ok); background: var(--ok-bg); }
+.mision-opcion.is-incorrecta { border-color: var(--danger); background: var(--danger-bg); }
+.mision-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: 1rem; }
+.mision-comprobar {
+  padding: .65rem 1rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #201707;
+  font-weight: 800;
+}
+.mision-pista {
+  padding: .65rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--accent-2);
+}
+.mision-estado { color: var(--muted); font-size: .86rem; }
+.mision-ayuda, .mision-explicacion {
+  margin: .85rem 0 0;
+  padding: .8rem 1rem;
+  border-radius: 10px;
+  line-height: 1.6;
+}
+.mision-ayuda { background: var(--warn-bg); border-left: 3px solid var(--warn); }
+.mision-explicacion { background: var(--ok-bg); border-left: 3px solid var(--ok); }
+.nav-toggle {
+  display: none;
+  width: 100%;
+  min-height: 42px;
+  margin: 0 0 .75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .sidebar { padding: .8rem 1rem; }
+  .nav-toggle { display: block; }
+  .sidebar--collapsed #nav-temario { display: none; }
+  .sidebar--collapsed { padding-bottom: .55rem; }
+  .mision-opciones { grid-template-columns: 1fr; }
+  .mision-opcion { min-height: 50px !important; }
+  .app-header { padding: .7rem 1rem; }
+  .brand h1 { font-size: 1.05rem; }
+  .subt { font-size: .75rem; }
+}
+@media (min-width: 761px) {
+  .nav-toggle { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sim button:hover, .mision-opcion { transition: none; }
+}
