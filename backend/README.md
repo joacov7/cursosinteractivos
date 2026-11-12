@@ -39,3 +39,16 @@ For local isolated development, a PostgreSQL 16 container can be used. CI applie
 - Payment status and course access must only be changed by trusted backend workflows.
 - `payload_summary` and `metadata_summary` must contain sanitized data, not secrets or card information.
 - The initial schema is a foundation; authentication, authorization and API endpoints are not implemented yet.
+
+
+## Authentication endpoints
+
+- `POST /api/v1/auth/register`: creates a student account. Public registration cannot select an administrator role.
+- `POST /api/v1/auth/login`: validates credentials, returns a short-lived bearer access token and sets a refresh token in an HttpOnly cookie.
+- `POST /api/v1/auth/refresh`: rotates the refresh token; the previous token is revoked.
+- `POST /api/v1/auth/logout`: revokes the refresh session and clears its cookie.
+- `GET /api/v1/auth/me`: returns the authenticated user's profile.
+
+Passwords are hashed with Argon2id. Refresh tokens are random opaque values; only SHA-256 hashes are stored in PostgreSQL. Access tokens are signed with HS256 and require a `JWT_SECRET` of at least 32 characters. Set `ENVIRONMENT=production` to enable the Secure cookie flag. Browser origins are restricted through `ALLOWED_ORIGINS`.
+
+The current authentication stage does not yet include email verification, password reset delivery, rate limiting, administrator bootstrap tooling, or end-to-end browser tests. These remain explicit follow-up tasks before production launch.
