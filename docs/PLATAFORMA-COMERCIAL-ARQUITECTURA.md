@@ -215,3 +215,16 @@ Se creó una primera propuesta de esquema PostgreSQL/Supabase y una segunda migr
 **Validación actual:** GitHub Actions ejecutó 64 pruebas, todas aprobadas. Las seis nuevas pruebas del esquema son pruebas estáticas de contrato sobre los archivos SQL; no equivalen a ejecutar las migraciones contra una instancia PostgreSQL real. Todavía no se creó ni modificó un proyecto Supabase, no se configuraron credenciales y no se habilitó ningún pago real.
 
 Siguiente paso técnico: levantar un entorno de desarrollo Supabase aislado, aplicar las migraciones allí y probar RLS con usuarios anónimos, alumnos y administradores antes de construir el login o conectar Mercado Pago.
+
+
+### Prueba real de migraciones y RLS en PostgreSQL (12-11-2026)
+
+Se incorporó un segundo job de CI con PostgreSQL 16 efímero:
+
+- Levanta PostgreSQL limpio y crea una capa mínima compatible con Supabase Auth (`auth.users`, `auth.uid()`, roles `anon`, `authenticated` y `service_role`).
+- Aplica ambas migraciones SQL con `ON_ERROR_STOP`.
+- Comprueba lectura pública del catálogo y previews, bloqueo de lecciones pagas y borradores, acceso a cursos gratuitos y a cursos pagos con inscripción activa.
+- Verifica aislamiento de perfiles, permisos de rol, escritura de progreso, bloqueo de inserciones directas de órdenes, eventos de pago y resultados de quiz, y acceso público limitado a verificación de certificados.
+- El workflow terminó con éxito: job Node **64/64** y job PostgreSQL/migraciones/RLS **correcto**.
+
+Esto valida la sintaxis y las reglas principales en PostgreSQL 16 con una capa Auth simulada. Todavía no sustituye una prueba contra un proyecto Supabase real (Auth, Storage, JWT, RLS y configuración de proyecto), pero ya no es solo una inspección estática de SQL.
