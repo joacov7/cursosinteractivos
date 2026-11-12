@@ -73,6 +73,7 @@ export function evaluarCircuito(nodes, edges) {
   const base = {
     estado: "incompleto", I: 0, capCable: null, breaker: null,
     warnings: [], edgesActivos: [], termicasActivas: [],
+    potenciaTotalW: 0, cargasConectadas: [],
   };
   if (!fuente || !cargas.length || !edges.length) return base;
 
@@ -149,5 +150,7 @@ export function evaluarCircuito(nodes, edges) {
     warnings,
     edgesActivos: [...activos],
     termicasActivas: [...termicasActivas],
+    potenciaTotalW: caminosCarga.reduce((s, x) => s + Math.max(0, Number(x.carga.props.potencia) || 0), 0),
+    cargasConectadas: caminosCarga.map((x) => ({ id: x.carga.id, nombre: x.carga.props.nombre || "Carga", potenciaW: Math.max(0, Number(x.carga.props.potencia) || 0) })),
   };
 }
