@@ -6,6 +6,7 @@
 //   - breaker > capacidad_cable     → la térmica no protege al cable (falla "grande")
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgCableBreaker } from "../visuales.js";
 
 // Cargas típicas (corriente aproximada a 220 V).
 const CARGAS = [
@@ -100,6 +101,8 @@ export function render(container) {
         <strong>la carga entre en el cable</strong> y que <strong>la térmica proteja al cable</strong>
         (dimensionada en relación al cable, no a la carga).
       </p>
+
+      ${svgCableBreaker()}
 
       <div class="controles">
         <label>
