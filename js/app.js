@@ -194,6 +194,12 @@ function router() {
     certificado.render(vista, { onCambioProgreso: refrescarProgreso });
   } else if (partes[0] === "catalogo") {
     catalogoView.render(vista);
+  } else if (partes[0] === "cuenta") {
+    cuenta.render(vista);
+  } else if (partes[0] === "verificar-email") {
+    cuenta.render(vista, { action: "verify", token: params.get("token") });
+  } else if (partes[0] === "restablecer-contrasena") {
+    cuenta.render(vista, { action: "reset", token: params.get("token") });
   } else if (partes[0] === "pendiente") {
     renderPendiente();
   } else {
