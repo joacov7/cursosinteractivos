@@ -131,6 +131,6 @@ test("los modelos de iluminación y serie/paralelo declaran sus simplificaciones
   assert.match(iluminacion, /límite.*supuesto didáctico/i);
   assert.match(iluminacion, /lúmenes/i);
   assert.doesNotMatch(iluminacion, /la térmica de.*cortará/i);
-  assert.match(serie, /abierto ? Infinity/);
+  assert.match(serie, /abierto \\? Infinity/);
   assert.match(serie, /Modelo resistivo ideal/);
 });
