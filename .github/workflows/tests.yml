@@ -65,6 +65,8 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Apply all migrations
         run: alembic upgrade head
+      - name: Exercise authentication against PostgreSQL
+        run: PYTHONPATH=. pytest -q
       - name: Verify schema can be rolled back
         run: alembic downgrade base
       - name: Verify schema can be applied again
