@@ -161,3 +161,12 @@ Resultados previstos:
 - BLOQUEADO: fuente energizada.
 
 Esta función es una simplificación educativa y no sustituye un óhmetro, procedimientos de trabajo seguro ni una evaluación profesional.
+
+
+## Caída de tensión y diagnóstico de cargas (12-11-2026)
+
+Se añadió al banco un estimador monofásico de caída de tensión para dos conductores, con longitud de ida, sección, corriente y material explícitos. Usa resistividad aproximada a 20 °C (cobre 0,0175 y aluminio 0,0282 Ω·mm²/m), calcula la ida y vuelta y presenta voltios, porcentaje y tensión estimada sobre 220 V. El umbral del 3 % aparece como advertencia orientativa, nunca como aprobación normativa.
+
+El diagnóstico de potencia suma solo cargas con camino completo entre fase de fuente y borne de fase de carga, y entre neutro de carga y neutro de fuente. Muestra potencia nominal, corriente ideal y energía estimada a partir de horas ingresadas. No modela factor de potencia, arranque, simultaneidad real ni consumo medido.
+
+La interfaz usa tarjetas y métricas adaptables; no se ha realizado aún una inspección visual manual en dispositivos físicos. Las estimaciones no sustituyen el cálculo conforme a reglamentación AEA ni la verificación profesional de la instalación.
