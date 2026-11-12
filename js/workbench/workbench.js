@@ -9,6 +9,7 @@ import {
   crearNodo, crearEdge, idGlobalPuerto, posPuerto, snap,
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
+import { calcularCaidaTension, calcularConsumoEnergia, diagnosticarCargasConectadas } from "./analisis.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
 import { calcularLectura, crearEscenarioFalla, medirEntreBornes, medirResistenciaEntreBornes, evaluarBloqueoMedicion } from "./instrumentos.js";
 import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico, permiteEnergizarConFalla } from "./diagnostico.js";
@@ -81,6 +82,29 @@ export function render(container) {
           </select></label>
         </div>
         <p id="wb-medida-ayuda" class="wb-hint">Lecturas ideales del modelo didáctico. No son mediciones de una instalación real.</p>
+      </section>
+      <section class="wb-analisis" aria-label="Análisis de instalación">
+        <div class="wb-analisis-head"><div><span class="wb-kicker">Análisis eléctrico</span><h3>Caída de tensión y consumo</h3></div><span class="wb-model-tag">Estimaciones didácticas</span></div>
+        <div class="wb-analisis-grid">
+          <div class="wb-analisis-card">
+            <h4>Caída de tensión monofásica</h4>
+            <p>Modelo de dos conductores (fase + neutro), cobre o aluminio, resistividad a 20 °C.</p>
+            <div class="wb-analisis-controles">
+              <label>Longitud de ida (m)<input id="wb-caida-longitud" type="number" min="0.1" step="0.5" value="20"></label>
+              <label>Sección (mm²)<select id="wb-caida-seccion"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option><option>10</option><option>16</option></select></label>
+              <label>Corriente (A)<input id="wb-caida-corriente" type="number" min="0" step="0.1" value="10"></label>
+              <label>Material<select id="wb-caida-material"><option value="cobre">Cobre</option><option value="aluminio">Aluminio</option></select></label>
+            </div>
+            <div id="wb-caida-resultado" class="wb-analisis-resultado" aria-live="polite"></div>
+          </div>
+          <div class="wb-analisis-card">
+            <h4>Potencia y energía de las cargas</h4>
+            <p>Se cuentan únicamente las cargas con camino completo desde la fuente.</p>
+            <label>Horas de uso estimadas por día<input id="wb-consumo-horas" type="number" min="0" max="24" step="0.5" value="5"></label>
+            <div id="wb-consumo-resultado" class="wb-analisis-resultado" aria-live="polite"></div>
+          </div>
+        </div>
+        <p class="wb-analisis-disclaimer">No contempla temperatura real del conductor, reactancia, factor de potencia, método de instalación, agrupamiento, armónicos ni condiciones de protección. No reemplaza el cálculo reglamentario ni la verificación en obra.</p>
       </section>
       <section id="wb-diagnostico" class="wb-diagnostico" aria-label="Diagnóstico guiado de fallas" aria-live="polite"></section>
 
@@ -322,6 +346,7 @@ export function render(container) {
     actualizarConexiones();
     pintarProps();
     pintarEstado(r);
+    pintarAnalisis(r);
     pintarRetos(r);
     pintarDiagnostico();
   }
@@ -568,6 +593,26 @@ export function render(container) {
     pintar();
   }
 
+  function pintarAnalisis(r) {
+    const leer = (id) => container.querySelector(id)?.value;
+    const caida = calcularCaidaTension({
+      longitudM: leer("#wb-caida-longitud"),
+      seccionMm2: leer("#wb-caida-seccion"),
+      corrienteA: leer("#wb-caida-corriente"),
+      material: leer("#wb-caida-material"),
+    });
+    const panelCaida = container.querySelector("#wb-caida-resultado");
+    if (panelCaida) panelCaida.innerHTML = !caida.valida
+      ? `<p class="wb-analisis-error">${caida.error}</p>`
+      : `<div class="wb-analisis-metricas"><span>Caída estimada<strong>${caida.caidaV.toFixed(2).replace(".", ",")} V</strong></span><span>Porcentaje<strong>${caida.porcentaje.toFixed(2).replace(".", ",")} %</strong></span><span>Tensión al final<strong>${caida.tensionEstimadaV.toFixed(1).replace(".", ",")} V</strong></span></div><p class="wb-analisis-nota">${caida.advertencia}</p>`;
+    const cargas = r.cargasConectadas || diagnosticarCargasConectadas(estado.nodes, escenarioActual().edges).cargas;
+    const potencia = Number(r.potenciaTotalW) || 0;
+    const horas = Number(leer("#wb-consumo-horas"));
+    const energia = calcularConsumoEnergia(potencia, horas);
+    const panelConsumo = container.querySelector("#wb-consumo-resultado");
+    if (panelConsumo) panelConsumo.innerHTML = `<div class="wb-analisis-metricas"><span>Cargas conectadas<strong>${cargas.length}</strong></span><span>Potencia estimada<strong>${potencia.toLocaleString("es-AR")} W</strong></span><span>Corriente ideal<strong>${(potencia / 220).toFixed(2).replace(".", ",")} A</strong></span><span>Energía diaria<strong>${energia === null ? "—" : energia.toFixed(2).replace(".", ",") + " kWh"}</strong></span></div><ul class="wb-cargas-lista">${cargas.length ? cargas.map(c => `<li>${c.nombre}: ${Number(c.potenciaW).toLocaleString("es-AR")} W</li>`).join("") : "<li>No hay cargas con circuito completo.</li>"}</ul><p class="wb-analisis-nota">Potencia nominal del modelo; la energía es una proyección simple (kW × horas), no una lectura de medidor. No incluye factor de potencia ni corrientes de arranque.</p>`;
+  }
+
   function pintarEstado(r) {
     const map = {
       incompleto: ["Circuito incompleto", "Uní fuente → térmica → carga y cerrá el neutro para que circule corriente."],
@@ -665,6 +710,10 @@ export function render(container) {
   container.querySelector("#wb-fuente").addEventListener("click", () => {
     if (!fuenteEncendida && !permiteEnergizarConFalla(fallaActiva)) { pintar(); return; }
     fuenteEncendida = !fuenteEncendida; pintar();
+  });
+  ["#wb-caida-longitud", "#wb-caida-seccion", "#wb-caida-corriente", "#wb-caida-material", "#wb-consumo-horas"].forEach((id) => {
+    container.querySelector(id).addEventListener("input", () => pintar());
+    container.querySelector(id).addEventListener("change", () => pintar());
   });
   container.querySelector("#wb-modo-medicion").addEventListener("change", (ev) => { modoMedicion = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-a").addEventListener("change", (ev) => { puntaA = ev.target.value; pintar(); });
