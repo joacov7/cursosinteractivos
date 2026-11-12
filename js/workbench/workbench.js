@@ -10,6 +10,7 @@ import {
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
+import { calcularLectura } from "./instrumentos.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Este es un banco de pruebas virtual. En una instalación real, cada tramo se " +
@@ -22,6 +23,9 @@ export function render(container) {
   let inter = null; // interacción en curso
   let modo = "libre"; // "libre" | "retos"
   let retoIdx = 0;
+  let fallaActiva = "ninguna";
+  let modoMedicion = "tension";
+  let puntoMedicion = "carga";
   const completados = leerCompletados();
 
   container.innerHTML = `
@@ -54,6 +58,25 @@ export function render(container) {
         <button type="button" id="wb-conectar">Conectar bornes</button>
         <p id="wb-conexion-msg" class="wb-hint" role="status">Alternativa accesible al arrastre de cables.</p>
       </div>
+      <section class="wb-instrumentos" aria-label="Instrumentos y fallas didácticas">
+        <div class="wb-instrumentos-head">
+          <div><span class="wb-kicker">Laboratorio</span><h3>Multímetro virtual</h3></div>
+          <output id="wb-medida" class="wb-medida" aria-live="polite">220,0 V~</output>
+        </div>
+        <div class="wb-instrumentos-controles">
+          <label>Medición<select id="wb-modo-medicion">
+            <option value="tension">Tensión (V~)</option><option value="corriente">Corriente (A)</option><option value="continuidad">Continuidad</option>
+          </select></label>
+          <label>Puntos de prueba<select id="wb-punto-medicion">
+            <option value="carga">En la carga</option><option value="fuente">En la fuente</option><option value="circuito">En el circuito</option>
+          </select></label>
+          <label>Inyectar una falla<select id="wb-falla">
+            <option value="ninguna">Sin falla</option><option value="conductor-abierto">Conductor abierto</option><option value="puente-termica">Puente sobre la térmica</option>
+          </select></label>
+        </div>
+        <p id="wb-medida-ayuda" class="wb-hint">Lecturas ideales del modelo didáctico. No son mediciones de una instalación real.</p>
+      </section>
+
       <div class="wb-lienzo-wrap">
         <svg id="wb-svg" class="wb-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Banco de trabajo eléctrico interactivo"></svg>
       </div>
@@ -169,8 +192,34 @@ export function render(container) {
   }
 
   // ── Render ────────────────────────────────────────────────────────
+  function escenarioActual() {
+    const nodes = estado.nodes.map((n) => ({ ...n, props: { ...n.props }, ports: n.ports.map((p) => ({ ...p })) }));
+    let edges = estado.edges.map((e) => ({ ...e }));
+    let edgeAbierto = null;
+    if (fallaActiva === "conductor-abierto") {
+      const base = evaluarCircuito(nodes, edges);
+      edgeAbierto = base.edgesActivos[0] || null;
+      if (edgeAbierto) edges = edges.filter((e) => e.id !== edgeAbierto);
+    } else if (fallaActiva === "puente-termica") {
+      const fuente = nodes.find((n) => n.tipo === "fuente");
+      const carga = nodes.find((n) => n.tipo === "carga");
+      if (fuente && carga) edges.push({
+        id: "falla-puente-termica", desde: `${fuente.id}:F`, hasta: `${carga.id}:F`,
+        mm2: 6, capacidadA: 32,
+      });
+    }
+    return { nodes, edges, edgeAbierto };
+  }
+
   function pintar() {
-    const r = evaluarCircuito(estado.nodes, estado.edges);
+    const escenario = escenarioActual();
+    const r = evaluarCircuito(escenario.nodes, escenario.edges);
+    r.falla = fallaActiva;
+    const lectura = calcularLectura(r, modoMedicion, puntoMedicion, escenario.nodes);
+    const display = container.querySelector("#wb-medida");
+    if (display) display.textContent = lectura.valor;
+    const ayuda = container.querySelector("#wb-medida-ayuda");
+    if (ayuda) ayuda.textContent = lectura.detalle;
     const hot = r.estado === "sobrecarga";
     const activos = new Set(r.edgesActivos);
 
@@ -179,6 +228,7 @@ export function render(container) {
         const a = posGlobal(e.desde);
         const b = posGlobal(e.hasta);
         const clase = ["wb-edge"];
+        if (e.id === escenario.edgeAbierto) clase.push("wb-edge--open");
         if (hot && activos.has(e.id)) clase.push("wb-edge--hot");
         else if (r.estado === "seguro" && activos.has(e.id)) clase.push("wb-edge--flow");
         if (seleccion && seleccion.clase === "edge" && seleccion.id === e.id) clase.push("wb-edge--sel");
@@ -434,6 +484,7 @@ export function render(container) {
         <span>Cable: <strong>${r.capCable ?? "—"} A</strong></span>
         <span>Térmica: <strong>${r.breaker ?? "sin protección"}${r.breaker ? " A" : ""}</strong></span>
       </div>`}
+      ${r.falla && r.falla !== "ninguna" ? `<p class="wb-falla-activa">Falla inyectada: ${r.falla === "conductor-abierto" ? "conductor abierto" : "puente sobre la térmica"}. Escenario virtual.</p>` : ""}
       ${r.warnings.length ? `<ul class="problemas">${r.warnings
         .map((w) => `<li class="problema problema--peligro"><span class="problema-detalle">${w}</span></li>`).join("")}</ul>` : ""}`;
   }
@@ -506,6 +557,9 @@ export function render(container) {
     b.addEventListener("click", () => agregar(b.dataset.add))
   );
   container.querySelector("#wb-ejemplo").addEventListener("click", cargarEjemplo);
+  container.querySelector("#wb-modo-medicion").addEventListener("change", (ev) => { modoMedicion = ev.target.value; pintar(); });
+  container.querySelector("#wb-punto-medicion").addEventListener("change", (ev) => { puntoMedicion = ev.target.value; pintar(); });
+  container.querySelector("#wb-falla").addEventListener("change", (ev) => { fallaActiva = ev.target.value; pintar(); });
   container.querySelector("#wb-conectar").addEventListener("click", () => {
     const mensaje = conectar(container.querySelector("#wb-desde").value, container.querySelector("#wb-hasta").value);
     container.querySelector("#wb-conexion-msg").textContent = mensaje || "Conexión agregada.";
