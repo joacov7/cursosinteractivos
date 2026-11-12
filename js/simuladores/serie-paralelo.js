@@ -26,7 +26,7 @@ export function render(container) {
 
       <h2>Simulador: Serie vs. paralelo</h2>
       <p class="sim-intro">
-        Tres lamparitas iguales (${R} Ω cada una) a ${V} V. Cambiá la configuración y hacé
+        Tres resistencias ideales iguales (${R} Ω cada una) a ${V} V. Cambiá la configuración y hacé
         clic en una lamparita para "quemarla" (dejarla abierta). Observá qué pasa con el resto.
       </p>
 
