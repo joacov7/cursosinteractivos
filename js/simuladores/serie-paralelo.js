@@ -4,6 +4,7 @@
 // demás siguen. Muestra la resistencia equivalente en cada caso.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgSerieParalelo } from "../visuales.js";
 
 const V = 220; // tensión de alimentación
 const R = 440; // resistencia de cada lamparita (Ω)
@@ -28,6 +29,8 @@ export function render(container) {
         Tres lamparitas iguales (${R} Ω cada una) a ${V} V. Cambiá la configuración y hacé
         clic en una lamparita para "quemarla" (dejarla abierta). Observá qué pasa con el resto.
       </p>
+
+      ${svgSerieParalelo()}
 
       <div class="controles">
         <label>
