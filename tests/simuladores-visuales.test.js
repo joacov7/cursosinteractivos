@@ -45,3 +45,15 @@ test("los 15 diagramas SVG tienen etiqueta accesible y viewBox", () => {
     assert.match(svg, /<\/svg>/);
   }
 });
+
+import { IDS_MISIONES, obtenerMision } from "../js/guia-interactiva.js";
+
+test("cada simulador tiene una misión didáctica válida", () => {
+  assert.equal(IDS_MISIONES.length, 15);
+  for (const id of IDS_MISIONES) {
+    const m = obtenerMision(id);
+    assert.ok(m.titulo && m.pregunta && m.explicacion && m.pista);
+    assert.equal(m.opciones.length, 3);
+    assert.ok(m.correcta >= 0 && m.correcta < m.opciones.length);
+  }
+});
