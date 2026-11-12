@@ -14,10 +14,10 @@ const ARTEFACTOS = [
   { id: "lampara", nombre: "Iluminación LED del hogar", tipo: "mono" },
   { id: "heladera", nombre: "Heladera familiar", tipo: "mono" },
   { id: "aire_hogar", nombre: "Aire acondicionado split hogareño", tipo: "mono" },
-  { id: "motor_industrial", nombre: "Motor industrial de 10 HP", tipo: "tri" },
-  { id: "ascensor", nombre: "Ascensor de edificio", tipo: "tri" },
-  { id: "soldadora_grande", nombre: "Soldadora industrial de gran porte", tipo: "tri" },
-  { id: "bomba_grande", nombre: "Bomba de agua de gran caudal", tipo: "tri" },
+  { id: "motor_industrial", nombre: "Motor 10 HP — placa: 3~ 380 V", tipo: "tri" },
+  { id: "ascensor", nombre: "Accionamiento de ascensor — placa: 3~ 380 V", tipo: "tri" },
+  { id: "soldadora_grande", nombre: "Soldadora industrial — placa: 3~ 380 V", tipo: "tri" },
+  { id: "bomba_grande", nombre: "Bomba — motor indicado en placa: 3~ 380 V", tipo: "tri" },
   { id: "microondas", nombre: "Microondas", tipo: "mono" },
 ];
 
@@ -55,7 +55,7 @@ export function render(container) {
       <button type="button" id="btn-verificar" class="btn-primario">Verificar</button>
       <div id="tri-resultado" class="resultado" aria-live="polite" hidden></div>
 
-      <p class="cierre-educativo">${AVISO_EDUCATIVO}</p>
+      <p class="nota-modelo">La clasificación se basa en la placa indicada en cada caso. No se puede inferir la alimentación solo por la categoría del equipo: existen modelos monofásicos y trifásicos. Los valores 220/380 V son referencias nominales usadas por esta actividad.</p>\n\n      <p class="cierre-educativo">${AVISO_EDUCATIVO}</p>
     </section>
   `;
 
@@ -90,7 +90,7 @@ export function render(container) {
       <div class="resultado-cabecera">
         <span class="badge">${ok ? "✔ Todo correcto" : `✖ ${errores.length} error(es)`}</span>
         <p>${ok
-          ? "La regla práctica: cargas grandes (motores de mucha potencia, ascensores, máquinas industriales) van en trifásica; el resto del hogar es monofásico."
+          ? "En estos ejemplos, la placa indica el tipo de alimentación. En equipos reales, verificá siempre la placa, el esquema de conexión y la tensión de red disponible."
           : "Revisá: " + errores.map((a) => `${a.nombre} es ${a.tipo === "tri" ? "trifásica" : "monofásica"}`).join("; ") + "."}</p>
       </div>`;
   });
