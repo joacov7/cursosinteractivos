@@ -177,3 +177,10 @@ La interfaz usa tarjetas y métricas adaptables; no se ha realizado aún una ins
 El estimador muestra una tabla comparativa de secciones para la misma corriente, longitud y material, ordenada por las secciones didácticas disponibles. La tabla solo compara caída de tensión y no selecciona ni certifica una sección adecuada.
 
 El análisis de cargas permite ingresar un porcentaje supuesto de simultaneidad, diferenciando potencia instalada de demanda simultánea estimada. La energía diaria proyectada utiliza esa demanda por las horas de uso ingresadas. El factor es editable y no se presenta como valor normativo o medición real.
+
+
+## Navegación móvil y accesibilidad del índice (12-11-2026)
+
+Al seleccionar un tema desde el temario en pantallas móviles, el índice se pliega automáticamente para devolver espacio a la lección. El botón sincroniza su etiqueta y aria-expanded, y los enlaces indican el destino activo mediante aria-current="page". Se agregaron pruebas de regresión para el control, su estado accesible, el breakpoint móvil, el foco visible y prefers-reduced-motion.
+
+Estas pruebas verifican el contrato estático del código; no sustituyen pruebas manuales de interacción con lectores de pantalla ni recorridos reales en Android/iOS.
