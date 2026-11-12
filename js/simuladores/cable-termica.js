@@ -1,9 +1,8 @@
 // Simulador Cable + Térmica (spec 1.2 y 1.3).
 // El alumno elige una carga, una sección de cable y una térmica, y comprueba
 // las tres reglas de falla:
-//   - load > capacidad_cable  → el cable se calienta / humea
-//   - breaker < load                → la térmica corta apenas se usa (falla "chica")
-//   - breaker > capacidad_cable     → la térmica no protege al cable (falla "grande")
+//   - compara la corriente de carga con ampacidades asumidas en este escenario
+//   - identifica incompatibilidades didácticas sin calcular temperatura ni curva de disparo
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
 import { svgCableBreaker } from "../visuales.js";
@@ -77,7 +76,7 @@ function evaluar(loadA, capacidadCableA, breakerA) {
     ok,
     problemas,
     resumen: ok
-      ? "Combinación correcta: la carga entra en el cable y la térmica protege al cable sin cortar de más."
+      ? "Combinación compatible con los supuestos del ejercicio. No valida una instalación real."
       : "Combinación inválida. Revisá las observaciones.",
   };
 }
@@ -95,9 +94,8 @@ export function render(container) {
 
       <h2>Simulador: Cable + Térmica</h2>
       <p class="sim-intro">
-        Elegí la carga del circuito, la sección del cable y la térmica. El objetivo es que
-        <strong>compará la corriente de carga</strong> con los valores supuestos de conductor y protección.
-        La actividad no dimensiona una instalación real.
+        Elegí una carga, una sección de conductor y una protección. Compará la corriente de carga
+        con los valores supuestos del escenario; la actividad no dimensiona una instalación real.
       </p>
 
       ${svgCableBreaker()}
