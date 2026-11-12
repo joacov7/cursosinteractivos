@@ -59,6 +59,16 @@ navToggle?.addEventListener("click", () => {
   navToggle.textContent = collapsed ? "Mostrar temario" : "Ocultar temario";
 });
 
+// En móvil, elegir un tema pliega el índice para devolver el espacio a la lección.
+nav.addEventListener("click", (event) => {
+  if (!event.target.closest("a.nav-tema")) return;
+  if (window.matchMedia?.("(max-width: 760px)").matches) {
+    sidebar.classList.add("sidebar--collapsed");
+    navToggle?.setAttribute("aria-expanded", "false");
+    if (navToggle) navToggle.textContent = "Mostrar temario";
+  }
+});
+
 const todosLosTemas = CURRICULA.flatMap((b) => b.temas);
 
 function renderNav() {
@@ -155,7 +165,10 @@ function anexarQuizCTA(simId) {
 function marcarActivo() {
   const hash = location.hash || "#/";
   nav.querySelectorAll(".nav-tema").forEach((a) => {
-    a.classList.toggle("nav-tema--activo", a.getAttribute("href") === hash);
+    const activo = a.getAttribute("href") === hash;
+    a.classList.toggle("nav-tema--activo", activo);
+    if (activo) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
   });
 }
 
