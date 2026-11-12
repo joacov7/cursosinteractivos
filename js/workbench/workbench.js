@@ -24,6 +24,7 @@ export function render(container) {
   let modo = "libre"; // "libre" | "retos"
   let retoIdx = 0;
   let fallaActiva = "ninguna";
+  let fuenteEncendida = true;
   let modoMedicion = "tension";
   let puntaA = "";
   let puntaB = "";
@@ -50,6 +51,7 @@ export function render(container) {
         <button type="button" data-add="carga">+ Carga</button>
         <button type="button" id="wb-ejemplo">Cargar ejemplo</button>
         <button type="button" id="wb-limpiar">Limpiar</button>
+        <button type="button" id="wb-fuente" class="wb-power wb-power--on" aria-pressed="true">Fuente: ENCENDIDA</button>
       </div>
 
       <div class="wb-conexion-teclado" aria-label="Conexión accesible">
@@ -66,7 +68,7 @@ export function render(container) {
         </div>
         <div class="wb-instrumentos-controles">
           <label>Medición<select id="wb-modo-medicion">
-            <option value="tension">Tensión (V~)</option><option value="corriente">Corriente (A)</option><option value="continuidad">Continuidad</option>
+            <option value="tension">Tensión (V~)</option><option value="corriente">Corriente (A)</option><option value="continuidad">Continuidad (solo sin tensión)</option>
           </select></label>
           <label>Punta roja<select id="wb-punta-a" aria-label="Borne de punta roja"></select></label>
           <label>Punta negra<select id="wb-punta-b" aria-label="Borne de punta negra"></select></label>
@@ -217,12 +219,24 @@ export function render(container) {
       r.warnings = [...r.warnings, "Cortocircuito fase-neutro detectado. La corriente de cortocircuito y la actuación de la protección no se calculan en este modelo."];
     }
     const lecturaBase = calcularLectura(r, modoMedicion, "circuito", escenario.nodes);
-    const puntas = medirEntreBornes(escenario.nodes, escenario.edges, puntaA, puntaB);
-    const lectura = modoMedicion === "tension"
-      ? { valor: puntas.tension, detalle: puntas.detalle }
-      : modoMedicion === "continuidad"
-        ? { valor: puntas.continuidad, detalle: "Continuidad lógica entre las puntas seleccionadas. No equivale a una prueba reglamentaria del conductor de protección." }
-        : lecturaBase;
+    const puntas = medirEntreBornes(escenario.nodes, escenario.edges, puntaA, puntaB, { energizada: fuenteEncendida });
+    const bloqueo = evaluarBloqueoMedicion(modoMedicion, fuenteEncendida);
+    const lectura = bloqueo
+      ? { valor: "BLOQUEADO", detalle: bloqueo }
+      : modoMedicion === "tension"
+        ? { valor: puntas.tension, detalle: puntas.detalle }
+        : modoMedicion === "continuidad"
+          ? { valor: puntas.continuidad, detalle: "Continuidad lógica entre las puntas seleccionadas. Solo se habilita con la fuente desconectada; no equivale a una prueba reglamentaria del conductor de protección." }
+          : !fuenteEncendida
+            ? { valor: "0,0 A", detalle: "Fuente desconectada: no circula corriente en el modelo." }
+            : lecturaBase;
+    const botonFuente = container.querySelector("#wb-fuente");
+    if (botonFuente) {
+      botonFuente.textContent = fuenteEncendida ? "Fuente: ENCENDIDA" : "Fuente: DESCONECTADA";
+      botonFuente.setAttribute("aria-pressed", String(fuenteEncendida));
+      botonFuente.classList.toggle("wb-power--on", fuenteEncendida);
+      botonFuente.classList.toggle("wb-power--off", !fuenteEncendida);
+    }
     const display = container.querySelector("#wb-medida");
     if (display) display.textContent = lectura.valor;
     const ayuda = container.querySelector("#wb-medida-ayuda");
@@ -241,9 +255,9 @@ export function render(container) {
         const clase = ["wb-edge"];
         if (e.id === escenario.edgeAbierto) clase.push("wb-edge--open");
         if (e.id === "falla-puente-termica" || e.id === "falla-corto-fn") clase.push("wb-edge--fault");
-        if (hot && activos.has(e.id)) clase.push("wb-edge--hot");
-        else if (r.estado === "seguro" && activos.has(e.id)) clase.push("wb-edge--flow");
-        else if (["inseguro"].includes(r.estado) && activos.has(e.id)) clase.push("wb-edge--energized");
+        if (fuenteEncendida && hot && activos.has(e.id)) clase.push("wb-edge--hot");
+        else if (fuenteEncendida && r.estado === "seguro" && activos.has(e.id)) clase.push("wb-edge--flow");
+        else if (fuenteEncendida && ["inseguro"].includes(r.estado) && activos.has(e.id)) clase.push("wb-edge--energized");
         if (seleccion && seleccion.clase === "edge" && seleccion.id === e.id) clase.push("wb-edge--sel");
         return `<path d="${pathCable(a.x, a.y, b.x, b.y)}" class="${clase.join(" ")}"
                   data-edge="${e.id}" fill="none" />
@@ -270,7 +284,7 @@ export function render(container) {
           .join("")
       : "";
 
-    const nodesSvg = estado.nodes.map((n) => nodoSvg(n, r)).join("");
+    const nodesSvg = estado.nodes.map((n) => nodoSvg(n, r, fuenteEncendida)).join("");
     const minX = Math.min(0, ...estado.nodes.map((n) => n.x)) - 40;
     const minY = Math.min(0, ...estado.nodes.map((n) => n.y)) - 40;
     const maxX = Math.max(720, ...estado.nodes.map((n) => n.x + NODO_W + 60));
@@ -363,13 +377,13 @@ export function render(container) {
     panelRetos.querySelector("#wb-reto-libre").addEventListener("click", () => { modo = "libre"; pintar(); });
   }
 
-  function nodoSvg(n, r) {
+  function nodoSvg(n, r, fuenteActiva = true) {
     const sel = seleccion && seleccion.clase === "node" && seleccion.id === n.id;
     const tripped = r.estado === "salta" && r.termicasActivas.includes(n.id);
-    const energized = n.tipo === "carga" && r.edgesActivos.length > 0 && !["incompleto", "salta"].includes(r.estado);
-    const conducting = n.tipo === "termica" && r.termicasActivas.includes(n.id) && !tripped;
+    const energized = fuenteActiva && n.tipo === "carga" && r.edgesActivos.length > 0 && !["incompleto", "salta"].includes(r.estado);
+    const conducting = fuenteActiva && n.tipo === "termica" && r.termicasActivas.includes(n.id) && !tripped;
     const nombre =
-      n.tipo === "fuente" ? "Fuente 220 V" :
+      n.tipo === "fuente" ? (fuenteActiva ? "Fuente 220 V · ON" : "Fuente · OFF") :
       n.tipo === "termica" ? "Térmica" : (n.props.nombre || "Carga");
 
     const ports = n.ports
@@ -384,14 +398,14 @@ export function render(container) {
       <g class="wb-node wb-node--${n.tipo} ${sel ? "wb-node--sel" : ""} ${tripped ? "wb-node--tripped" : ""} ${energized ? "wb-node--energized" : ""} ${conducting ? "wb-node--conducting" : ""}"
          data-node="${n.id}">
         <rect x="${n.x}" y="${n.y}" width="${NODO_W}" height="${NODO_H}" rx="9" class="wb-node-box"></rect>
-        ${arteComponente(n, tripped, energized)}
+        ${arteComponente(n, tripped, energized, fuenteActiva)}
         <text class="wb-node-cap" x="${n.x + NODO_W / 2}" y="${n.y + NODO_H + 15}">${nombre}</text>
         ${ports}
       </g>`;
   }
 
   // Ilustración SVG a medida de cada componente (coordenadas relativas al nodo).
-  function arteComponente(n, tripped, energized = false) {
+  function arteComponente(n, tripped, energized = false, fuenteActiva = true) {
     const cx = n.x + NODO_W / 2;
     const top = n.y;
 
@@ -402,7 +416,7 @@ export function render(container) {
         <circle class="wb-art-line" cx="${cx}" cy="${cyc}" r="15" fill="none"></circle>
         <path class="wb-art-line" fill="none"
           d="M ${cx - 9} ${cyc} q 4.5 -9 9 0 t 9 0"></path>
-        <text class="wb-node-s" x="${cx}" y="${top + NODO_H - 8}">220 V ~</text>`;
+        <text class="wb-node-s" x="${cx}" y="${top + NODO_H - 8}">${fuenteActiva ? "220 V ~" : "DESCONECTADA"}</text>`;
     }
 
     if (n.tipo === "termica") {
@@ -573,6 +587,7 @@ export function render(container) {
     b.addEventListener("click", () => agregar(b.dataset.add))
   );
   container.querySelector("#wb-ejemplo").addEventListener("click", cargarEjemplo);
+  container.querySelector("#wb-fuente").addEventListener("click", () => { fuenteEncendida = !fuenteEncendida; pintar(); });
   container.querySelector("#wb-modo-medicion").addEventListener("change", (ev) => { modoMedicion = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-a").addEventListener("change", (ev) => { puntaA = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-b").addEventListener("change", (ev) => { puntaB = ev.target.value; pintar(); });
@@ -583,7 +598,7 @@ export function render(container) {
     if (!mensaje) pintar();
   });
   container.querySelector("#wb-limpiar").addEventListener("click", () => {
-    estado.nodes = []; estado.edges = []; seleccion = null; pintar();
+    estado.nodes = []; estado.edges = []; seleccion = null; fuenteEncendida = false; pintar();
   });
 
   cargarEjemplo(); // arranca con un circuito de ejemplo funcionando
