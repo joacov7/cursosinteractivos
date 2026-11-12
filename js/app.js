@@ -21,6 +21,7 @@ import * as quiz from "./quiz.js";
 import * as certificado from "./certificado.js";
 import * as landing from "./landing.js";
 import * as cuenta from "./cuenta.js";
+import * as api from "./api-client.js";
 import * as workbench from "./workbench/workbench.js";
 import { QUIZZES } from "../data/quizzes.js";
 import { estaAprobado, resumenNivel, cursoCompleto } from "./progreso.js";
@@ -178,7 +179,34 @@ function refrescarProgreso() {
   marcarActivo();
 }
 
-function router() {
+
+async function validarAcceso(simulatorKey) {
+  vista.innerHTML = '<section class="account-page"><p>Verificando el acceso al curso…</p></section>';
+  try {
+    const allowed = await api.canAccessSimulator(simulatorKey);
+    if (allowed) return true;
+    vista.innerHTML = `
+      <section class="access-wall">
+        <span class="account-course-tag">CURSO DE ELECTRICIDAD</span>
+        <h2>Esta clase está bloqueada</h2>
+        <p>Podés acceder a esta simulación cuando tengas una inscripción activa al curso.</p>
+        <a class="btn-primario" href="#/cuenta">Ingresar o ver mis cursos</a>
+        <a href="#/">Volver al inicio</a>
+      </section>`;
+    return false;
+  } catch (error) {
+    vista.innerHTML = `
+      <section class="access-wall">
+        <h2>No pudimos validar el acceso</h2>
+        <p>${String(error.message).replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}</p>
+        <p>La plataforma no habilita las clases pagas si no puede verificar la inscripción.</p>
+        <a class="btn-primario" href="#/cuenta">Ir a mi cuenta</a>
+      </section>`;
+    return false;
+  }
+}
+
+async function router() {
   const hash = location.hash || "#/";
   const route = hash.slice(2);
   const [pathname, query = ""] = route.split("?");
@@ -186,15 +214,22 @@ function router() {
   const params = new URLSearchParams(query);
 
   if (partes[0] === "sim" && partes[1] && SIMULADORES[partes[1]]) {
-    SIMULADORES[partes[1]].render(vista);
-    activarGuia(vista, partes[1]);
-    anexarQuizCTA(partes[1]);
+    if (await validarAcceso(partes[1])) {
+      SIMULADORES[partes[1]].render(vista);
+      activarGuia(vista, partes[1]);
+      anexarQuizCTA(partes[1]);
+    }
   } else if (partes[0] === "quiz" && partes[1]) {
-    quiz.render(vista, { oficio: OFICIO, temaId: partes[1], onCambioProgreso: refrescarProgreso });
+    const tema = todosLosTemas.find((item) => item.id === partes[1]);
+    if (tema?.sim && await validarAcceso(tema.sim)) {
+      quiz.render(vista, { oficio: OFICIO, temaId: partes[1], onCambioProgreso: refrescarProgreso });
+    } else if (!tema) {
+      renderPendiente();
+    }
   } else if (partes[0] === "banco") {
-    workbench.render(vista);
+    if (await validarAcceso("banco")) workbench.render(vista);
   } else if (partes[0] === "certificado") {
-    certificado.render(vista, { onCambioProgreso: refrescarProgreso });
+    if (await validarAcceso("banco")) certificado.render(vista, { onCambioProgreso: refrescarProgreso });
   } else if (partes[0] === "catalogo") {
     catalogoView.render(vista);
   } else if (partes[0] === "cuenta") {
