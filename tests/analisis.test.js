@@ -38,3 +38,16 @@ test("energía diaria convierte kW por horas", () => {
   assert.equal(calcularConsumoEnergia(0,24),0);
   assert.equal(calcularConsumoEnergia(-1,5),null);
 });
+
+
+test("demanda simultánea aplica el porcentaje indicado sin exceder 100 %", () => {
+  assert.equal(calcularDemandaSimultanea(3000,50),1500);
+  assert.equal(calcularDemandaSimultanea(3000,100),3000);
+  assert.equal(calcularDemandaSimultanea(3000,101),null);
+});
+test("comparación de secciones muestra menor caída al aumentar sección", () => {
+  const rows = compararSecciones({corrienteA:10,longitudM:20,material:"cobre"});
+  assert.equal(rows.length,6);
+  assert.ok(rows[0].caidaV > rows[1].caidaV);
+  assert.ok(rows[1].caidaV > rows[2].caidaV);
+});
