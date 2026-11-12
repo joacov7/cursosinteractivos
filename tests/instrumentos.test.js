@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calcularLectura, crearEscenarioFalla, medirEntreBornes } from "../js/workbench/instrumentos.js";
+import { calcularLectura, crearEscenarioFalla, medirEntreBornes, evaluarBloqueoMedicion } from "../js/workbench/instrumentos.js";
 
 const nodes = [{ tipo: "fuente" }, { tipo: "carga" }];
 test("multímetro mide tensión nominal ideal en la fuente", () => {
@@ -94,4 +94,24 @@ test("el multímetro no inventa corriente de cortocircuito", () => {
   const lectura = calcularLectura({ estado: "corto", I: 14 }, "corriente", "circuito", nodes);
   assert.equal(lectura.valor, "Icc: no modelada");
   assert.match(lectura.detalle, /impedancia/);
+});
+
+
+test("continuidad queda bloqueada cuando la fuente está energizada", () => {
+  assert.match(evaluarBloqueoMedicion("continuidad", true), /Desconectá la fuente/);
+  assert.equal(evaluarBloqueoMedicion("tension", true), "");
+  assert.equal(evaluarBloqueoMedicion("corriente", true), "");
+});
+
+test("continuidad se habilita con la fuente desconectada", () => {
+  assert.equal(evaluarBloqueoMedicion("continuidad", false), "");
+});
+
+test("fuente desconectada elimina la lectura de tensión aunque exista continuidad topológica", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }, { id: "c", tipo: "carga", props: {}, ports: [] }];
+  const edges = [{ id: "e1", desde: "f:F", hasta: "c:F" }];
+  const m = medirEntreBornes(nodes, edges, "f:F", "c:F", { energizada: false });
+  assert.equal(m.tension, "0,0 V~");
+  assert.equal(m.continuidad, "CONTINUIDAD");
+  assert.match(m.detalle, /Fuente desconectada/);
 });
