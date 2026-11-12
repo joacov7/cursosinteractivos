@@ -88,3 +88,12 @@ Un curso, un administrador y alumnos individuales. Incluye perfiles, cursos, mó
 ## Límites de esta etapa
 
 La elección de Neon no implica crear una cuenta, proyecto o base de datos externa. No se han cargado credenciales ni desplegado servicios. La configuración real se hará cuando exista un proyecto Neon creado por el titular. No se hará merge ni deploy sin autorización explícita.
+
+
+## Esquema PostgreSQL inicial
+
+La primera migración Alembic vive en `backend/migrations/versions/20261112_0001_initial_platform.py`. Crea estas entidades: `users`, `courses`, `course_modules`, `lessons`, `enrollments`, `lesson_progress`, `quiz_attempts`, `orders`, `payment_events`, `certificates` y `admin_audit_log`.
+
+La base guarda importes como enteros en unidad menor (`amount_minor` / `price_minor`) para evitar errores de punto flotante. Email tiene índice único insensible a mayúsculas. Los eventos de pago son idempotentes por proveedor e ID de evento. La migración se prueba en CI contra PostgreSQL 16, incluyendo upgrade, downgrade y upgrade.
+
+Este esquema no crea usuarios ni cursos iniciales, no configura Neon real y no implementa todavía autenticación ni endpoints de negocio. Los roles y estados son restricciones de datos, no sustituyen la autorización que deberá aplicar FastAPI.
