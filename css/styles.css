@@ -1178,3 +1178,13 @@ body {
 .wb-edge--open { stroke:var(--danger)!important; stroke-dasharray:5 7!important; opacity:.55; }
 .wb-falla-activa { padding:.55rem .75rem; border-left:3px solid var(--warn); background:var(--warn-bg); color:var(--text); font-size:.85rem; }
 @media(max-width:650px) { .wb-instrumentos-controles { grid-template-columns:1fr; } .wb-instrumentos-head { align-items:flex-start; flex-direction:column; } .wb-medida { width:100%; } }
+
+
+/* Flujo eléctrico didáctico y fallas del banco */
+.wb-edge--energized { stroke: var(--warn); stroke-width: 4; stroke-dasharray: 7 7; animation: wb-flow 1s linear infinite; }
+.wb-edge--fault { stroke: var(--danger); stroke-width: 4.5; stroke-dasharray: 3 5; animation: wb-pulso .65s ease-in-out infinite; }
+.wb-edge--open { stroke: var(--danger)!important; stroke-dasharray: 4 7!important; opacity: .7; }
+.wb-instrumentos-controles { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.wb-medida { display:block; font-variant-numeric: tabular-nums; }
+@media(max-width:900px) { .wb-instrumentos-controles { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:560px) { .wb-instrumentos-controles { grid-template-columns: 1fr; } }
