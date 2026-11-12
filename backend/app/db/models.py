@@ -207,3 +207,18 @@ sa.Index("ix_lesson_progress_user", LessonProgress.user_id)
 sa.Index("ix_orders_user_created", Order.user_id, Order.created_at)
 sa.Index("ix_payment_events_order", PaymentEvent.order_id)
 sa.Index("ix_certificates_public_code", Certificate.public_code)
+
+
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    refresh_token_hash: Mapped[str] = mapped_column(sa.String(64), nullable=False, unique=True)
+    expires_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
+    last_used_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now())
+
+
+sa.Index("ix_user_sessions_user_expiry", UserSession.user_id, UserSession.expires_at)
