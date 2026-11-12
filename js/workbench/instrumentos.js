@@ -38,3 +38,26 @@ export function calcularLectura(resultado, modo, punto, nodes = []) {
 
   return { valor: "—", detalle: "Seleccioná una función de medición." };
 }
+
+/**
+ * Construye una copia aislada del circuito para inyectar fallas sin alterar
+ * el diseño original que el alumno está armando.
+ */
+export function crearEscenarioFalla(nodes, edges, falla, evaluar) {
+  const copiaNodos = nodes.map((n) => ({ ...n, props: { ...n.props }, ports: (n.ports || []).map((p) => ({ ...p })) }));
+  let copiaEdges = edges.map((e) => ({ ...e }));
+  let edgeAbierto = null;
+  if (falla === "conductor-abierto") {
+    const base = evaluar(copiaNodos, copiaEdges);
+    edgeAbierto = base.edgesActivos[0] || null;
+    if (edgeAbierto) copiaEdges = copiaEdges.filter((e) => e.id !== edgeAbierto);
+  } else if (falla === "puente-termica") {
+    const fuente = copiaNodos.find((n) => n.tipo === "fuente");
+    const carga = copiaNodos.find((n) => n.tipo === "carga");
+    if (fuente && carga) copiaEdges.push({
+      id: "falla-puente-termica", desde: `${fuente.id}:F`, hasta: `${carga.id}:F`,
+      mm2: 6, capacidadA: 32,
+    });
+  }
+  return { nodes: copiaNodos, edges: copiaEdges, edgeAbierto };
+}
