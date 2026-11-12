@@ -5,6 +5,7 @@ from app.db import models  # noqa: F401
 def test_initial_platform_tables_are_registered():
     expected = {
         "users",
+        "user_sessions",
         "courses",
         "course_modules",
         "lessons",
