@@ -3,15 +3,10 @@
 import { CURRICULA } from "../data/curricula.js";
 // Los simuladores se cargan bajo demanda después de validar el acceso al curso.
 import * as catalogoView from "./catalogo-view.js";
-import * as quiz from "./quiz.js";
-import * as certificado from "./certificado.js";
 import * as landing from "./landing.js";
 import * as cuenta from "./cuenta.js";
 import * as api from "./api-client.js";
-import * as workbench from "./workbench/workbench.js";
-import { QUIZZES } from "../data/quizzes.js";
 import { estaAprobado, resumenNivel, cursoCompleto } from "./progreso.js";
-import { activarGuia } from "./guia-interactiva.js";
 
 // Oficio actual. Al sumar plomería / refrigeración / mecánica, este valor y la
 // currícula pasan a seleccionarse por oficio; el resto del motor ya es genérico.
@@ -133,7 +128,7 @@ function renderPendiente() {
 // CTA al quiz de cierre debajo de un simulador. Un simulador puede cubrir más de
 // un tema (p. ej. cable-termica cubre 1.2 y 1.3), así que se listan todos.
 function anexarQuizCTA(simId) {
-  const temas = todosLosTemas.filter((t) => t.sim === simId && QUIZZES[t.id]);
+  const temas = todosLosTemas.filter((t) => t.sim === simId);
   if (!temas.length) return;
   const links = temas
     .map((t) => {
@@ -203,20 +198,28 @@ async function router() {
     if (await validarAcceso(partes[1])) {
       const simulator = await SIMULADORES[partes[1]]();
       simulator.render(vista);
-      activarGuia(vista, partes[1]);
+      const guia = await import("./guia-interactiva.js");
+      guia.activarGuia(vista, partes[1]);
       anexarQuizCTA(partes[1]);
     }
   } else if (partes[0] === "quiz" && partes[1]) {
     const tema = todosLosTemas.find((item) => item.id === partes[1]);
     if (tema?.sim && await validarAcceso(tema.sim)) {
+      const quiz = await import("./quiz.js");
       quiz.render(vista, { oficio: OFICIO, temaId: partes[1], onCambioProgreso: refrescarProgreso });
     } else if (!tema) {
       renderPendiente();
     }
   } else if (partes[0] === "banco") {
-    if (await validarAcceso("banco")) workbench.render(vista);
+    if (await validarAcceso("banco")) {
+      const workbench = await import("./workbench/workbench.js");
+      workbench.render(vista);
+    }
   } else if (partes[0] === "certificado") {
-    if (await validarAcceso("banco")) certificado.render(vista, { onCambioProgreso: refrescarProgreso });
+    if (await validarAcceso("banco")) {
+      const certificado = await import("./certificado.js");
+      certificado.render(vista, { onCambioProgreso: refrescarProgreso });
+    }
   } else if (partes[0] === "catalogo") {
     catalogoView.render(vista);
   } else if (partes[0] === "cuenta") {
