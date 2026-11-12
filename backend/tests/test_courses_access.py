@@ -2,6 +2,7 @@ import asyncio
 import os
 from uuid import uuid4
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
@@ -9,7 +10,7 @@ from sqlalchemy.pool import NullPool
 from app.core.config import get_settings
 from app.core.security import create_access_token, hash_password
 from app.db.models import Course, CourseModule, Enrollment, Lesson, User
-from app.db.session import _async_database_url
+from app.db.session import _async_database_url, get_db_session
 from app.main import app
 
 
