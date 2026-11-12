@@ -4,6 +4,7 @@
 // El alumno dimensiona las protecciones y provoca una falla.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgSelectividad } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "La selectividad evita que una falla puntual deje toda la planta parada. En " +
@@ -32,6 +33,8 @@ export function render(container) {
         general para que, ante una falla en una máquina, corte <strong>solo esa</strong> y las demás
         sigan trabajando. Regla práctica: la seccional debe ser bastante menor que la general.
       </p>
+
+      ${svgSelectividad()}
 
       <div class="tablero">
         <div class="tablero-slot">
