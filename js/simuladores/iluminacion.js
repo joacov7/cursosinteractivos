@@ -49,7 +49,7 @@ export function render(container) {
         </label>
       </div>
 
-      <div id="ilum-resultado" class="resultado" aria-live="polite"></div>
+      <p class="nota-modelo">Modelo ideal a 220 V: suma watts nominales y calcula I = P/V. El límite de 10 A es solo un supuesto didáctico; no vincula automáticamente una térmica con 1,5 mm² ni contempla factor de potencia, corriente de arranque, temperatura, método de instalación o reglamentación. Para comparar luz, revisar lúmenes y especificaciones del fabricante.</p>\n      <div id="ilum-resultado" class="resultado" aria-live="polite"></div>
 
       <div class="comparacion">
         <h3>Por qué importa el tipo</h3>
@@ -83,8 +83,8 @@ export function render(container) {
       <div class="resultado-cabecera">
         <span class="badge">${sobre ? "✖ Supera la térmica" : "✔ Entra en el circuito"}</span>
         <p>${sobre
-          ? `Con ${bocas} bocas ${TIPOS[tipo].nombre} el circuito pide ${corriente.toFixed(1)} A y la térmica de ${LIMITE_A} A cortará. Máximo con esta lámpara: ${maxBocas} bocas.`
-          : `${bocas} bocas ${TIPOS[tipo].nombre} consumen ${corriente.toFixed(1)} A: entran holgado. Con esta lámpara entran hasta ${maxBocas} bocas.`}</p>
+          ? `Con ${bocas} bocas ${TIPOS[tipo].nombre} la corriente ideal estimada es ${corriente.toFixed(1)} A, por encima del límite supuesto de ${LIMITE_A} A en este ejercicio. No se calcula el tiempo de actuación de una protección real.`
+          : `${bocas} bocas ${TIPOS[tipo].nombre} representan ${corriente.toFixed(1)} A en el modelo ideal, por debajo del límite supuesto. Esto no valida la cantidad de bocas ni el dimensionamiento real.`}</p>
       </div>
       <div class="valores">
         <span>Potencia total: <strong>${potencia} W</strong></span>
