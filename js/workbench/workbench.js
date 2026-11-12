@@ -10,7 +10,7 @@ import {
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
-import { calcularLectura, crearEscenarioFalla, medirEntreBornes } from "./instrumentos.js";
+import { calcularLectura, crearEscenarioFalla, medirEntreBornes, evaluarBloqueoMedicion } from "./instrumentos.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Este es un banco de pruebas virtual. En una instalación real, cada tramo se " +
@@ -176,6 +176,7 @@ export function render(container) {
   }
 
   function cargarEjemplo() {
+    fuenteEncendida = true;
     estado.nodes = [];
     estado.edges = [];
     const f = crearNodo("fuente", 40, 80);
