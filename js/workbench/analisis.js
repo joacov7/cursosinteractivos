@@ -51,3 +51,17 @@ export function calcularConsumoEnergia(potenciaW, horas) {
   if (!Number.isFinite(p) || p < 0 || !Number.isFinite(h) || h < 0) return null;
   return (p / 1000) * h;
 }
+
+
+export function calcularDemandaSimultanea(potenciaInstaladaW, simultaneidadPct = 100) {
+  const potencia = Number(potenciaInstaladaW), factor = Number(simultaneidadPct);
+  if (!Number.isFinite(potencia) || potencia < 0 || !Number.isFinite(factor) || factor < 0 || factor > 100) return null;
+  return potencia * factor / 100;
+}
+
+export function compararSecciones({ corrienteA, longitudM, material = "cobre", tensionV = 220, secciones = [1.5, 2.5, 4, 6, 10, 16] } = {}) {
+  return secciones.map((seccionMm2) => {
+    const resultado = calcularCaidaTension({ corrienteA, longitudM, seccionMm2, material });
+    return { seccionMm2, ...resultado, tensionV };
+  });
+}
