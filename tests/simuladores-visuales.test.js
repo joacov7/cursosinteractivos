@@ -14,6 +14,7 @@ import * as tablero from "../js/simuladores/tablero.js";
 import * as iluminacion from "../js/simuladores/iluminacion.js";
 import * as trifasica from "../js/simuladores/trifasica.js";
 import * as motores from "../js/simuladores/motores-arranque.js";
+import { evaluarArranque } from "../js/simuladores/motores-arranque.js";
 import * as compresor from "../js/simuladores/compresor-diagnostico.js";
 import * as selectividad from "../js/simuladores/selectividad.js";
 import * as normativa from "../js/simuladores/normativa-aea.js";
@@ -78,4 +79,34 @@ test("los simuladores eléctricos explicitan límites del modelo", async () => {
   assert.match(fallas, /no representan corrientes/i);
   assert.match(fallas, /no tiempo de disparo/i);
   assert.doesNotMatch(fallas, /≈ 15 ms|< 20 ms|const pico = NOMINAL_A \* 50/);
+});
+
+
+test("el simulador de motores respeta bandas magnéticas y no inventa un disparo exacto", () => {
+  const directoB = evaluarArranque("directo", "B");
+  const directoC = evaluarArranque("directo", "C");
+  const directoD = evaluarArranque("directo", "D");
+  const estrellaB = evaluarArranque("estrella_triangulo", "B");
+
+  assert.equal(directoB.estado, "encima");
+  assert.equal(directoC.estado, "indeterminado");
+  assert.equal(directoD.estado, "debajo");
+  assert.equal(estrellaB.estado, "debajo");
+  assert.equal(directoC.minimo, 50);
+  assert.equal(directoC.maximo, 100);
+  assert.throws(() => evaluarArranque("desconocido", "C"), TypeError);
+});
+
+test("los simuladores de cargas y trifásica no presentan supuestos como reglas de diseño", async () => {
+  const [cargas, trifasica, polaridad] = await Promise.all([
+    readFile(new URL("../js/simuladores/cargas-ambiente.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/simuladores/trifasica.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/simuladores/polaridad.js", import.meta.url), "utf8"),
+  ]);
+  assert.match(cargas, /no dimensiona una instalación real/i);
+  assert.doesNotMatch(cargas, /Así se dimensiona una instalación/);
+  assert.match(trifasica, /placa/i);
+  assert.match(trifasica, /valores nominales/i);
+  assert.match(polaridad, /verificá ausencia de tensión/i);
+  assert.doesNotMatch(polaridad, /Cambiar la lámpara es seguro/);
 });
