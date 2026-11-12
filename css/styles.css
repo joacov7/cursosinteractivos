@@ -1265,3 +1265,14 @@ body {
 .wb-cargas-lista { margin:.6rem 0; padding-left:1.2rem; color:var(--muted); font-size:.8rem; }
 @media(max-width:650px) { .wb-analisis-grid { grid-template-columns:1fr; } .wb-analisis-controles { grid-template-columns:1fr 1fr; } .wb-analisis-metricas { grid-template-columns:1fr 1fr; } }
 @media(max-width:380px) { .wb-analisis-controles,.wb-analisis-metricas { grid-template-columns:1fr; } }
+
+
+.wb-comparativa { margin-top:.8rem; }
+.wb-comparativa h5 { margin:.25rem 0 .5rem; font-size:.82rem; }
+.wb-tabla-scroll { max-width:100%; overflow-x:auto; border:1px solid var(--border); border-radius:9px; }
+.wb-tabla { width:100%; border-collapse:collapse; font-size:.76rem; font-variant-numeric:tabular-nums; }
+.wb-tabla th,.wb-tabla td { padding:.55rem .6rem; text-align:left; white-space:nowrap; border-bottom:1px solid var(--border); }
+.wb-tabla th { color:var(--muted); font-weight:600; background:var(--panel); }
+.wb-tabla tr:last-child td { border-bottom:0; }
+.wb-tabla tr.is-selected td { background:var(--accent-soft,rgba(65,130,220,.12)); font-weight:650; }
+@media(max-width:380px) { .wb-tabla { font-size:.7rem; } .wb-tabla th,.wb-tabla td { padding:.45rem .4rem; } }
