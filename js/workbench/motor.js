@@ -133,11 +133,11 @@ export function evaluarCircuito(nodes, edges) {
   let estado = "seguro";
   if (capCable === null) {
     estado = "incompleto";
-  } else if (I > capCable && (breaker === null || breaker > capCable)) {
+  } else if (I > capCable && (sinProteccionSerie || breaker === null || breaker > capCable)) {
     estado = "sobrecarga";
   } else if (breaker !== null && I > breaker) {
     estado = "salta";
-  } else if (breaker === null || breaker > capCable) {
+  } else if (sinProteccionSerie || breaker === null || breaker > capCable) {
     estado = "inseguro";
   }
 
