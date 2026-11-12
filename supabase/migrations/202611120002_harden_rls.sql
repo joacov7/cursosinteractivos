@@ -137,3 +137,31 @@ create trigger orders_set_updated_at
 -- IMPORTANT: lesson_progress is learner-editable for UX. Never issue certificates
 -- from progress rows or client-submitted quiz data alone. The backend must recompute
 -- completion from authoritative rules and server-validated quiz attempts.
+
+
+-- Reset table grants to avoid inheriting permissive default grants from a project.
+revoke all on public.profiles, public.courses, public.modules, public.lessons,
+  public.enrollments, public.lesson_progress, public.quiz_attempts, public.orders,
+  public.payment_events, public.certificates, public.admin_audit_log
+  from anon, authenticated;
+revoke all on public.public_certificate_verification from anon, authenticated;
+
+grant select on public.profiles to authenticated;
+grant update (display_name) on public.profiles to authenticated;
+
+grant select on public.courses, public.modules, public.lessons to anon, authenticated;
+grant select, insert, update, delete on public.courses, public.modules, public.lessons to authenticated;
+
+grant select on public.enrollments to authenticated;
+grant select, insert, update, delete on public.enrollments to authenticated;
+
+grant select, insert, update on public.lesson_progress to authenticated;
+grant select on public.quiz_attempts to authenticated;
+grant select on public.orders to authenticated;
+grant select on public.certificates to authenticated;
+grant select, insert, update, delete on public.certificates to authenticated;
+grant select, insert on public.admin_audit_log to authenticated;
+grant select on public.public_certificate_verification to anon, authenticated;
+
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+revoke all on function public.set_updated_at() from public, anon, authenticated;
