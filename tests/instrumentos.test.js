@@ -140,3 +140,12 @@ test("óhmetro rechaza redes paralelas o un puente externo no resuelto", () => {
   const es = [{ id: "e1", desde: "c1:F", hasta: "c1:N" }];
   assert.equal(medirResistenciaEntreBornes(ns, es, "c1:F", "c1:N", { energizada: false }).valor, "NO MODELADA");
 });
+
+
+test("óhmetro indica circuito abierto cuando no hay camino entre bornes existentes", () => {
+  const ns = [
+    { id: "f1", tipo: "fuente", props: {}, ports: [{ id: "F" }, { id: "N" }] },
+    { id: "c1", tipo: "carga", props: { potencia: 4840 }, ports: [{ id: "F" }, { id: "N" }] },
+  ];
+  assert.equal(medirResistenciaEntreBornes(ns, [], "f1:F", "c1:F", { energizada: false }).valor, "OL");
+});
