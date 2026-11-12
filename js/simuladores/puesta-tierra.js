@@ -67,7 +67,7 @@ export function render(container) {
   function actualizarEscena() {
     const conTierra = chk.checked;
     carcasa.classList.toggle("tierra-carcasa--energizada", !conTierra);
-    carcasa.classList.toggle("tierra-carcasa--segura", conTierra);
+    carcasa.classList.toggle("tierra-carcasa--con-pe", conTierra);
     tensionCarcasa.textContent = conTierra ? "Falla derivada por PE" : "Masa potencialmente energizada";
     camino.textContent = conTierra
       ? "Camino de falla por PE → verificar actuación y tiempo de desconexión"
