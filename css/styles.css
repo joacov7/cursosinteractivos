@@ -1164,3 +1164,17 @@ body {
   color: var(--muted);
   font-size: .84rem;
 }
+
+
+/* ── Instrumentación del banco de trabajo ── */
+.wb-instrumentos { margin: 1rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(145deg, var(--panel), #111a24); }
+.wb-instrumentos-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+.wb-instrumentos-head h3 { margin:.15rem 0 0; font-size:1.05rem; }
+.wb-kicker { color:var(--accent-2); font-size:.7rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.wb-medida { min-width:150px; padding:.55rem .9rem; border:1px solid #42634a; border-radius:9px; background:#07140b; color:#8df59a; text-align:center; font:700 1.45rem ui-monospace,monospace; box-shadow:inset 0 0 18px rgba(80,220,110,.08); }
+.wb-instrumentos-controles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; margin-top:1rem; }
+.wb-instrumentos-controles label { display:flex; flex-direction:column; gap:.35rem; color:var(--muted); font-size:.82rem; }
+.wb-hint { color:var(--muted); font-size:.82rem; }
+.wb-edge--open { stroke:var(--danger)!important; stroke-dasharray:5 7!important; opacity:.55; }
+.wb-falla-activa { padding:.55rem .75rem; border-left:3px solid var(--warn); background:var(--warn-bg); color:var(--text); font-size:.85rem; }
+@media(max-width:650px) { .wb-instrumentos-controles { grid-template-columns:1fr; } .wb-instrumentos-head { align-items:flex-start; flex-direction:column; } .wb-medida { width:100%; } }
