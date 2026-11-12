@@ -405,7 +405,7 @@ export function render(container) {
         <div class="wb-diagnostico wb-diagnostico--ok">
           <div class="wb-diagnostico-cab"><span class="wb-kicker">Práctica completada</span><span class="wb-diagnostico-progreso">3/3</span></div>
           <h3>${caso.titulo}</h3>
-          <p>Resolviste el caso. Recordá: esta práctica enseña razonamiento y límites del modelo; no habilita a intervenir una instalación real.</p>
+          <p>Resolviste el caso. Recordá: esta práctica enseña razonamiento y límites del modelo; no habilita a intervenir una instalación real.</p><p class="wb-diagnostico-feedback">${diagnosticoFeedback}</p>
           <button type="button" id="wb-diag-reiniciar">Repetir diagnóstico</button>
         </div>`;
       panelDiagnostico.querySelector("#wb-diag-reiniciar").addEventListener("click", () => {
@@ -416,7 +416,7 @@ export function render(container) {
     const paso = caso.pasos[diagnosticoPaso];
     panelDiagnostico.innerHTML = `
       <div class="wb-diagnostico">
-        <div class="wb-diagnostico-cab"><span class="wb-kicker">Diagnóstico guiado · ${diagnosticoPaso + 1}/${caso.pasos.length}</span><span class="wb-diagnostico-progreso">${Math.round(diagnosticoPaso / caso.pasos.length * 100)}%</span></div>
+        <div class="wb-diagnostico-cab"><span class="wb-kicker">Diagnóstico guiado · ${diagnosticoPaso + 1}/${caso.pasos.length}</span><span class="wb-diagnostico-progreso">${Math.round((diagnosticoPaso + 1) / caso.pasos.length * 100)}%</span></div>
         <h3>${caso.titulo}</h3>
         <p class="wb-diagnostico-contexto">${caso.contexto}</p>
         <p class="wb-diagnostico-pregunta">${paso.pregunta}</p>
@@ -438,7 +438,7 @@ export function render(container) {
     });
     panelDiagnostico.querySelector("#wb-diag-comprobar").addEventListener("click", () => {
       const resultado = evaluarRespuestaDiagnostico(fallaActiva, diagnosticoPaso, diagnosticoOpcion);
-      diagnosticoFeedback = resultado.correcta ? resultado.explicacion : resultado.explicacion;
+      diagnosticoFeedback = resultado.correcta ? "¡Correcto! " + resultado.explicacion : resultado.explicacion;
       if (resultado.correcta) {
         diagnosticoPaso += 1;
         diagnosticoOpcion = null;
