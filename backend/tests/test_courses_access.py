@@ -14,6 +14,33 @@ from app.db.session import _async_database_url, get_db_session
 from app.main import app
 
 
+
+@pytest.fixture
+def client(monkeypatch):
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is only configured in the PostgreSQL integration job")
+    monkeypatch.setenv("JWT_SECRET", "course-test-secret-" + "x" * 32)
+    monkeypatch.setenv("ENVIRONMENT", "test")
+    monkeypatch.setenv("REQUIRE_VERIFIED_EMAIL", "false")
+    get_settings.cache_clear()
+    engine = create_async_engine(_async_database_url(database_url), poolclass=NullPool)
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+
+    async def override_db_session():
+        async with factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()
+        asyncio.run(engine.dispose())
+        get_settings.cache_clear()
+
+
 def test_catalog_hides_paid_lesson_content_until_enrollment(client: TestClient):
     database_url = os.environ["DATABASE_URL"]
     email = f"course-{uuid4().hex}@example.com"
