@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico } from "../js/workbench/diagnostico.js";
+import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico, permiteEnergizarConFalla } from "../js/workbench/diagnostico.js";
 
 test("cada falla disponible tiene tres pasos de diagnóstico", () => {
   for (const falla of ["conductor-abierto", "puente-termica", "corto-fase-neutro"]) {
@@ -37,4 +37,10 @@ test("el diagnóstico de corto no inventa Icc ni actuación de protección", () 
 test("un caso o paso inexistente no se considera una respuesta válida", () => {
   assert.equal(evaluarRespuestaDiagnostico("ninguna", 0, 0).valida, false);
   assert.equal(evaluarRespuestaDiagnostico("corto-fase-neutro", 99, 0).valida, false);
+});
+
+test("el banco bloquea energizar mientras está inyectado un corto fase-neutro", () => {
+  assert.equal(permiteEnergizarConFalla("corto-fase-neutro"), false);
+  assert.equal(permiteEnergizarConFalla("conductor-abierto"), true);
+  assert.equal(permiteEnergizarConFalla("ninguna"), true);
 });
