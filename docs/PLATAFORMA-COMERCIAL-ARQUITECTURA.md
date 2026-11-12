@@ -198,3 +198,20 @@ Hasta tener esas decisiones, no mostrar precios ni promesas comerciales en produ
 ## 13. Primera tarea técnica recomendada
 
 Antes de escribir pantallas, crear migraciones SQL y pruebas RLS para perfiles, cursos, lecciones, inscripciones y progreso. Luego integrar autenticación y un simulador existente como prueba vertical completa.
+
+
+## Estado de la primera base técnica (12-11-2026)
+
+Se creó una primera propuesta de esquema PostgreSQL/Supabase y una segunda migración de endurecimiento:
+
+- Perfiles, cursos, módulos, lecciones, inscripciones y progreso.
+- Intentos de quiz, órdenes, eventos de pago, certificados y auditoría administrativa.
+- RLS para acceso por propietario, previews, cursos gratuitos e inscripciones activas.
+- Los pagos, eventos de webhook, creación de inscripciones y registro de resultados de quiz quedan reservados al backend/service role.
+- El rol no es modificable por el usuario desde el cliente.
+- La vista pública de certificados expone solo código, nombre visible, curso, fecha y estado.
+- Se agregó idempotencia por evento de proveedor y unicidad del ID de pago por proveedor.
+
+**Validación actual:** GitHub Actions ejecutó 64 pruebas, todas aprobadas. Las seis nuevas pruebas del esquema son pruebas estáticas de contrato sobre los archivos SQL; no equivalen a ejecutar las migraciones contra una instancia PostgreSQL real. Todavía no se creó ni modificó un proyecto Supabase, no se configuraron credenciales y no se habilitó ningún pago real.
+
+Siguiente paso técnico: levantar un entorno de desarrollo Supabase aislado, aplicar las migraciones allí y probar RLS con usuarios anónimos, alumnos y administradores antes de construir el login o conectar Mercado Pago.
