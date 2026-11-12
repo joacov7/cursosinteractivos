@@ -3,6 +3,7 @@
 // alumno clasifica artefactos como monofásicos o trifásicos.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgTrifasica } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "En trifásica hay 380 V entre fases: el riesgo es mayor. Verificá secuencia de " +
@@ -35,6 +36,8 @@ export function render(container) {
         <strong>trifásica</strong> usa tres fases (<strong>380 V</strong> entre fases) y se necesita para
         cargas grandes, sobre todo motores de mucha potencia. Clasificá cada artefacto.
       </p>
+
+      ${svgTrifasica()}
 
       <div class="clasif-lista">
         ${ARTEFACTOS.map(
