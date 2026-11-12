@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str | None = None
     allowed_origins: list[str] = ["http://localhost:5173"]
+    jwt_secret: str | None = None
+    access_token_minutes: int = 15
+    refresh_token_days: int = 30
 
     model_config = SettingsConfigDict(
         env_file=".env",
