@@ -134,3 +134,14 @@ test("los modelos de iluminación y serie/paralelo declaran sus simplificaciones
   assert.ok(serie.includes("const Req = abierto ? Infinity"));
   assert.match(serie, /Modelo resistivo ideal/);
 });
+
+
+test("el simulador de cable y térmica no presenta ampacidades como tabla normativa", async () => {
+  const cable = await readFile(new URL("../js/simuladores/cable-termica.js", import.meta.url), "utf8");
+  assert.match(cable, /no son una tabla normativa universal/i);
+  assert.match(cable, /no calcula temperatura/i);
+  assert.match(cable, /no es necesariamente instantáneo/i);
+  assert.match(cable, /no dimensiona una instalación real/i);
+  assert.doesNotMatch(cable, /buscapolos|cortará apenas se usa|puede humear o iniciar fuego/);
+  assert.match(cable, /instrumento adecuado y comprobado/i);
+});
