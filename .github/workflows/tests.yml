@@ -1,7 +1,7 @@
 name: Tests
 on:
   push:
-    branches: [improve/ux-visual-audit]
+    branches: [improve/ux-visual-audit, feat/commercial-platform-foundation]
   pull_request:
     branches: [claude/new-session-gjpwc5]
 jobs:
