@@ -5,6 +5,7 @@
 // protección actúe.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgTierra } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Toda carcasa metálica de un artefacto debe estar conectada a tierra. Ante " +
@@ -22,6 +23,8 @@ export function render(container) {
         Un artefacto tiene una <strong>falla de aislación</strong>: un conductor interno toca la
         carcasa metálica y la deja energizada. Probá qué pasa con y sin puesta a tierra.
       </p>
+
+      ${svgTierra()}
 
       <label class="switch-tierra">
         <input type="checkbox" id="chk-tierra" />
