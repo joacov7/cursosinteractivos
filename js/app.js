@@ -1,29 +1,12 @@
 // Shell de la app: navegación por hash + temario del módulo Electricidad.
 
 import { CURRICULA } from "../data/curricula.js";
-import * as cableTermica from "./simuladores/cable-termica.js";
-import * as ohmPotencia from "./simuladores/ohm-potencia.js";
-import * as cortoSobrecarga from "./simuladores/corto-sobrecarga.js";
-import * as puestaTierra from "./simuladores/puesta-tierra.js";
-import * as polaridad from "./simuladores/polaridad.js";
-import * as serieParalelo from "./simuladores/serie-paralelo.js";
-import * as cargasAmbiente from "./simuladores/cargas-ambiente.js";
-import * as diferencial from "./simuladores/diferencial.js";
-import * as tablero from "./simuladores/tablero.js";
-import * as iluminacion from "./simuladores/iluminacion.js";
-import * as trifasica from "./simuladores/trifasica.js";
-import * as motoresArranque from "./simuladores/motores-arranque.js";
-import * as compresorDiagnostico from "./simuladores/compresor-diagnostico.js";
-import * as selectividad from "./simuladores/selectividad.js";
-import * as normativaAea from "./simuladores/normativa-aea.js";
+// Los simuladores se cargan bajo demanda después de validar el acceso al curso.
 import * as catalogoView from "./catalogo-view.js";
-import * as quiz from "./quiz.js";
-import * as certificado from "./certificado.js";
 import * as landing from "./landing.js";
-import * as workbench from "./workbench/workbench.js";
-import { QUIZZES } from "../data/quizzes.js";
+import * as cuenta from "./cuenta.js";
+import * as api from "./api-client.js";
 import { estaAprobado, resumenNivel, cursoCompleto } from "./progreso.js";
-import { activarGuia } from "./guia-interactiva.js";
 
 // Oficio actual. Al sumar plomería / refrigeración / mecánica, este valor y la
 // currícula pasan a seleccionarse por oficio; el resto del motor ya es genérico.
@@ -31,21 +14,21 @@ const OFICIO = "electricidad";
 
 // Registro de simuladores disponibles por id.
 const SIMULADORES = {
-  "cable-termica": cableTermica,
-  "ohm-potencia": ohmPotencia,
-  "corto-sobrecarga": cortoSobrecarga,
-  "puesta-tierra": puestaTierra,
-  polaridad: polaridad,
-  "serie-paralelo": serieParalelo,
-  "cargas-ambiente": cargasAmbiente,
-  diferencial: diferencial,
-  tablero: tablero,
-  iluminacion: iluminacion,
-  trifasica: trifasica,
-  "motores-arranque": motoresArranque,
-  "compresor-diagnostico": compresorDiagnostico,
-  selectividad: selectividad,
-  "normativa-aea": normativaAea,
+  "cable-termica": () => import("./simuladores/cable-termica.js"),
+  "ohm-potencia": () => import("./simuladores/ohm-potencia.js"),
+  "corto-sobrecarga": () => import("./simuladores/corto-sobrecarga.js"),
+  "puesta-tierra": () => import("./simuladores/puesta-tierra.js"),
+  "polaridad": () => import("./simuladores/polaridad.js"),
+  "serie-paralelo": () => import("./simuladores/serie-paralelo.js"),
+  "cargas-ambiente": () => import("./simuladores/cargas-ambiente.js"),
+  "diferencial": () => import("./simuladores/diferencial.js"),
+  "tablero": () => import("./simuladores/tablero.js"),
+  "iluminacion": () => import("./simuladores/iluminacion.js"),
+  "trifasica": () => import("./simuladores/trifasica.js"),
+  "motores-arranque": () => import("./simuladores/motores-arranque.js"),
+  "compresor-diagnostico": () => import("./simuladores/compresor-diagnostico.js"),
+  "selectividad": () => import("./simuladores/selectividad.js"),
+  "normativa-aea": () => import("./simuladores/normativa-aea.js"),
 };
 
 const vista = document.getElementById("vista");
@@ -145,7 +128,7 @@ function renderPendiente() {
 // CTA al quiz de cierre debajo de un simulador. Un simulador puede cubrir más de
 // un tema (p. ej. cable-termica cubre 1.2 y 1.3), así que se listan todos.
 function anexarQuizCTA(simId) {
-  const temas = todosLosTemas.filter((t) => t.sim === simId && QUIZZES[t.id]);
+  const temas = todosLosTemas.filter((t) => t.sim === simId);
   if (!temas.length) return;
   const links = temas
     .map((t) => {
@@ -177,22 +160,74 @@ function refrescarProgreso() {
   marcarActivo();
 }
 
-function router() {
+
+async function validarAcceso(simulatorKey) {
+  vista.innerHTML = '<section class="account-page"><p>Verificando el acceso al curso…</p></section>';
+  try {
+    const allowed = await api.canAccessSimulator(simulatorKey);
+    if (allowed) return true;
+    vista.innerHTML = `
+      <section class="access-wall">
+        <span class="account-course-tag">CURSO DE ELECTRICIDAD</span>
+        <h2>Esta clase está bloqueada</h2>
+        <p>Podés acceder a esta simulación cuando tengas una inscripción activa al curso.</p>
+        <a class="btn-primario" href="#/cuenta">Ingresar o ver mis cursos</a>
+        <a href="#/">Volver al inicio</a>
+      </section>`;
+    return false;
+  } catch (error) {
+    vista.innerHTML = `
+      <section class="access-wall">
+        <h2>No pudimos validar el acceso</h2>
+        <p>${String(error.message).replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}</p>
+        <p>La plataforma no habilita las clases pagas si no puede verificar la inscripción.</p>
+        <a class="btn-primario" href="#/cuenta">Ir a mi cuenta</a>
+      </section>`;
+    return false;
+  }
+}
+
+async function router() {
   const hash = location.hash || "#/";
-  const partes = hash.replace(/^#\//, "").split("/");
+  const route = hash.slice(2);
+  const [pathname, query = ""] = route.split("?");
+  const partes = pathname.split("/");
+  const params = new URLSearchParams(query);
 
   if (partes[0] === "sim" && partes[1] && SIMULADORES[partes[1]]) {
-    SIMULADORES[partes[1]].render(vista);
-    activarGuia(vista, partes[1]);
-    anexarQuizCTA(partes[1]);
+    if (await validarAcceso(partes[1])) {
+      const simulator = await SIMULADORES[partes[1]]();
+      simulator.render(vista);
+      const guia = await import("./guia-interactiva.js");
+      guia.activarGuia(vista, partes[1]);
+      anexarQuizCTA(partes[1]);
+    }
   } else if (partes[0] === "quiz" && partes[1]) {
-    quiz.render(vista, { oficio: OFICIO, temaId: partes[1], onCambioProgreso: refrescarProgreso });
+    const tema = todosLosTemas.find((item) => item.id === partes[1]);
+    if (tema?.sim && await validarAcceso(tema.sim)) {
+      const quiz = await import("./quiz.js");
+      quiz.render(vista, { oficio: OFICIO, temaId: partes[1], onCambioProgreso: refrescarProgreso });
+    } else if (!tema) {
+      renderPendiente();
+    }
   } else if (partes[0] === "banco") {
-    workbench.render(vista);
+    if (await validarAcceso("banco")) {
+      const workbench = await import("./workbench/workbench.js");
+      workbench.render(vista);
+    }
   } else if (partes[0] === "certificado") {
-    certificado.render(vista, { onCambioProgreso: refrescarProgreso });
+    if (await validarAcceso("banco")) {
+      const certificado = await import("./certificado.js");
+      certificado.render(vista, { onCambioProgreso: refrescarProgreso });
+    }
   } else if (partes[0] === "catalogo") {
     catalogoView.render(vista);
+  } else if (partes[0] === "cuenta") {
+    cuenta.render(vista);
+  } else if (partes[0] === "verificar-email") {
+    cuenta.render(vista, { action: "verify", token: params.get("token") });
+  } else if (partes[0] === "restablecer-contrasena") {
+    cuenta.render(vista, { action: "reset", token: params.get("token") });
   } else if (partes[0] === "pendiente") {
     renderPendiente();
   } else {

@@ -143,3 +143,21 @@ sigan otros oficios (**plomería, refrigeración, mecánica**). Dos consecuencia
   navegador del alumno (`localStorage`) y no sirve como prueba. Es una decisión de
   producto (proveedor de pago, autenticación, emisión de certificados) a definir
   aparte.
+
+
+## Cuenta y aula online
+
+La interfaz incluye acceso a **Mi cuenta**: registro, inicio y cierre de sesión, verificación de correo, recuperación de contraseña, catálogo publicado, cursos habilitados y guardado de avance. La sesión usa un access token en memoria y refresh token en cookie HttpOnly; no se persiste el token de acceso en localStorage.
+
+Para desarrollo local, la etiqueta `meta[name="api-base-url"]` de `index.html` apunta a `http://localhost:8000`. Para producción debe cambiarse por el origen de la API desplegada. Configurá CORS y SMTP según `backend/README.md`.
+
+El frontend todavía no integra checkout ni Mercado Pago. Un curso aparece como habilitado solo cuando el backend tiene una inscripción activa; no se debe habilitar manualmente desde el navegador.
+
+
+### Control de acceso del curso
+
+El router consulta la inscripción al backend antes de abrir simuladores, quizzes, banco de trabajo o certificado. Cable + Térmica queda como muestra gratuita. Los módulos de simulación se cargan bajo demanda después de validar el acceso.
+
+**Importante:** como el frontend sigue siendo estático, los archivos JavaScript de los simuladores tienen URLs públicas. La verificación del router evita el acceso normal desde la interfaz, pero no es protección fuerte contra quien inspeccione o descargue los archivos. Antes de vender a escala, el contenido pago debe servirse desde endpoints autenticados o almacenamiento privado con enlaces firmados de corta duración.
+
+Después de configurar PostgreSQL y aplicar migraciones, el catálogo inicial se carga una sola vez con `python -m app.cli seed-electricity-course` desde `backend/`. El comando publica el curso y registra módulos y simuladores; no crea pagos ni inscripciones.
