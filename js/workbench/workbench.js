@@ -11,7 +11,7 @@ import {
 import { evaluarCircuito } from "./motor.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
 import { calcularLectura, crearEscenarioFalla, medirEntreBornes, evaluarBloqueoMedicion } from "./instrumentos.js";
-import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico } from "./diagnostico.js";
+import { CASOS_DIAGNOSTICO, evaluarRespuestaDiagnostico, permiteEnergizarConFalla } from "./diagnostico.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Este es un banco de pruebas virtual. En una instalación real, cada tramo se " +
@@ -55,7 +55,7 @@ export function render(container) {
         <button type="button" data-add="carga">+ Carga</button>
         <button type="button" id="wb-ejemplo">Cargar ejemplo</button>
         <button type="button" id="wb-limpiar">Limpiar</button>
-        <button type="button" id="wb-fuente" class="wb-power wb-power--on" aria-pressed="true">Fuente: ENCENDIDA</button>
+        <button type="button" id="wb-fuente" class="wb-power wb-power--on" aria-pressed="true">Fuente: ENCENDIDA</button><span id="wb-fuente-aviso" class="wb-hint" role="status"></span>
       </div>
 
       <div class="wb-conexion-teclado" aria-label="Conexión accesible">
@@ -183,6 +183,9 @@ export function render(container) {
 
   function cargarEjemplo() {
     fuenteEncendida = true;
+    fallaActiva = "ninguna";
+    const selectorFalla = container.querySelector("#wb-falla");
+    if (selectorFalla) selectorFalla.value = "ninguna";
     estado.nodes = [];
     estado.edges = [];
     const f = crearNodo("fuente", 40, 80);
@@ -244,6 +247,8 @@ export function render(container) {
       botonFuente.classList.toggle("wb-power--on", fuenteEncendida);
       botonFuente.classList.toggle("wb-power--off", !fuenteEncendida);
     }
+    const avisoFuente = container.querySelector("#wb-fuente-aviso");
+    if (avisoFuente) avisoFuente.textContent = fallaActiva === "corto-fase-neutro" ? "Bloqueo didáctico: no se puede energizar mientras el cortocircuito esté inyectado." : "";
     const display = container.querySelector("#wb-medida");
     if (display) display.textContent = lectura.valor;
     const ayuda = container.querySelector("#wb-medida-ayuda");
@@ -655,12 +660,17 @@ export function render(container) {
     b.addEventListener("click", () => agregar(b.dataset.add))
   );
   container.querySelector("#wb-ejemplo").addEventListener("click", cargarEjemplo);
-  container.querySelector("#wb-fuente").addEventListener("click", () => { fuenteEncendida = !fuenteEncendida; pintar(); });
+  container.querySelector("#wb-fuente").addEventListener("click", () => {
+    if (!fuenteEncendida && !permiteEnergizarConFalla(fallaActiva)) { pintar(); return; }
+    fuenteEncendida = !fuenteEncendida; pintar();
+  });
   container.querySelector("#wb-modo-medicion").addEventListener("change", (ev) => { modoMedicion = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-a").addEventListener("change", (ev) => { puntaA = ev.target.value; pintar(); });
   container.querySelector("#wb-punta-b").addEventListener("change", (ev) => { puntaB = ev.target.value; pintar(); });
   container.querySelector("#wb-falla").addEventListener("change", (ev) => {
-    fallaActiva = ev.target.value; diagnosticoPaso = 0; diagnosticoOpcion = null; diagnosticoFeedback = ""; pintar();
+    fallaActiva = ev.target.value;
+    if (!permiteEnergizarConFalla(fallaActiva)) fuenteEncendida = false;
+    diagnosticoPaso = 0; diagnosticoOpcion = null; diagnosticoFeedback = ""; pintar();
   });
   container.querySelector("#wb-conectar").addEventListener("click", () => {
     const mensaje = conectar(container.querySelector("#wb-desde").value, container.querySelector("#wb-hasta").value);
