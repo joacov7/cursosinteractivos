@@ -366,6 +366,8 @@ export function render(container) {
   function nodoSvg(n, r) {
     const sel = seleccion && seleccion.clase === "node" && seleccion.id === n.id;
     const tripped = r.estado === "salta" && r.termicasActivas.includes(n.id);
+    const energized = n.tipo === "carga" && r.edgesActivos.length > 0 && !["incompleto", "salta"].includes(r.estado);
+    const conducting = n.tipo === "termica" && r.termicasActivas.includes(n.id) && !tripped;
     const nombre =
       n.tipo === "fuente" ? "Fuente 220 V" :
       n.tipo === "termica" ? "Térmica" : (n.props.nombre || "Carga");
@@ -379,17 +381,17 @@ export function render(container) {
       .join("");
 
     return `
-      <g class="wb-node wb-node--${n.tipo} ${sel ? "wb-node--sel" : ""} ${tripped ? "wb-node--tripped" : ""}"
+      <g class="wb-node wb-node--${n.tipo} ${sel ? "wb-node--sel" : ""} ${tripped ? "wb-node--tripped" : ""} ${energized ? "wb-node--energized" : ""} ${conducting ? "wb-node--conducting" : ""}"
          data-node="${n.id}">
         <rect x="${n.x}" y="${n.y}" width="${NODO_W}" height="${NODO_H}" rx="9" class="wb-node-box"></rect>
-        ${arteComponente(n, tripped)}
+        ${arteComponente(n, tripped, energized)}
         <text class="wb-node-cap" x="${n.x + NODO_W / 2}" y="${n.y + NODO_H + 15}">${nombre}</text>
         ${ports}
       </g>`;
   }
 
   // Ilustración SVG a medida de cada componente (coordenadas relativas al nodo).
-  function arteComponente(n, tripped) {
+  function arteComponente(n, tripped, energized = false) {
     const cx = n.x + NODO_W / 2;
     const top = n.y;
 
@@ -423,7 +425,7 @@ export function render(container) {
     return `
       <line class="wb-art-line" x1="${cx - 6}" y1="${py}" x2="${cx - 6}" y2="${py + 6}"></line>
       <line class="wb-art-line" x1="${cx + 6}" y1="${py}" x2="${cx + 6}" y2="${py + 6}"></line>
-      <rect class="wb-art-fill" x="${px}" y="${py + 6}" width="22" height="16" rx="4"></rect>
+      <rect class="wb-art-fill ${energized ? "wb-load-glow" : ""}" x="${px}" y="${py + 6}" width="22" height="16" rx="4"></rect>
       <path class="wb-art-line" fill="none" d="M ${cx} ${py + 22} q 0 8 10 8"></path>
       <text class="wb-node-s" x="${cx}" y="${top + NODO_H - 8}">${(n.props.potencia / 220).toFixed(1)} A</text>`;
   }
