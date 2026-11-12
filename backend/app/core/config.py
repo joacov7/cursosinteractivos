@@ -11,6 +11,15 @@ class Settings(BaseSettings):
     jwt_secret: str | None = None
     access_token_minutes: int = 15
     refresh_token_days: int = 30
+    require_verified_email: bool = True
+    email_verification_minutes: int = 60 * 24
+    password_reset_minutes: int = 30
+    frontend_url: str = "http://localhost:5173"
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
