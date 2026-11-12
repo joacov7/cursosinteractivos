@@ -1,11 +1,16 @@
 name: Tests
+
 on:
   push:
-    branches: [improve/ux-visual-audit]
+    branches:
+      - improve/ux-visual-audit
+      - feat/platform-fastapi-foundation
   pull_request:
-    branches: [claude/new-session-gjpwc5]
+    branches:
+      - improve/ux-visual-audit
+
 jobs:
-  test:
+  node-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,3 +18,18 @@ jobs:
         with:
           node-version: 20
       - run: npm test
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: PYTHONPATH=. pytest -q
