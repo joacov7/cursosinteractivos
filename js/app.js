@@ -1,21 +1,7 @@
 // Shell de la app: navegación por hash + temario del módulo Electricidad.
 
 import { CURRICULA } from "../data/curricula.js";
-import * as cableTermica from "./simuladores/cable-termica.js";
-import * as ohmPotencia from "./simuladores/ohm-potencia.js";
-import * as cortoSobrecarga from "./simuladores/corto-sobrecarga.js";
-import * as puestaTierra from "./simuladores/puesta-tierra.js";
-import * as polaridad from "./simuladores/polaridad.js";
-import * as serieParalelo from "./simuladores/serie-paralelo.js";
-import * as cargasAmbiente from "./simuladores/cargas-ambiente.js";
-import * as diferencial from "./simuladores/diferencial.js";
-import * as tablero from "./simuladores/tablero.js";
-import * as iluminacion from "./simuladores/iluminacion.js";
-import * as trifasica from "./simuladores/trifasica.js";
-import * as motoresArranque from "./simuladores/motores-arranque.js";
-import * as compresorDiagnostico from "./simuladores/compresor-diagnostico.js";
-import * as selectividad from "./simuladores/selectividad.js";
-import * as normativaAea from "./simuladores/normativa-aea.js";
+// Los simuladores se cargan bajo demanda después de validar el acceso al curso.
 import * as catalogoView from "./catalogo-view.js";
 import * as quiz from "./quiz.js";
 import * as certificado from "./certificado.js";
@@ -33,21 +19,21 @@ const OFICIO = "electricidad";
 
 // Registro de simuladores disponibles por id.
 const SIMULADORES = {
-  "cable-termica": cableTermica,
-  "ohm-potencia": ohmPotencia,
-  "corto-sobrecarga": cortoSobrecarga,
-  "puesta-tierra": puestaTierra,
-  polaridad: polaridad,
-  "serie-paralelo": serieParalelo,
-  "cargas-ambiente": cargasAmbiente,
-  diferencial: diferencial,
-  tablero: tablero,
-  iluminacion: iluminacion,
-  trifasica: trifasica,
-  "motores-arranque": motoresArranque,
-  "compresor-diagnostico": compresorDiagnostico,
-  selectividad: selectividad,
-  "normativa-aea": normativaAea,
+  "cable-termica": () => import("./simuladores/cable-termica.js"),
+  "ohm-potencia": () => import("./simuladores/ohm-potencia.js"),
+  "corto-sobrecarga": () => import("./simuladores/corto-sobrecarga.js"),
+  "puesta-tierra": () => import("./simuladores/puesta-tierra.js"),
+  "polaridad": () => import("./simuladores/polaridad.js"),
+  "serie-paralelo": () => import("./simuladores/serie-paralelo.js"),
+  "cargas-ambiente": () => import("./simuladores/cargas-ambiente.js"),
+  "diferencial": () => import("./simuladores/diferencial.js"),
+  "tablero": () => import("./simuladores/tablero.js"),
+  "iluminacion": () => import("./simuladores/iluminacion.js"),
+  "trifasica": () => import("./simuladores/trifasica.js"),
+  "motores-arranque": () => import("./simuladores/motores-arranque.js"),
+  "compresor-diagnostico": () => import("./simuladores/compresor-diagnostico.js"),
+  "selectividad": () => import("./simuladores/selectividad.js"),
+  "normativa-aea": () => import("./simuladores/normativa-aea.js"),
 };
 
 const vista = document.getElementById("vista");
@@ -215,7 +201,8 @@ async function router() {
 
   if (partes[0] === "sim" && partes[1] && SIMULADORES[partes[1]]) {
     if (await validarAcceso(partes[1])) {
-      SIMULADORES[partes[1]].render(vista);
+      const simulator = await SIMULADORES[partes[1]]();
+      simulator.render(vista);
       activarGuia(vista, partes[1]);
       anexarQuizCTA(partes[1]);
     }
