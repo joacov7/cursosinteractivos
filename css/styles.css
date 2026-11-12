@@ -880,3 +880,41 @@ button { cursor: pointer; }
   background: var(--danger-bg); color: var(--danger);
   border: 1px solid var(--danger); border-radius: 8px; padding: 0.5rem 0.8rem;
 }
+
+
+/* Accesibilidad, foco y adaptación del laboratorio */
+:where(a, button, select, input, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.wb-lienzo-wrap {
+  background-color: #111a25;
+  background-image: radial-gradient(rgba(255,255,255,0.075) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.wb-svg {
+  height: clamp(300px, 56vw, 440px);
+  min-height: 300px;
+  max-height: 440px;
+}
+.wb-toolbar button, .wb-reto-nav button, .wb-retos-libre button {
+  min-height: 42px;
+}
+.wb-props-fila select { min-height: 42px; }
+.wb-node, .wb-port { vector-effect: non-scaling-stroke; }
+@media (max-width: 560px) {
+  .wb-toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wb-toolbar button { width: 100%; }
+  .wb-reto-nav button { flex: 1 1 calc(50% - 0.5rem); }
+  .wb-abajo { grid-template-columns: 1fr; }
+  .resultado-cabecera { align-items: flex-start; flex-direction: column; gap: 0.35rem; }
+  .wb-svg { height: 320px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
