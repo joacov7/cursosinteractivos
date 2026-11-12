@@ -197,3 +197,20 @@ Se ajustaron tres simuladores para evitar que una simplificación didáctica se 
 Se agregaron pruebas de regresión que impiden reintroducir los mensajes concluyentes y los valores de disparo ficticios. GitHub Actions completó la ejecución del commit `a0ee4874e7ccaf5e493718761b33da40e9ffe633` con **53 pruebas aprobadas y 0 fallidas**.
 
 Pendiente antes de considerar la versión educativa cerrada: revisión técnica externa de contenido y valores por electricista matriculado, además de pruebas visuales/manuales en navegadores y dispositivos reales. La suite automatizada no reemplaza esas validaciones.
+
+
+## Revisión ampliada de modelos didácticos (12-11-2026)
+
+Se completó otra pasada sobre motores, cargas, trifásica, polaridad, iluminación, serie/paralelo y selectividad:
+
+- **Arranque de motores:** se sustituyó el disparo binario por un umbral único por curva por una comparación contra bandas magnéticas orientativas (B, C y D). Si el pico supuesto cae dentro de la banda, el simulador devuelve “indeterminado” y exige consultar la curva tiempo-corriente del fabricante. Se aclara que no dimensiona la protección térmica ni la coordinación completa del motor.
+- **Selectividad:** se eliminó la regla incorrecta según la cual una térmica seccional de menor amperaje que la general garantiza que cortará primero. El ejercicio ahora distingue escalonamiento nominal de selectividad verificada y explica qué datos faltan: corriente de cortocircuito prevista, curvas tiempo-corriente y tablas de coordinación del fabricante.
+- **Cargas por ambiente:** los límites de 10, 16 y 20 A quedan identificados como supuestos didácticos. Se retiró la asociación automática con secciones de cable y cualquier afirmación de que el ejercicio dimensiona una instalación.
+- **Trifásica:** la clasificación se realiza a partir de la placa indicada en cada ejemplo, no por la categoría del artefacto. Los 220/380 V se identifican como valores nominales de referencia de la actividad.
+- **Polaridad:** se retiró la afirmación de que cambiar una lámpara es seguro por el solo hecho de que el interruptor esté apagado. Ahora se indica cortar la alimentación y verificar ausencia de tensión antes de intervenir.
+- **Iluminación:** se quitó la equivalencia universal de brillo LED/incandescente y se aclara que se compara potencia nominal, mientras que la equivalencia luminosa depende de lúmenes y eficacia. El límite de 10 A es solo didáctico y no implica una sección de conductor.
+- **Serie/paralelo:** se corrigió la resistencia equivalente de un circuito serie abierto (infinita) y se documentó que el modelo mantiene resistencia constante, a diferencia del comportamiento térmico real de una lámpara incandescente.
+
+Se añadieron pruebas unitarias y regresiones para bandas de arranque, escalonamiento nominal, supuestos de iluminación y resistencia equivalente en circuito abierto. GitHub Actions completó el commit `2b9965b0a3e0ff5cc16b8c1bd3a0270cd3ccbe3a` con **57 pruebas aprobadas y 0 fallidas**.
+
+La revisión de código estática de los simuladores prioritarios quedó completada. Siguen pendientes la inspección visual manual en dispositivos/navegadores reales y una revisión profesional externa de los criterios eléctricos y normativos antes de declarar el material apto para formación técnica formal.
