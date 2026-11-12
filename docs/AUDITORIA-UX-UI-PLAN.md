@@ -148,3 +148,16 @@ Este comité es una estructura de trabajo propuesta para orientar las decisiones
 ## Orden recomendado de ejecución
 
 No empezar por una reescritura total ni cambiar de framework. Primero corregir el motor y crear pruebas; después establecer el sistema visual y rehacer la experiencia móvil; finalmente integrar la capa comercial. Mantener JavaScript nativo y SVG mientras sigan siendo suficientes para el producto.
+
+
+## Extensión del multímetro virtual: resistencia
+
+Se incorporó una función de resistencia (Ω) al banco de trabajo. La medición se bloquea mientras la fuente está energizada. El cálculo se limita a la resistencia equivalente nominal ideal de una única carga cuya potencia está definida, usando R = V²/P a 220 V. No representa motores, electrónica, cargas variables ni redes serie/paralelo.
+
+Resultados previstos:
+- Valor en ohmios: solo entre F y N de una carga reconocida y sin camino externo que la puentee.
+- OL: bornes válidos sin camino conductor entre ellos.
+- NO MODELADA: red conectada, bornes no compatibles o topología que el modelo no resuelve.
+- BLOQUEADO: fuente energizada.
+
+Esta función es una simplificación educativa y no sustituye un óhmetro, procedimientos de trabajo seguro ni una evaluación profesional.
