@@ -1,8 +1,8 @@
 // Ilustraciones SVG didácticas compartidas por los simuladores.
 // Son esquemas conceptuales, no planos de montaje ni documentación normativa.
 const wrap = (label, body, viewBox = "0 0 760 220") =>
-  '<div class="diagrama-card"><svg class="diagrama-svg" viewBox="' + viewBox + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' +
-  '<defs><pattern id="dv-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="currentColor" opacity=".07"/></pattern></defs><rect width="100%" height="100%" fill="url(#dv-grid)"/>' + body + '</svg></div>';
+  '<figure class="diagrama-card"><svg class="diagrama-svg" viewBox="' + viewBox + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' +
+  '<defs><pattern id="dv-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="currentColor" opacity=".07"/></pattern></defs><rect width="100%" height="100%" fill="url(#dv-grid)"/>' + body + '</svg><figcaption class="diagrama-caption">Esquema conceptual · ' + label + '</figcaption></figure>';
 const txt = (x,y,value,cls="dv-label") => '<text x="' + x + '" y="' + y + '" class="' + cls + '">' + value + '</text>';
 
 export const svgOhm = () => wrap("Circuito resistivo con fuente, resistencia, tensión y corriente",
