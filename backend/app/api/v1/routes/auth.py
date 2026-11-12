@@ -118,7 +118,7 @@ async def refresh(
 
     now = datetime.now(timezone.utc)
     session = await db.scalar(
-        select(UserSession).where(UserSession.refresh_token_hash == hash_refresh_token(raw_token))
+        select(UserSession).where(UserSession.refresh_token_hash == hash_refresh_token(raw_token)).with_for_update()
     )
     if session is None or session.revoked_at is not None or session.expires_at <= now:
         response.delete_cookie(_REFRESH_COOKIE, path="/api/v1/auth")
