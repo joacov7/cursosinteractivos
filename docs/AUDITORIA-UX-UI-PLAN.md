@@ -214,3 +214,12 @@ Se completó otra pasada sobre motores, cargas, trifásica, polaridad, iluminaci
 Se añadieron pruebas unitarias y regresiones para bandas de arranque, escalonamiento nominal, supuestos de iluminación y resistencia equivalente en circuito abierto. GitHub Actions completó el commit `2b9965b0a3e0ff5cc16b8c1bd3a0270cd3ccbe3a` con **57 pruebas aprobadas y 0 fallidas**.
 
 La revisión de código estática de los simuladores prioritarios quedó completada. Siguen pendientes la inspección visual manual en dispositivos/navegadores reales y una revisión profesional externa de los criterios eléctricos y normativos antes de declarar el material apto para formación técnica formal.
+
+
+## Ajuste final del simulador cable + térmica (12-11-2026)
+
+Las capacidades por sección quedan rotuladas como valores supuestos del escenario y no como una tabla normativa. El simulador ya no afirma que un conductor se incendia o que una térmica dispara instantáneamente por comparar dos valores nominales: explica que el tiempo depende de la curva y del dispositivo, y que no modela temperatura ni degradación real de aislación. La combinación favorable se describe como compatible con los supuestos del ejercicio, no como una instalación segura o correctamente dimensionada.
+
+También se reemplazó la recomendación de usar un buscapolos como verificación de ausencia de tensión por la indicación de aislar fuentes, evitar reconexión y verificar con un instrumento adecuado y comprobado.
+
+Se añadieron pruebas de regresión para mantener explícitos estos límites. GitHub Actions completó el commit `45367ea2cbcae7d612063893b58acccb430d7009` con **58 pruebas aprobadas y 0 fallidas**.
