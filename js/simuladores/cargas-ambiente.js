@@ -4,6 +4,7 @@
 // meter toda la casa en un solo circuito y sobrecargarlo.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgCargas } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Repartir la carga en circuitos separados no es opcional: evita sobrecargas, " +
@@ -42,6 +43,8 @@ export function render(container) {
         Asigná cada artefacto a un circuito. La idea es <strong>no meter todo en uno</strong>:
         separá iluminación, tomas de uso general y cargas especiales, y que ninguno supere su límite.
       </p>
+
+      ${svgCargas()}
 
       <div class="cargas-grid">
         <div class="cargas-artefactos">
