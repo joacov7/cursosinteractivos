@@ -10,7 +10,7 @@ import {
 } from "./modelo.js";
 import { evaluarCircuito } from "./motor.js";
 import { RETOS, leerCompletados, guardarCompletados } from "./retos.js";
-import { calcularLectura } from "./instrumentos.js";
+import { calcularLectura, crearEscenarioFalla } from "./instrumentos.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Este es un banco de pruebas virtual. En una instalación real, cada tramo se " +
@@ -193,22 +193,7 @@ export function render(container) {
 
   // ── Render ────────────────────────────────────────────────────────
   function escenarioActual() {
-    const nodes = estado.nodes.map((n) => ({ ...n, props: { ...n.props }, ports: n.ports.map((p) => ({ ...p })) }));
-    let edges = estado.edges.map((e) => ({ ...e }));
-    let edgeAbierto = null;
-    if (fallaActiva === "conductor-abierto") {
-      const base = evaluarCircuito(nodes, edges);
-      edgeAbierto = base.edgesActivos[0] || null;
-      if (edgeAbierto) edges = edges.filter((e) => e.id !== edgeAbierto);
-    } else if (fallaActiva === "puente-termica") {
-      const fuente = nodes.find((n) => n.tipo === "fuente");
-      const carga = nodes.find((n) => n.tipo === "carga");
-      if (fuente && carga) edges.push({
-        id: "falla-puente-termica", desde: `${fuente.id}:F`, hasta: `${carga.id}:F`,
-        mm2: 6, capacidadA: 32,
-      });
-    }
-    return { nodes, edges, edgeAbierto };
+    return crearEscenarioFalla(estado.nodes, estado.edges, fallaActiva, evaluarCircuito);
   }
 
   function pintar() {
