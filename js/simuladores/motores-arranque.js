@@ -4,6 +4,7 @@
 // cada arranque. El alumno prueba método de arranque + curva de térmica.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgMotor } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Un motor arranca tomando varias veces su corriente nominal. Dimensionar la " +
@@ -37,6 +38,8 @@ export function render(container) {
         térmica, y arrancá el motor. El objetivo: que <strong>no salte en el arranque</strong> pero que
         siga protegiendo.
       </p>
+
+      ${svgMotor()}
 
       <div class="controles">
         <label>
