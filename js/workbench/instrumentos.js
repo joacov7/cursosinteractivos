@@ -126,7 +126,28 @@ export function medirResistenciaEntreBornes(nodes, edges, borneA, borneB, { ener
     return n.tipo === "carga" && ((borneA === a && borneB === b) || (borneA === b && borneB === a));
   });
   if (!carga || !(Number(carga.props?.potencia) > 0)) {
-    return { valor: "NO MODELADA", detalle: "El modelo solo calcula la resistencia equivalente nominal entre los bornes F y N de una carga con potencia definida. No extrapola valores a otros puntos." };
+    const bornesValidos = new Set(nodes.flatMap((n) => (n.ports || []).map((p) => `${n.id}:${p.id}`)));
+    if (!bornesValidos.has(borneA) || !bornesValidos.has(borneB)) {
+      return { valor: "NO MODELADA", detalle: "Una o ambas puntas no corresponden a bornes existentes en el banco." };
+    }
+    const adyAbierta = new Map();
+    const addAbierta = (a, b) => {
+      if (!adyAbierta.has(a)) adyAbierta.set(a, []);
+      adyAbierta.get(a).push(b);
+    };
+    for (const e of edges) { addAbierta(e.desde, e.hasta); addAbierta(e.hasta, e.desde); }
+    for (const n of nodes) {
+      if (n.tipo === "termica") { addAbierta(`${n.id}:in`, `${n.id}:out`); addAbierta(`${n.id}:out`, `${n.id}:in`); }
+    }
+    const vistosAbierta = new Set([borneA]), colaAbierta = [borneA];
+    while (colaAbierta.length) {
+      const actual = colaAbierta.shift();
+      for (const siguiente of adyAbierta.get(actual) || []) {
+        if (siguiente === borneB) return { valor: "NO MODELADA", detalle: "Hay conexión entre las puntas, pero no corresponde a una única carga resistiva reconocida. La red no se resuelve en este modelo." };
+        if (!vistosAbierta.has(siguiente)) { vistosAbierta.add(siguiente); colaAbierta.push(siguiente); }
+      }
+    }
+    return { valor: "OL", detalle: "No hay un camino conductor entre las puntas y no se reconoce una carga resistiva entre esos bornes." };
   }
 
   // Busca un camino alternativo formado solo por conductores ideales y térmicas.
