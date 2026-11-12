@@ -87,7 +87,7 @@ export function render(container) {
     // el portalámparas queda con FASE presente aunque esté apagado.
     const faseEnPorta = encendido || invertida;
     porta.classList.toggle("lampara-porta--fase", faseEnPorta);
-    porta.textContent = faseEnPorta ? "Portalámparas — ⚡ FASE presente" : "Portalámparas — sin tensión";
+    porta.textContent = faseEnPorta ? "Portalámparas — ⚡ FASE presente" : "Portalámparas — fase no detectada en el modelo";
 
     if (!invertida) {
       resultado.className = "resultado resultado--ok";
