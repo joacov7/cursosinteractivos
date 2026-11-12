@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calcularLectura, crearEscenarioFalla } from "../js/workbench/instrumentos.js";
+import { calcularLectura, crearEscenarioFalla, medirEntreBornes } from "../js/workbench/instrumentos.js";
 
 const nodes = [{ tipo: "fuente" }, { tipo: "carga" }];
 test("multímetro mide tensión nominal ideal en la fuente", () => {
@@ -41,4 +41,39 @@ test("inyectar puente agrega una derivación de fase sin alterar el circuito ori
   assert.equal(escenario.edges[1].desde, "f1:F");
   assert.equal(escenario.edges[1].hasta, "c1:F");
   assert.equal(edges.length, 1);
+});
+
+test("multímetro mide 220 V entre fase y neutro con circuito conectado", () => {
+  const nodes = [
+    { id: "f", tipo: "fuente", props: {}, ports: [] },
+    { id: "t", tipo: "termica", props: {}, ports: [] },
+    { id: "c", tipo: "carga", props: {}, ports: [] },
+  ];
+  const edges = [
+    { id: "e1", desde: "f:F", hasta: "t:in" },
+    { id: "e2", desde: "t:out", hasta: "c:F" },
+    { id: "e3", desde: "c:N", hasta: "f:N" },
+  ];
+  const m = medirEntreBornes(nodes, edges, "f:F", "f:N");
+  assert.equal(m.tension, "220,0 V~");
+  assert.equal(m.continuidad, "ABIERTO");
+});
+test("multímetro reconoce continuidad entre bornes del mismo nodo conectado", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }];
+  const edges = [{ id: "e1", desde: "f:F", hasta: "x:F" }];
+  const m = medirEntreBornes(nodes, edges, "f:F", "x:F");
+  assert.equal(m.continuidad, "CONTINUIDAD");
+  assert.equal(m.tension, "0,0 V~");
+});
+test("multímetro muestra OL en una punta flotante", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }];
+  const m = medirEntreBornes(nodes, [], "f:F", "x:N");
+  assert.equal(m.tension, "OL");
+});
+test("abrir conductor elimina la lectura de tensión a través del corte", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }, { id: "c", tipo: "carga", props: {}, ports: [] }];
+  const edges = [{ id: "e1", desde: "f:F", hasta: "c:F" }];
+  const m = medirEntreBornes(nodes, edges, "f:F", "c:F");
+  assert.equal(m.tension, "0,0 V~");
+  assert.equal(m.continuidad, "ABIERTO");
 });
