@@ -35,7 +35,7 @@ test("pagos y activación de inscripciones no son escrituras directas del navega
   assert.match(sql, /revoke all on public\.payment_events from anon, authenticated/i);
   assert.match(hardeningSql, /revoke insert on public\.quiz_attempts from authenticated/i);
   assert.match(hardeningSql, /unique index if not exists idx_orders_unique_provider_payment/i);
-  assert.match(hardeningSql, /unique \(provider, provider_event_id\)/i);
+  assert.match(sql, /unique \(provider, provider_event_id\)/i);
 });
 
 test("el acceso a lecciones y el progreso respetan preview, curso gratuito o inscripción activa", async () => {
