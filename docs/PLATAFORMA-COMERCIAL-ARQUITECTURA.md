@@ -97,3 +97,10 @@ La primera migración Alembic vive en `backend/migrations/versions/20261112_0001
 La base guarda importes como enteros en unidad menor (`amount_minor` / `price_minor`) para evitar errores de punto flotante. Email tiene índice único insensible a mayúsculas. Los eventos de pago son idempotentes por proveedor e ID de evento. La migración se prueba en CI contra PostgreSQL 16, incluyendo upgrade, downgrade y upgrade.
 
 Este esquema no crea usuarios ni cursos iniciales, no configura Neon real y no implementa todavía autenticación ni endpoints de negocio. Los roles y estados son restricciones de datos, no sustituyen la autorización que deberá aplicar FastAPI.
+
+
+## Autenticación — primera implementación
+
+La API expone registro de alumno, login, renovación rotativa de sesión, logout y perfil autenticado. Las contraseñas se almacenan con Argon2id. Los access tokens HS256 son breves y requieren un secreto de al menos 32 caracteres. Los refresh tokens son aleatorios, se entregan en cookie HttpOnly/SameSite=Lax y solo se almacena su hash; cada renovación revoca el token anterior. El backend consulta el usuario en PostgreSQL para validar que siga activo. El registro público siempre asigna rol `student`.
+
+Pendiente antes de producción: verificación de email, recuperación de contraseña y entrega de correo, limitación de intentos, herramienta segura de bootstrap de administrador, política de CSRF/orígenes revisada con el dominio definitivo y pruebas de navegador.
