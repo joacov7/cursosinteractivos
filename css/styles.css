@@ -980,3 +980,13 @@ button { cursor: pointer; }
   .diagrama-card { margin-inline: -0.25rem; padding: 0.45rem; }
   .diagrama-svg { width: 560px; max-width: none; }
 }
+
+.diagrama-card { margin: 1.15rem 0 1.4rem; }
+.diagrama-caption {
+  padding: 0.55rem 0.35rem 0.1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+.dv-flow { animation: dv-march 1.2s linear infinite; }
+@keyframes dv-march { to { stroke-dashoffset: -32; } }
