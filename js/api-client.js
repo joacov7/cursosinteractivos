@@ -130,3 +130,12 @@ export async function saveProgress(lessonId, status = "completed") {
     }),
   });
 }
+
+
+export async function canAccessSimulator(simulatorKey) {
+  const course = await getCourse("electricidad-desde-cero");
+  const lessons = course.modules.flatMap((module) => module.lessons);
+  const matching = lessons.filter((lesson) => lesson.simulator_key === simulatorKey);
+  if (!matching.length) return false;
+  return course.access_granted || matching.some((lesson) => lesson.is_preview);
+}
