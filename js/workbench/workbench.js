@@ -47,8 +47,15 @@ export function render(container) {
         <button type="button" id="wb-limpiar">Limpiar</button>
       </div>
 
+      <div class="wb-conexion-teclado" aria-label="Conexión accesible">
+        <strong>Conectar sin arrastrar</strong>
+        <label>Desde <select id="wb-desde" aria-label="Borne de origen"></select></label>
+        <label>Hasta <select id="wb-hasta" aria-label="Borne de destino"></select></label>
+        <button type="button" id="wb-conectar">Conectar bornes</button>
+        <p id="wb-conexion-msg" class="wb-hint" role="status">Alternativa accesible al arrastre de cables.</p>
+      </div>
       <div class="wb-lienzo-wrap">
-        <svg id="wb-svg" class="wb-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="wb-svg" class="wb-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Banco de trabajo eléctrico interactivo"></svg>
       </div>
 
       <div class="wb-abajo">
@@ -88,6 +95,38 @@ export function render(container) {
   function pathCable(x1, y1, x2, y2) {
     const dx = Math.max(40, Math.abs(x2 - x1) / 2);
     return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+  }
+  function conectar(desde, hasta) {
+    const partesA = (desde || "").split(":");
+    const partesB = (hasta || "").split(":");
+    const a = nodo(partesA[0]), b = nodo(partesB[0]);
+    const pa = a && a.ports.find((p) => p.id === partesA[1]);
+    const pb = b && b.ports.find((p) => p.id === partesB[1]);
+    if (!pa || !pb || a.id === b.id) return "Elegí bornes de dos componentes distintos.";
+    if (pa.tipo !== pb.tipo) return "Conectá fase con fase o neutro con neutro.";
+    const repetida = estado.edges.some((e) =>
+      (e.desde === desde && e.hasta === hasta) || (e.desde === hasta && e.hasta === desde)
+    );
+    if (repetida) return "Esos bornes ya están conectados.";
+    estado.edges.push(crearEdge(desde, hasta, 2.5));
+    return "";
+  }
+
+  function actualizarConexiones() {
+    const desde = container.querySelector("#wb-desde");
+    const hasta = container.querySelector("#wb-hasta");
+    if (!desde || !hasta) return;
+    const anteriorDesde = desde.value, anteriorHasta = hasta.value;
+    const opciones = estado.nodes.flatMap((n) => n.ports.map((p) => ({
+      value: idGlobalPuerto(n.id, p.id),
+      label: (n.tipo === "fuente" ? "Fuente " : n.tipo === "termica" ? "Térmica " : "Carga ") +
+        n.id + " · " + (p.tipo === "F" ? "Fase" : "Neutro") + " · " + p.id,
+    })));
+    const html = opciones.map((o) => '<option value="' + o.value + '">' + o.label + '</option>').join("");
+    desde.innerHTML = html;
+    hasta.innerHTML = html;
+    if (opciones.some((o) => o.value === anteriorDesde)) desde.value = anteriorDesde;
+    if (opciones.some((o) => o.value === anteriorHasta)) hasta.value = anteriorHasta;
   }
 
   // ── Alta de nodos ─────────────────────────────────────────────────
@@ -189,6 +228,7 @@ export function render(container) {
       <g class="wb-nodes">${nodesSvg}</g>
     `;
 
+    actualizarConexiones();
     pintarProps();
     pintarEstado(r);
     pintarRetos(r);
@@ -445,9 +485,8 @@ export function render(container) {
     if (inter.modo === "wire") {
       const destino = document.elementFromPoint(ev.clientX, ev.clientY);
       const gid = destino && destino.dataset ? destino.dataset.port : null;
-      if (gid && gid.split(":")[0] !== inter.desde.split(":")[0]) {
-        estado.edges.push(crearEdge(inter.desde, gid, 2.5));
-      }
+      const mensaje = gid ? conectar(inter.desde, gid) : "Soltá sobre un borne para crear la conexión."; 
+      container.querySelector("#wb-conexion-msg").textContent = mensaje || "Conexión agregada."; 
       inter = null;
       pintar();
       return;
@@ -467,6 +506,11 @@ export function render(container) {
     b.addEventListener("click", () => agregar(b.dataset.add))
   );
   container.querySelector("#wb-ejemplo").addEventListener("click", cargarEjemplo);
+  container.querySelector("#wb-conectar").addEventListener("click", () => {
+    const mensaje = conectar(container.querySelector("#wb-desde").value, container.querySelector("#wb-hasta").value);
+    container.querySelector("#wb-conexion-msg").textContent = mensaje || "Conexión agregada.";
+    if (!mensaje) pintar();
+  });
   container.querySelector("#wb-limpiar").addEventListener("click", () => {
     estado.nodes = []; estado.edges = []; seleccion = null; pintar();
   });
