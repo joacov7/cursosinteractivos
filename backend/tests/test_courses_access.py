@@ -155,10 +155,11 @@ def test_catalog_hides_paid_lesson_content_until_enrollment(client: TestClient):
 def test_seed_command_creates_course_modules_and_preview_lessons(client):
     from app.cli import seed_electricity_course
     from app.db.models import Course
+    from app.db.session import build_session_factory
 
-    asyncio.run(seed_electricity_course())
+    async def exercise_seed():
+        await seed_electricity_course()
 
-    async def inspect_seed():
         engine = create_async_engine(_async_database_url(os.environ["DATABASE_URL"]), poolclass=NullPool)
         factory = async_sessionmaker(engine, expire_on_commit=False)
         async with factory() as db:
@@ -178,6 +179,11 @@ def test_seed_command_creates_course_modules_and_preview_lessons(client):
             assert any(lesson.simulator_key == "banco" for lesson in lessons)
         await engine.dispose()
 
-    asyncio.run(inspect_seed())
-    with pytest.raises(RuntimeError, match="ya existe"):
-        asyncio.run(seed_electricity_course())
+        with pytest.raises(RuntimeError, match="El curso ya existe"):
+            await seed_electricity_course()
+
+        cached_factory = build_session_factory()
+        if cached_factory is not None:
+            await cached_factory.kw["bind"].dispose()
+
+    asyncio.run(exercise_seed())
