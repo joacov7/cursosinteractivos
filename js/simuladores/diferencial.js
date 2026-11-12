@@ -1,14 +1,14 @@
 // Simulador Disyuntor diferencial / RCD (spec 2.3).
-// Una fuga de corriente a tierra por falla de aislación. El alumno compara:
-// con térmica sola no corta (no es sobrecarga); con diferencial corta en ms.
-// Protege PERSONAS, no la instalación. Sensibilidad doméstica: 30 mA.
+// Modelo conceptual: compara corriente diferencial con una sensibilidad seleccionada.
+// No calcula tiempos normalizados ni garantiza protección personal.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
 import { svgDiferencial } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
-  "El diferencial protege personas y la térmica protege la instalación: un " +
-  "tablero necesita AMBOS. Probá el diferencial con su botón de test una vez por mes.";
+  "El diferencial y la protección contra sobrecorrientes cumplen funciones distintas. " +
+  "Verificá el dispositivo y su botón de prueba según las instrucciones del fabricante; " +
+  "la prueba no reemplaza las verificaciones eléctricas reglamentarias.";
 
 const RECOMENDADO_MA = 30;
 
@@ -21,8 +21,8 @@ export function render(container) {
 
       <h2>Simulador: Disyuntor diferencial (RCD)</h2>
       <p class="sim-intro">
-        Un artefacto con falla de aislación produce una <strong>fuga a tierra</strong>. Elegí la
-        protección del tablero y provocá la fuga para ver qué corta y qué no.
+        Una falla de aislación puede generar una <strong>corriente diferencial</strong>.
+        Elegí la protección y observá el comportamiento del modelo simplificado.
       </p>
 
       ${svgDiferencial()}
@@ -31,19 +31,19 @@ export function render(container) {
         <label>
           Protección del tablero
           <select id="sel-proteccion">
-            <option value="termica">Solo térmica</option>
-            <option value="ambas">Térmica + diferencial</option>
+            <option value="termica">Solo protección termomagnética</option>
+            <option value="ambas">Termomagnética + diferencial</option>
           </select>
         </label>
         <label>
-          Sensibilidad del diferencial
+          Sensibilidad nominal del diferencial
           <select id="sel-sens">
-            <option value="30">30 mA (doméstico)</option>
-            <option value="300">300 mA (industrial)</option>
+            <option value="30">30 mA (alta sensibilidad)</option>
+            <option value="300">300 mA (sensibilidad menor)</option>
           </select>
         </label>
         <label>
-          Corriente de fuga a tierra
+          Corriente diferencial del escenario
           <select id="sel-fuga">
             <option value="15">15 mA</option>
             <option value="50" selected>50 mA</option>
@@ -52,18 +52,25 @@ export function render(container) {
         </label>
       </div>
 
-      <button type="button" id="btn-fuga" class="btn-primario">Provocar fuga a tierra</button>
+      <button type="button" id="btn-fuga" class="btn-primario">Simular corriente diferencial</button>
       <div id="dif-resultado" class="resultado" aria-live="polite" hidden></div>
 
       <div class="comparacion">
         <h3>Roles distintos</h3>
         <p>
-          Una fuga a tierra puede ser de decenas de miliamperios: <strong>no es una sobrecarga</strong>,
-          así que la térmica ni se entera. El diferencial mide la diferencia entre lo que entra por la
-          fase y lo que vuelve por el neutro; si falta corriente (se fue a tierra) y supera su
-          sensibilidad, corta en milisegundos. Por eso se necesitan los dos.
+          La protección termomagnética actúa frente a sobrecargas y cortocircuitos.
+          El diferencial detecta un desequilibrio entre las corrientes de los conductores activos.
+          En este modelo, el resultado cambia cuando la corriente diferencial alcanza el valor nominal
+          seleccionado; el comportamiento real depende del tipo de dispositivo, la forma de onda,
+          la corriente y el tiempo de actuación, la instalación y las condiciones de ensayo.
         </p>
       </div>
+      <p class="nota-modelo">
+        <strong>Importante:</strong> el umbral exacto de esta simulación es una simplificación pedagógica.
+        Un resultado favorable no demuestra que una persona esté protegida ni sustituye la selección,
+        instalación, ensayo y verificación de un dispositivo conforme a la reglamentación aplicable.
+        Un diferencial de 300 mA no es equivalente a uno de 30 mA como protección adicional de alta sensibilidad.
+      </p>
 
       <p class="cierre-educativo">${AVISO_EDUCATIVO}</p>
     </section>
@@ -86,26 +93,24 @@ export function render(container) {
       resultado.className = "resultado resultado--ok";
       resultado.innerHTML = `
         <div class="resultado-cabecera">
-          <span class="badge">✔ Cortó el diferencial</span>
-          <p>La fuga (${fuga} mA) superó la sensibilidad (${sens} mA): el diferencial cortó en
-          milisegundos y protegió a la persona. La térmica no habría actuado: no es una sobrecarga.</p>
+          <span class="badge">✔ Actuación en el modelo</span>
+          <p>La corriente diferencial del escenario (${fuga} mA) alcanzó o superó la sensibilidad nominal seleccionada (${sens} mA).
+          El modelo representa una actuación, pero no calcula el tiempo real ni permite concluir que la instalación o una persona estén protegidas.</p>
         </div>`;
     } else if (conDiferencial && fuga < sens) {
       resultado.className = "resultado resultado--falla";
       resultado.innerHTML = `
         <div class="resultado-cabecera">
-          <span class="badge">✖ No cortó (sensibilidad alta)</span>
-          <p>La fuga (${fuga} mA) no alcanzó la sensibilidad de ${sens} mA. Para protección de
-          personas se usa <strong>${RECOMENDADO_MA} mA</strong>; ${sens} mA es de uso industrial y
-          deja pasar fugas peligrosas para una persona.</p>
+          <span class="badge">✖ No actúa en este escenario</span>
+          <p>La corriente diferencial (${fuga} mA) quedó por debajo de la sensibilidad nominal (${sens} mA).
+          Para protección adicional de personas suele utilizarse alta sensibilidad, habitualmente 30 mA, según el diseño y la reglamentación aplicable.</p>
         </div>`;
     } else {
       resultado.className = "resultado resultado--falla";
       resultado.innerHTML = `
         <div class="resultado-cabecera">
-          <span class="badge">✖ Nadie cortó</span>
-          <p>Con solo térmica, una fuga a tierra de ${fuga} mA no dispara nada: la térmica ve
-          sobrecargas y cortocircuitos, no fugas. La persona queda expuesta. Falta un diferencial.</p>
+          <span class="badge">✖ Sin detección diferencial</span>
+          <p>En el escenario elegido no hay interruptor diferencial. La protección termomagnética no reemplaza la detección de corrientes diferenciales.</p>
         </div>`;
     }
   });
