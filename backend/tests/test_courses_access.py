@@ -149,3 +149,34 @@ def test_catalog_hides_paid_lesson_content_until_enrollment(client: TestClient):
     mine = client.get("/api/v1/me/courses", headers=headers)
     assert mine.status_code == 200
     assert any(item["course"]["id"] == str(identifiers["course_id"]) for item in mine.json())
+
+
+def test_seed_command_creates_course_modules_and_preview_lessons(client):
+    from app.cli import seed_electricity_course
+    from app.db.models import Course
+
+    asyncio.run(seed_electricity_course())
+
+    async def inspect_seed():
+        engine = create_async_engine(_async_database_url(os.environ["DATABASE_URL"]), poolclass=NullPool)
+        factory = async_sessionmaker(engine, expire_on_commit=False)
+        async with factory() as db:
+            course = await db.scalar(select(Course).where(Course.slug == "electricidad-desde-cero"))
+            assert course is not None
+            assert course.status == "published"
+            assert course.price_minor == 1490000
+            modules = list((await db.scalars(
+                select(CourseModule).where(CourseModule.course_id == course.id)
+            )).all())
+            lessons = list((await db.scalars(
+                select(Lesson).where(Lesson.module_id.in_([module.id for module in modules]))
+            )).all())
+            assert len(modules) == 4
+            assert len(lessons) == 17
+            assert sum(1 for lesson in lessons if lesson.is_preview) == 2
+            assert any(lesson.simulator_key == "banco" for lesson in lessons)
+        await engine.dispose()
+
+    asyncio.run(inspect_seed())
+    with pytest.raises(RuntimeError, match="ya existe"):
+        asyncio.run(seed_electricity_course())
