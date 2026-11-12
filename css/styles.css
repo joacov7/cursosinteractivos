@@ -1188,3 +1188,9 @@ body {
 .wb-medida { display:block; font-variant-numeric: tabular-nums; }
 @media(max-width:900px) { .wb-instrumentos-controles { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width:560px) { .wb-instrumentos-controles { grid-template-columns: 1fr; } }
+
+
+.wb-node--energized .wb-node-box { stroke: var(--ok); filter: drop-shadow(0 0 7px rgba(53,199,138,.35)); }
+.wb-node--conducting .wb-node-box { stroke: var(--ok); }
+.wb-node--tripped .wb-node-box { stroke: var(--danger); filter: drop-shadow(0 0 7px rgba(255,107,104,.28)); }
+.wb-load-glow { fill: #ffc247!important; stroke: #ffe5a0!important; filter: drop-shadow(0 0 7px rgba(255,194,71,.85)); }
