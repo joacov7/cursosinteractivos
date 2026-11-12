@@ -55,9 +55,16 @@ There is deliberately no public administrator-registration endpoint. After apply
 
 ```bash
 python -m app.cli create-admin
+
+# Cargar el catálogo inicial del curso (precio ARS 14.900,00 por defecto):
+python -m app.cli seed-electricity-course
+# Opcional: indicar el importe en centavos ARS
+python -m app.cli seed-electricity-course --price-minor 1490000
 ```
 
 It prompts for the first administrator's details and password, refuses to run if an administrator already exists, and marks the account email as verified. Restrict database credentials and terminal access. Do not run this command as part of application startup or a public web request.
+
+The separate `seed-electricity-course` command creates the initial published course and maps the 16 lessons/simulators into four modules. The Cable + Térmica simulator lessons are marked as previews. The command refuses to overwrite an existing course. Run it once after migrations; it does not create enrollments or process payments.
 
 ## Production checklist still open
 
@@ -77,7 +84,7 @@ Never commit `.env` or real credentials. Keep separate databases for development
 - `GET /api/v1/me/courses`: lists published free courses and courses with an active enrollment.
 - `PUT /api/v1/lessons/{lesson_id}/progress`: stores progress only for a published course the authenticated user can access. Completion is normalized to 100%.
 
-Access is enforced in the API, not by hiding frontend controls. Do not add paid lesson content to public responses or frontend bundles as a substitute for server-side authorization. Enrollment creation and payment-provider integration are separate trusted workflows and are not yet implemented.
+API responses enforce access to lesson content and progress. The static frontend now checks enrollment before opening paid routes and lazy-loads simulator/quiz/workbench modules after the check. This is a user-interface gate, not strong protection of intellectual property: static JavaScript chunk URLs remain publicly fetchable by someone who knows them. Before selling the course at scale, move paid lesson logic/assets behind authenticated delivery or private storage with short-lived signed URLs. Enrollment creation and payment-provider integration are separate trusted workflows and are not yet implemented.
 
 
 ## Frontend integration
