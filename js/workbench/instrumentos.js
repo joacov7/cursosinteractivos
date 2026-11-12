@@ -61,3 +61,36 @@ export function crearEscenarioFalla(nodes, edges, falla, evaluar) {
   }
   return { nodes: copiaNodos, edges: copiaEdges, edgeAbierto };
 }
+
+/**
+ * Multímetro entre dos bornes. La topología se reduce a nodos conectados
+ * idealmente; no modela impedancia, caída de tensión ni instrumentos reales.
+ */
+export function medirEntreBornes(nodes, edges, borneA, borneB) {
+  if (!borneA || !borneB) return { tension: "—", continuidad: "—", detalle: "Elegí los dos bornes de prueba." };
+  const parent = new Map();
+  const find = (x) => {
+    if (!parent.has(x)) parent.set(x, x);
+    if (parent.get(x) !== x) parent.set(x, find(parent.get(x)));
+    return parent.get(x);
+  };
+  const union = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent.set(ra, rb); };
+  for (const e of edges) union(e.desde, e.hasta);
+  for (const n of nodes) {
+    if (n.tipo === "termica") union(`${n.id}:in`, `${n.id}:out`);
+  }
+  const a = find(borneA), b = find(borneB);
+  const fuente = nodes.find((n) => n.tipo === "fuente");
+  if (!fuente) return { tension: "OL", continuidad: "ABIERTO", detalle: "No hay fuente en el banco." };
+  const fase = find(`${fuente.id}:F`), neutro = find(`${fuente.id}:N`);
+  const potencial = (grupo) => grupo === fase ? 220 : grupo === neutro ? 0 : null;
+  const va = potencial(a), vb = potencial(b);
+  const tension = va === null || vb === null ? "OL" : `${Math.abs(va-vb).toFixed(1).replace(".", ",")} V~`;
+  const continuidad = a === b ? "CONTINUIDAD" : "ABIERTO";
+  return {
+    tension, continuidad,
+    detalle: tension === "OL"
+      ? "Al menos una punta está en un nodo flotante o sin referencia en este modelo."
+      : "Lectura ideal entre los bornes seleccionados; no contempla impedancias ni caída de tensión.",
+  };
+}
