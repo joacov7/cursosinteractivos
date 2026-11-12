@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calcularCaidaTension, diagnosticarCargasConectadas, calcularConsumoEnergia } from "../js/workbench/analisis.js";
+import { calcularCaidaTension, diagnosticarCargasConectadas, calcularConsumoEnergia, calcularDemandaSimultanea, compararSecciones } from "../js/workbench/analisis.js";
 
 test("caída monofásica usa ida y vuelta y resistividad del cobre", () => {
   const r = calcularCaidaTension({ corrienteA:10, longitudM:20, seccionMm2:2.5, material:"cobre" });
