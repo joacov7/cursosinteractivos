@@ -4,6 +4,7 @@
 // Protege PERSONAS, no la instalación. Sensibilidad doméstica: 30 mA.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgDiferencial } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "El diferencial protege personas y la térmica protege la instalación: un " +
@@ -23,6 +24,8 @@ export function render(container) {
         Un artefacto con falla de aislación produce una <strong>fuga a tierra</strong>. Elegí la
         protección del tablero y provocá la fuga para ver qué corta y qué no.
       </p>
+
+      ${svgDiferencial()}
 
       <div class="controles">
         <label>
