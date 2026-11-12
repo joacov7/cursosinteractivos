@@ -2,7 +2,7 @@
 import asyncio
 import getpass
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 
 from app.core.security import hash_password
 from app.db.models import User
