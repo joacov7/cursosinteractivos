@@ -25,7 +25,7 @@ test("el diagnóstico rechaza continuidad con fuente conectada como práctica se
 test("el diagnóstico del puente identifica la térmica fuera de serie", () => {
   const r = evaluarRespuestaDiagnostico("puente-termica", 2, 0);
   assert.equal(r.correcta, true);
-  assert.match(r.explicacion, /camino alternativo/);
+  assert.match(r.explicacion, /térmica proteja/);
 });
 
 test("el diagnóstico de corto no inventa Icc ni actuación de protección", () => {
