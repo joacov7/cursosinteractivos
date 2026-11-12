@@ -74,8 +74,16 @@ export function render(container) {
     return posPuerto(n, p);
   }
   function svgXY(ev) {
-    const r = svg.getBoundingClientRect();
-    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    const matrix = svg.getScreenCTM();
+    if (!matrix) {
+      const r = svg.getBoundingClientRect();
+      return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    }
+    const point = svg.createSVGPoint();
+    point.x = ev.clientX;
+    point.y = ev.clientY;
+    const local = point.matrixTransform(matrix.inverse());
+    return { x: local.x, y: local.y };
   }
   function pathCable(x1, y1, x2, y2) {
     const dx = Math.max(40, Math.abs(x2 - x1) / 2);
@@ -161,6 +169,12 @@ export function render(container) {
       : "";
 
     const nodesSvg = estado.nodes.map((n) => nodoSvg(n, r)).join("");
+    const minX = Math.min(0, ...estado.nodes.map((n) => n.x)) - 40;
+    const minY = Math.min(0, ...estado.nodes.map((n) => n.y)) - 40;
+    const maxX = Math.max(720, ...estado.nodes.map((n) => n.x + NODO_W + 60));
+    const maxY = Math.max(440, ...estado.nodes.map((n) => n.y + NODO_H + 65));
+    svg.setAttribute("viewBox", `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
     svg.innerHTML = `
       <defs>
@@ -363,7 +377,8 @@ export function render(container) {
   function pintarEstado(r) {
     const map = {
       incompleto: ["Circuito incompleto", "Uní fuente → térmica → carga y cerrá el neutro para que circule corriente."],
-      seguro: ["✔ Seguro", "La carga entra en el cable y la térmica lo protege. Así se dimensiona bien."],
+      inseguro: ["⚠ Protección insuficiente", "Hay corriente, pero no existe una térmica correctamente conectada en serie o su valor no protege el cable."],
+      seguro: ["✔ Seguro en este modelo", "La carga queda dentro de la capacidad del cable y la térmica está en serie. Es una comprobación didáctica simplificada."],
       sobrecarga: ["✖ Sobrecarga", "La corriente supera la capacidad del cable: se calienta y humea. Faltó una protección adecuada."],
       salta: ["⚡ Salta la térmica", "La térmica corta porque la corriente supera su valor: protege el circuito."],
     };
