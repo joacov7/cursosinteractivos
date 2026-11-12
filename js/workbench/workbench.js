@@ -71,7 +71,7 @@ export function render(container) {
           <label>Punta roja<select id="wb-punta-a" aria-label="Borne de punta roja"></select></label>
           <label>Punta negra<select id="wb-punta-b" aria-label="Borne de punta negra"></select></label>
           <label>Inyectar una falla<select id="wb-falla">
-            <option value="ninguna">Sin falla</option><option value="conductor-abierto">Conductor abierto</option><option value="puente-termica">Puente sobre la térmica</option>
+            <option value="ninguna">Sin falla</option><option value="conductor-abierto">Conductor abierto</option><option value="puente-termica">Puente sobre la térmica</option><option value="corto-fase-neutro">Corto fase-neutro</option>
           </select></label>
         </div>
         <p id="wb-medida-ayuda" class="wb-hint">Lecturas ideales del modelo didáctico. No son mediciones de una instalación real.</p>
@@ -212,7 +212,7 @@ export function render(container) {
     const escenario = escenarioActual();
     const r = evaluarCircuito(escenario.nodes, escenario.edges);
     r.falla = fallaActiva;
-    const lecturaBase = calcularLectura(r, modoMedicion, "circuito", escenario.nodes);
+    if (fallaActiva === "corto-fase-neutro" && escenario.cortoDetectado) {\n      r.estado = "corto";\n      r.warnings = [...r.warnings, "Cortocircuito fase-neutro detectado. La corriente de cortocircuito y la actuación de la protección no se calculan en este modelo."];\n    }\n    const lecturaBase = calcularLectura(r, modoMedicion, "circuito", escenario.nodes);
     const puntas = medirEntreBornes(escenario.nodes, escenario.edges, puntaA, puntaB);
     const lectura = modoMedicion === "tension"
       ? { valor: puntas.tension, detalle: puntas.detalle }
@@ -236,7 +236,7 @@ export function render(container) {
         const b = posGlobal(e.hasta);
         const clase = ["wb-edge"];
         if (e.id === escenario.edgeAbierto) clase.push("wb-edge--open");
-        if (e.id === "falla-puente-termica") clase.push("wb-edge--fault");
+        if (e.id === "falla-puente-termica" || e.id === "falla-corto-fn") clase.push("wb-edge--fault");
         if (hot && activos.has(e.id)) clase.push("wb-edge--hot");
         else if (r.estado === "seguro" && activos.has(e.id)) clase.push("wb-edge--flow");
         else if (["inseguro"].includes(r.estado) && activos.has(e.id)) clase.push("wb-edge--energized");
@@ -481,7 +481,7 @@ export function render(container) {
       inseguro: ["⚠ Protección insuficiente", "Hay corriente, pero no existe una térmica correctamente conectada en serie o su valor no protege el cable."],
       seguro: ["✔ Seguro en este modelo", "La carga queda dentro de la capacidad del cable y la térmica está en serie. Es una comprobación didáctica simplificada."],
       sobrecarga: ["✖ Sobrecarga", "La corriente supera la capacidad del cable: se calienta y humea. Faltó una protección adecuada."],
-      salta: ["⚡ Salta la térmica", "La térmica corta porque la corriente supera su valor: protege el circuito."],
+      salta: ["⚡ Salta la térmica", "La térmica corta porque la corriente supera su valor: protege el circuito."],\n      corto: ["✖ Cortocircuito fase-neutro", "Se detectó una unión directa entre fase y neutro. No se calcula la corriente de falla ni se afirma que una protección real vaya a abrir."],
     };
     const [badge, msg] = map[r.estado] || map.incompleto;
     const clase =
@@ -495,7 +495,7 @@ export function render(container) {
         <span>Cable: <strong>${r.capCable ?? "—"} A</strong></span>
         <span>Térmica: <strong>${r.breaker ?? "sin protección"}${r.breaker ? " A" : ""}</strong></span>
       </div>`}
-      ${r.falla && r.falla !== "ninguna" ? `<p class="wb-falla-activa">Falla inyectada: ${r.falla === "conductor-abierto" ? "conductor abierto" : "puente sobre la térmica"}. Escenario virtual.</p>` : ""}
+      ${r.falla && r.falla !== "ninguna" ? `<p class="wb-falla-activa">Falla inyectada: ${r.falla === "conductor-abierto" ? "conductor abierto" : r.falla === "puente-termica" ? "puente sobre la térmica" : "cortocircuito fase-neutro"}. Escenario virtual.</p>` : ""}
       ${r.warnings.length ? `<ul class="problemas">${r.warnings
         .map((w) => `<li class="problema problema--peligro"><span class="problema-detalle">${w}</span></li>`).join("")}</ul>` : ""}`;
   }
