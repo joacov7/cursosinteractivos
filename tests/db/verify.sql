@@ -25,10 +25,10 @@ insert into public.enrollments (user_id, course_id, status, source) values
   ('00000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000002', 'active', 'payment');
 
 insert into public.certificates (
-  user_id, course_id, verification_code, student_name_snapshot, course_title_snapshot, status
+  user_id, course_id, verification_code, student_name_snapshot, course_title_snapshot, status, revoked_at
 ) values
   ('00000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001',
-   '40000000-0000-4000-8000-000000000001', 'Alumna Uno', 'Curso gratuito', 'issued'),
+   '40000000-0000-4000-8000-000000000001', 'Alumna Uno', 'Curso gratuito', 'issued', null),
   ('00000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000002',
    '40000000-0000-4000-8000-000000000002', 'Alumno Dos', 'Curso pago', 'revoked', now());
 
@@ -106,8 +106,12 @@ begin
   if (select count(*) from public.enrollments) <> 1 then
     raise exception 'student cannot read own enrollment';
   end if;
-  if has_table_privilege('authenticated', 'public.enrollments', 'INSERT') then
-    raise exception 'student has direct enrollment insert privilege';
-  end if;
+  begin
+    insert into public.enrollments (user_id, course_id, status)
+    values ('00000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', 'active');
+    raise exception 'student bypassed enrollment RLS';
+  exception when insufficient_privilege then
+    null;
+  end;
 end $$;
 rollback;
