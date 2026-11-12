@@ -17,6 +17,7 @@ import * as motores from "../js/simuladores/motores-arranque.js";
 import { evaluarArranque } from "../js/simuladores/motores-arranque.js";
 import * as compresor from "../js/simuladores/compresor-diagnostico.js";
 import * as selectividad from "../js/simuladores/selectividad.js";
+import { evaluarCoordinacionNominal } from "../js/simuladores/selectividad.js";
 import * as normativa from "../js/simuladores/normativa-aea.js";
 
 import {
@@ -109,4 +110,27 @@ test("los simuladores de cargas y trifásica no presentan supuestos como reglas 
   assert.match(trifasica, /valores nominales/i);
   assert.match(polaridad, /verificá ausencia de tensión/i);
   assert.doesNotMatch(polaridad, /Cambiar la lámpara es seguro/);
+});
+
+
+test("el simulador de selectividad no confunde escalonamiento nominal con selectividad verificada", () => {
+  const r = evaluarCoordinacionNominal(20, 40, 16);
+  assert.equal(r.escalonamientoNominal, true);
+  assert.equal(r.selectividadVerificada, false);
+  assert.equal(r.seccionalSobreCarga, false);
+  const sinEscalon = evaluarCoordinacionNominal(40, 40, 16);
+  assert.equal(sinEscalon.escalonamientoNominal, false);
+  assert.throws(() => evaluarCoordinacionNominal(0, 40, 10), TypeError);
+});
+
+test("los modelos de iluminación y serie/paralelo declaran sus simplificaciones", async () => {
+  const [iluminacion, serie] = await Promise.all([
+    readFile(new URL("../js/simuladores/iluminacion.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/simuladores/serie-paralelo.js", import.meta.url), "utf8"),
+  ]);
+  assert.match(iluminacion, /límite.*supuesto didáctico/i);
+  assert.match(iluminacion, /lúmenes/i);
+  assert.doesNotMatch(iluminacion, /la térmica de.*cortará/i);
+  assert.match(serie, /abierto ? Infinity/);
+  assert.match(serie, /Modelo resistivo ideal/);
 });
