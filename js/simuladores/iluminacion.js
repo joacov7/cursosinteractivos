@@ -4,6 +4,7 @@
 // de 10 A (cable de 1.5 mm²).
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgIluminacion } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "El circuito de iluminación se protege con térmica de 10 A y cable de 1.5 mm². " +
@@ -31,6 +32,8 @@ export function render(container) {
         Mismo nivel de luz, distinto consumo: una LED de 9 W ilumina como una incandescente de 60 W.
         Armá un circuito de iluminación y fijate cuántas bocas entran en la térmica de ${LIMITE_A} A.
       </p>
+
+      ${svgIluminacion()}
 
       <div class="controles">
         <label>
