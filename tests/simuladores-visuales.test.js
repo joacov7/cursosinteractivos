@@ -1,4 +1,5 @@
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 
 import * as ohm from "../js/simuladores/ohm-potencia.js";
@@ -56,4 +57,25 @@ test("cada simulador tiene una misión didáctica válida", () => {
     assert.equal(m.opciones.length, 3);
     assert.ok(m.correcta >= 0 && m.correcta < m.opciones.length);
   }
+});
+
+
+test("los simuladores eléctricos explicitan límites del modelo", async () => {
+  const [tablero, diferencial, fallas] = await Promise.all([
+    readFile(new URL("../js/simuladores/tablero.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/simuladores/diferencial.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/simuladores/corto-sobrecarga.js", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(tablero, /no define calibres|no define.*dimensionamiento/i);
+  assert.doesNotMatch(tablero, /Protege el cable de 1\.5 mm²|Protege el cable de 2\.5 mm²|Protege el cable de 4 mm²/);
+  assert.match(tablero, /no valida el dimensionamiento/i);
+
+  assert.match(diferencial, /no calcula el tiempo real/i);
+  assert.match(diferencial, /no.*permite concluir que.*persona/i);
+  assert.doesNotMatch(diferencial, /protegió a la persona/);
+
+  assert.match(fallas, /no representan corrientes/i);
+  assert.match(fallas, /no tiempo de disparo/i);
+  assert.doesNotMatch(fallas, /≈ 15 ms|< 20 ms|const pico = NOMINAL_A \* 50/);
 });
