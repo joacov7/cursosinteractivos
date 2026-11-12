@@ -170,3 +170,10 @@ Se añadió al banco un estimador monofásico de caída de tensión para dos con
 El diagnóstico de potencia suma solo cargas con camino completo entre fase de fuente y borne de fase de carga, y entre neutro de carga y neutro de fuente. Muestra potencia nominal, corriente ideal y energía estimada a partir de horas ingresadas. No modela factor de potencia, arranque, simultaneidad real ni consumo medido.
 
 La interfaz usa tarjetas y métricas adaptables; no se ha realizado aún una inspección visual manual en dispositivos físicos. Las estimaciones no sustituyen el cálculo conforme a reglamentación AEA ni la verificación profesional de la instalación.
+
+
+## Comparativa de secciones y simultaneidad (12-11-2026)
+
+El estimador muestra una tabla comparativa de secciones para la misma corriente, longitud y material, ordenada por las secciones didácticas disponibles. La tabla solo compara caída de tensión y no selecciona ni certifica una sección adecuada.
+
+El análisis de cargas permite ingresar un porcentaje supuesto de simultaneidad, diferenciando potencia instalada de demanda simultánea estimada. La energía diaria proyectada utiliza esa demanda por las horas de uso ingresadas. El factor es editable y no se presenta como valor normativo o medición real.
