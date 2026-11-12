@@ -1,7 +1,7 @@
 // Lecturas del multímetro virtual. Modelo ideal y exclusivamente didáctico.
 export function evaluarBloqueoMedicion(modo, fuenteEncendida) {
-  if (fuenteEncendida && modo === "continuidad") {
-    return "Desconectá la fuente antes de medir continuidad. La prueba queda bloqueada mientras el circuito está energizado.";
+  if (fuenteEncendida && ["continuidad", "resistencia"].includes(modo)) {
+    return `Desconectá la fuente antes de medir ${modo === "resistencia" ? "resistencia" : "continuidad"}. La prueba queda bloqueada mientras el circuito está energizado.`;
   }
   return "";
 }
@@ -108,5 +108,51 @@ export function medirEntreBornes(nodes, edges, borneA, borneB, { energizada = tr
       : tension === "OL"
         ? "Al menos una punta está en un nodo flotante o sin referencia en este modelo."
         : "Lectura ideal entre los bornes seleccionados; no contempla impedancias ni caída de tensión.",
+  };
+}
+
+
+/**
+ * Óhmetro didáctico limitado a la resistencia equivalente nominal de una
+ * única carga explícitamente modelada por su potencia a 220 V.
+ * No calcula redes serie/paralelo ni motores/cargas no óhmicas reales.
+ */
+export function medirResistenciaEntreBornes(nodes, edges, borneA, borneB, { energizada = true } = {}) {
+  if (energizada) return { valor: "BLOQUEADO", detalle: "Desconectá la fuente antes de medir resistencia. Nunca uses el óhmetro sobre un circuito energizado." };
+  if (!borneA || !borneB) return { valor: "—", detalle: "Elegí los dos bornes de prueba." };
+
+  const carga = nodes.find((n) => {
+    const a = `${n.id}:F`, b = `${n.id}:N`;
+    return n.tipo === "carga" && ((borneA === a && borneB === b) || (borneA === b && borneB === a));
+  });
+  if (!carga || !(Number(carga.props?.potencia) > 0)) {
+    return { valor: "NO MODELADA", detalle: "El modelo solo calcula la resistencia equivalente nominal entre los bornes F y N de una carga con potencia definida. No extrapola valores a otros puntos." };
+  }
+
+  // Busca un camino alternativo formado solo por conductores ideales y térmicas.
+  // Si existe, la carga está puenteada o hay una red paralela que este modelo no resuelve.
+  const inicio = `${carga.id}:F`, fin = `${carga.id}:N`;
+  const ady = new Map();
+  const add = (a, b) => {
+    if (!ady.has(a)) ady.set(a, []);
+    ady.get(a).push(b);
+  };
+  for (const e of edges) { add(e.desde, e.hasta); add(e.hasta, e.desde); }
+  for (const n of nodes) {
+    if (n.tipo === "termica") { add(`${n.id}:in`, `${n.id}:out`); add(`${n.id}:out`, `${n.id}:in`); }
+  }
+  const vistos = new Set([inicio]), cola = [inicio];
+  while (cola.length) {
+    const actual = cola.shift();
+    for (const siguiente of ady.get(actual) || []) {
+      if (siguiente === fin) return { valor: "NO MODELADA", detalle: "Hay un camino externo entre los bornes de la carga. El modelo no resuelve resistencias equivalentes en paralelo ni puentes." };
+      if (!vistos.has(siguiente)) { vistos.add(siguiente); cola.push(siguiente); }
+    }
+  }
+
+  const ohm = (220 * 220) / Number(carga.props.potencia);
+  return {
+    valor: `${ohm.toFixed(1).replace(".", ",")} Ω`,
+    detalle: `Resistencia equivalente nominal ideal de esta carga: 220² / ${Number(carga.props.potencia)} W. Es una aproximación didáctica a potencia nominal; no representa el comportamiento real de motores, electrónica ni cargas variables.`,
   };
 }
