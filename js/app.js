@@ -180,7 +180,10 @@ function refrescarProgreso() {
 
 function router() {
   const hash = location.hash || "#/";
-  const partes = hash.replace(/^#\//, "").split("/");
+  const route = hash.slice(2);
+  const [pathname, query = ""] = route.split("?");
+  const partes = pathname.split("/");
+  const params = new URLSearchParams(query);
 
   if (partes[0] === "sim" && partes[1] && SIMULADORES[partes[1]]) {
     SIMULADORES[partes[1]].render(vista);
