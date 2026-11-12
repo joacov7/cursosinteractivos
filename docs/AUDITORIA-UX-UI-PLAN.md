@@ -184,3 +184,16 @@ El análisis de cargas permite ingresar un porcentaje supuesto de simultaneidad,
 Al seleccionar un tema desde el temario en pantallas móviles, el índice se pliega automáticamente para devolver espacio a la lección. El botón sincroniza su etiqueta y aria-expanded, y los enlaces indican el destino activo mediante aria-current="page". Se agregaron pruebas de regresión para el control, su estado accesible, el breakpoint móvil, el foco visible y prefers-reduced-motion.
 
 Estas pruebas verifican el contrato estático del código; no sustituyen pruebas manuales de interacción con lectores de pantalla ni recorridos reales en Android/iOS.
+
+
+## Revisión de supuestos eléctricos en simuladores (12-11-2026)
+
+Se ajustaron tres simuladores para evitar que una simplificación didáctica se interprete como dimensionamiento o garantía de seguridad:
+
+- **Tablero:** el ejercicio ahora evalúa reconocimiento de componentes y orden funcional. Se retiraron las afirmaciones que asociaban automáticamente secciones de 1,5 / 2,5 / 4 mm² con térmicas concretas. Los valores de 10, 16 y 20 A quedan explícitamente como opciones del ejercicio, no como recomendación de dimensionamiento. La pantalla advierte que el diseño real debe considerar corriente de diseño, capacidad admisible corregida, método de instalación, agrupamiento, temperatura, caída de tensión y poder de corte.
+- **Diferencial:** se reemplazó el mensaje de “protegió a la persona” por “actuación en el modelo”. La comparación de umbral se identifica como simplificación conceptual; se aclara que no calcula tiempos normalizados ni demuestra protección. También se distingue un dispositivo de 300 mA de uno de 30 mA de alta sensibilidad y se remite el test al manual del fabricante.
+- **Cortocircuito y sobrecarga:** se eliminaron los valores ficticios de pico de corriente y tiempo de disparo. La animación conserva la diferencia conceptual entre respuesta térmica retardada y magnética rápida, sin mostrar magnitudes ni tiempos como si fueran mediciones o curvas reales.
+
+Se agregaron pruebas de regresión que impiden reintroducir los mensajes concluyentes y los valores de disparo ficticios. GitHub Actions completó la ejecución del commit `a0ee4874e7ccaf5e493718761b33da40e9ffe633` con **53 pruebas aprobadas y 0 fallidas**.
+
+Pendiente antes de considerar la versión educativa cerrada: revisión técnica externa de contenido y valores por electricista matriculado, además de pruebas visuales/manuales en navegadores y dispositivos reales. La suite automatizada no reemplaza esas validaciones.
