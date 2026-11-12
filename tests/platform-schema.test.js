@@ -57,5 +57,6 @@ test("la verificación pública del certificado expone solo campos no sensibles"
 test("la revocación de certificados exige fecha y el progreso del cliente no se considera autoridad", async () => {
   const hardeningSql = await readFile(hardening, "utf8");
   assert.match(hardeningSql, /status = 'revoked' and revoked_at is not null/i);
-  assert.match(hardeningSql, /Never issue certificates from progress rows or client-submitted quiz data alone/i);
+  assert.match(hardeningSql, /lesson_progress is learner-editable for UX/i);
+  assert.match(hardeningSql, /server-validated quiz attempts/i);
 });
