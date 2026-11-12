@@ -4,6 +4,7 @@
 // circuito (iluminación, tomas, AC/cocina).
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgTablero } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "En un tablero real: identificá cada circuito con etiquetas, respetá la " +
@@ -41,6 +42,8 @@ export function render(container) {
         respetando la jerarquía: primero corta todo la <strong>llave general</strong>, después el
         <strong>diferencial</strong> protege personas, y cada circuito lleva su <strong>térmica</strong>.
       </p>
+
+      ${svgTablero()}
 
       <div class="tablero" id="tablero">
         ${SLOTS.map(
