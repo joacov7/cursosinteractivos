@@ -74,6 +74,6 @@ test("abrir conductor elimina la lectura de tensión a través del corte", () =>
   const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }, { id: "c", tipo: "carga", props: {}, ports: [] }];
   const edges = [{ id: "e1", desde: "f:F", hasta: "c:F" }];
   const m = medirEntreBornes(nodes, edges, "f:F", "c:F");
-  assert.equal(m.tension, "0,0 V~");
+  assert.equal(m.tension, "OL");
   assert.equal(m.continuidad, "ABIERTO");
 });
