@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calcularLectura, crearEscenarioFalla, medirEntreBornes, evaluarBloqueoMedicion } from "../js/workbench/instrumentos.js";
+import { calcularLectura, crearEscenarioFalla, medirEntreBornes, medirResistenciaEntreBornes, evaluarBloqueoMedicion } from "../js/workbench/instrumentos.js";
 
 const nodes = [{ tipo: "fuente" }, { tipo: "carga" }];
 test("multímetro mide tensión nominal ideal en la fuente", () => {
@@ -114,4 +114,29 @@ test("fuente desconectada elimina la lectura de tensión aunque exista continuid
   assert.equal(m.tension, "0,0 V~");
   assert.equal(m.continuidad, "CONTINUIDAD");
   assert.match(m.detalle, /Fuente desconectada/);
+});
+
+
+test("óhmetro calcula la resistencia equivalente nominal de una carga modelada", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  const m = medirResistenciaEntreBornes(ns, [], "c1:F", "c1:N", { energizada: false });
+  assert.equal(m.valor, "10,0 Ω");
+  assert.match(m.detalle, /equivalente nominal/);
+});
+
+test("óhmetro bloquea la medición con fuente energizada", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  assert.equal(medirResistenciaEntreBornes(ns, [], "c1:F", "c1:N").valor, "BLOQUEADO");
+  assert.match(evaluarBloqueoMedicion("resistencia", true), /Desconectá la fuente/);
+});
+
+test("óhmetro no inventa resistencia para bornes no modelados", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  assert.equal(medirResistenciaEntreBornes(ns, [], "c1:F", "otro:N", { energizada: false }).valor, "NO MODELADA");
+});
+
+test("óhmetro rechaza redes paralelas o un puente externo no resuelto", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  const es = [{ id: "e1", desde: "c1:F", hasta: "c1:N" }];
+  assert.equal(medirResistenciaEntreBornes(ns, es, "c1:F", "c1:N", { energizada: false }).valor, "NO MODELADA");
 });
