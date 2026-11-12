@@ -143,3 +143,12 @@ sigan otros oficios (**plomería, refrigeración, mecánica**). Dos consecuencia
   navegador del alumno (`localStorage`) y no sirve como prueba. Es una decisión de
   producto (proveedor de pago, autenticación, emisión de certificados) a definir
   aparte.
+
+
+## Cuenta y aula online
+
+La interfaz incluye acceso a **Mi cuenta**: registro, inicio y cierre de sesión, verificación de correo, recuperación de contraseña, catálogo publicado, cursos habilitados y guardado de avance. La sesión usa un access token en memoria y refresh token en cookie HttpOnly; no se persiste el token de acceso en localStorage.
+
+Para desarrollo local, la etiqueta `meta[name="api-base-url"]` de `index.html` apunta a `http://localhost:8000`. Para producción debe cambiarse por el origen de la API desplegada. Configurá CORS y SMTP según `backend/README.md`.
+
+El frontend todavía no integra checkout ni Mercado Pago. Un curso aparece como habilitado solo cuando el backend tiene una inscripción activa; no se debe habilitar manualmente desde el navegador.
