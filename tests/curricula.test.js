@@ -88,3 +88,14 @@ test("el certificado inserta el nombre del alumno como texto, nunca como HTML", 
   assert.doesNotMatch(source, /id="cert-alumno">\$\{nombre/);
   assert.doesNotMatch(source, /id="cert-nombre"[^>]*value="\$\{nombre/);
 });
+
+test("los quizzes evitan presentar valores eléctricos simplificados como reglas universales", () => {
+  assert.match(QUIZZES["1.3"].preguntas[0].q, /coordinar la corriente de carga/i);
+  assert.match(QUIZZES["1.3"].preguntas[0].explicacion, /Ib ≤ In ≤ Iz/);
+  assert.match(QUIZZES["1.3"].preguntas[1].explicacion, /tiempo depende de su curva/i);
+  assert.match(QUIZZES["1.4"].preguntas[3].explicacion, /no hay un tiempo único/i);
+  assert.match(QUIZZES["2.2"].preguntas[3].q, /Antes de elegir la sección y protección/i);
+  assert.match(QUIZZES["2.3"].preguntas[0].explicacion, /No reemplaza la puesta a tierra/i);
+  assert.match(QUIZZES["2.5"].preguntas[3].explicacion, /no son universales/i);
+  assert.match(QUIZZES["3.2"].preguntas[3].explicacion, /No se elige únicamente/i);
+});
