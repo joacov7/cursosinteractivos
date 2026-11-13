@@ -48,7 +48,7 @@ Lienzo SVG interactivo para armar circuitos con fuente, térmica, cargas y condu
 
 - JavaScript nativo con ES modules; no requiere framework ni proceso de build.
 - SVG y eventos de puntero para el banco de trabajo.
-- Pruebas automatizadas con el runner nativo `node --test`.
+- Pruebas automatizadas con el runner nativo `node --test` (64 casos definidos en la suite).
 
 Archivos principales:
 
@@ -62,10 +62,11 @@ Archivos principales:
 - `data/curricula.js`, `data/quizzes.js`, `data/catalogo.js`: contenido y datos.
 - `tests/`: pruebas automatizadas.
 - `docs/AUDITORIA-UX-UI-PLAN.md`: auditoría, decisiones y límites conocidos.
+- `docs/PRUEBA-MANUAL-ELECTRICIDAD.md`: checklist de aceptación en escritorio y móvil.
 
 ## Estado de cierre
 
-La implementación educativa y sus pruebas automatizadas están avanzadas. La última ejecución registrada para la rama de laboratorio informó **58 pruebas aprobadas**. Esto no reemplaza las verificaciones finales que faltan:
+La implementación educativa está avanzada y la suite contiene **64 casos automatizados**. La última ejecución confirmada antes de los cambios recientes pasó en el commit `569169b`; los cambios posteriores en los textos de los quizzes y sus pruebas de regresión todavía requieren una nueva ejecución de CI. Esto no reemplaza las verificaciones finales que faltan:
 
 1. Recorrido manual completo en navegador de escritorio y móvil (incluido el banco de trabajo táctil).
 2. Revisión profesional externa de valores, supuestos, seguridad y referencias normativas.
