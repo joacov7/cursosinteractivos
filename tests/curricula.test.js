@@ -79,3 +79,12 @@ test("el umbral de aprobación y el aviso de seguridad están definidos", () => 
   assert.match(AVISO_EDUCATIVO, /simulación educativa/i);
   assert.match(AVISO_EDUCATIVO, /electricista matriculado/i);
 });
+
+test("el certificado inserta el nombre del alumno como texto, nunca como HTML", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../js/certificado.js", import.meta.url), "utf8");
+  assert.match(source, /inputNombre\.value = nombre/);
+  assert.match(source, /alumno\.textContent = nombre \|\| "—"/);
+  assert.doesNotMatch(source, /id="cert-alumno">\$\{nombre/);
+  assert.doesNotMatch(source, /id="cert-nombre"[^>]*value="\$\{nombre/);
+});
