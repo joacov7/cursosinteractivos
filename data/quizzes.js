@@ -87,7 +87,7 @@ export const QUIZZES = {
           "Elegir según el tamaño del tablero",
         ],
         correcta: 1,
-        explicacion: "Como criterio básico, Ib es la corriente de diseño, In la corriente nominal de la protección e Iz la capacidad admisible corregida del conductor. También deben verificarse cortocircuito, caída de tensión, curva, poder de corte y normativa aplicable.",
+        explicacion: "Como criterio básico, debe cumplirse Ib ≤ In ≤ Iz: Ib es la corriente de diseño, In la corriente nominal de la protección e Iz la capacidad admisible corregida del conductor. También deben verificarse cortocircuito, caída de tensión, curva, poder de corte y normativa aplicable.",
       },
       {
         q: "Si la corriente de carga supera la nominal de la térmica…",
