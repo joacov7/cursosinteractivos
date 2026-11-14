@@ -487,7 +487,7 @@ export const QUIZZES = {
         q: "¿Qué debe comprobarse antes de elegir una curva C o D para una carga con alto pico de arranque?",
         opciones: ["Solo que la carga sea un motor", "Que el arranque sea compatible y que la protección siga actuando correctamente ante cortocircuitos", "Que el cable sea del color correcto", "Que el tablero tenga espacio"],
         correcta: 1,
-        explicacion: "Una curva más tolerante al pico puede afectar la desconexión ante fallas. Deben comprobarse la corriente de arranque, la impedancia del lazo, el tiempo de desconexión y las condiciones reglamentarias.",
+        explicacion: "Una curva más tolerante al pico puede afectar la desconexión ante fallas. No se elige únicamente por el pico de arranque: deben comprobarse la corriente de arranque, la impedancia del lazo, el tiempo de desconexión y las condiciones reglamentarias.",
       },
     ],
   },
