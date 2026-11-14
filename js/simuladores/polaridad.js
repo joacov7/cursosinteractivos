@@ -4,6 +4,7 @@
 // presente en partes que en reposo no deberían tenerla.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgPolaridad } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "En un tomacorriente 2P+T (IRAM 2073) mirándolo de frente: la tierra es el " +
@@ -22,6 +23,8 @@ export function render(container) {
         Una lámpara con su interruptor, conectada a un toma 2P+T. Cambiá la conexión y el
         interruptor, y mirá dónde queda presente la fase.
       </p>
+
+      ${svgPolaridad()}
 
       <div class="controles">
         <label>
@@ -84,15 +87,14 @@ export function render(container) {
     // el portalámparas queda con FASE presente aunque esté apagado.
     const faseEnPorta = encendido || invertida;
     porta.classList.toggle("lampara-porta--fase", faseEnPorta);
-    porta.textContent = faseEnPorta ? "Portalámparas — ⚡ FASE presente" : "Portalámparas — sin tensión";
+    porta.textContent = faseEnPorta ? "Portalámparas — ⚡ FASE presente" : "Portalámparas — fase no detectada en el modelo";
 
     if (!invertida) {
       resultado.className = "resultado resultado--ok";
       resultado.innerHTML = `
         <div class="resultado-cabecera">
           <span class="badge">✔ Polaridad correcta</span>
-          <p>El interruptor corta la <strong>fase</strong>. Con la lámpara apagada, el
-          portalámparas queda del lado del neutro: sin tensión. Cambiar la lámpara es seguro.</p>
+          <p>El interruptor corta la <strong>fase</strong>. En el modelo, al apagarlo no queda fase en el portalámparas. Antes de cambiar una lámpara real, cortá la alimentación del circuito y verificá ausencia de tensión.</p>
         </div>`;
     } else if (invertida && !encendido) {
       resultado.className = "resultado resultado--falla";

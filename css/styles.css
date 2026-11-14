@@ -368,7 +368,7 @@ button { cursor: pointer; }
   font-size: 0.9rem;
 }
 .tierra-carcasa--energizada { border-color: var(--danger); background: var(--danger-bg); }
-.tierra-carcasa--segura { border-color: var(--ok); background: var(--ok-bg); }
+.tierra-carcasa--con-pe { border-color: var(--accent-2); background: rgba(58,132,192,.18); }
 .tierra-tension { font-family: ui-monospace, monospace; font-size: 1.2rem; }
 .tierra-camino { font-size: 0.88rem; padding: 0.5rem 0.8rem; border-radius: 8px; }
 .tierra-camino--peligro { background: var(--danger-bg); color: var(--danger); }
@@ -880,3 +880,399 @@ button { cursor: pointer; }
   background: var(--danger-bg); color: var(--danger);
   border: 1px solid var(--danger); border-radius: 8px; padding: 0.5rem 0.8rem;
 }
+
+
+/* Accesibilidad, foco y adaptación del laboratorio */
+:where(a, button, select, input, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.wb-lienzo-wrap {
+  background-color: #111a25;
+  background-image: radial-gradient(rgba(255,255,255,0.075) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.wb-svg {
+  height: clamp(300px, 56vw, 440px);
+  min-height: 300px;
+  max-height: 440px;
+}
+.wb-toolbar button, .wb-reto-nav button, .wb-retos-libre button {
+  min-height: 42px;
+}
+.wb-props-fila select { min-height: 42px; }
+.wb-node, .wb-port { vector-effect: non-scaling-stroke; }
+@media (max-width: 560px) {
+  .wb-toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wb-toolbar button { width: 100%; }
+  .wb-reto-nav button { flex: 1 1 calc(50% - 0.5rem); }
+  .wb-abajo { grid-template-columns: 1fr; }
+  .resultado-cabecera { align-items: flex-start; flex-direction: column; gap: 0.35rem; }
+  .wb-svg { height: 320px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.wb-conexion-teclado {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 0.9rem 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+.wb-conexion-teclado strong { flex-basis: 100%; }
+.wb-conexion-teclado label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.wb-conexion-teclado select { min-width: 150px; min-height: 42px; }
+.wb-conexion-teclado button {
+  min-height: 42px;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--accent-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+}
+.wb-conexion-teclado .wb-hint { flex-basis: 100%; margin: 0; }
+@media (max-width: 560px) {
+  .wb-conexion-teclado { display: grid; grid-template-columns: 1fr; align-items: stretch; }
+  .wb-conexion-teclado select, .wb-conexion-teclado button { width: 100%; }
+}
+
+
+/* Biblioteca de diagramas técnicos SVG */
+.diagrama-card {
+  margin: 1.15rem 0 1.4rem;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(145deg, var(--panel), var(--panel-2));
+  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+}
+.diagrama-svg { display: block; width: 100%; height: auto; color: var(--muted); }
+.dv-wire { fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.dv-phase { fill: none; stroke: #f05b58; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.dv-neutral { fill: none; stroke: #55a5ff; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.dv-earth { fill: none; stroke: #d6ae42; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.dv-flow { fill: none; stroke: var(--ok); stroke-width: 4; stroke-dasharray: 9 7; stroke-linecap: round; }
+.dv-alert { fill: none; stroke: var(--danger); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.dv-device { fill: var(--panel-2); stroke: var(--text); stroke-width: 2.2; }
+.dv-panel { fill: var(--panel); stroke: var(--border); stroke-width: 2; }
+.dv-good { fill: var(--ok); stroke: var(--ok); stroke-width: 3; }
+.dv-label { fill: var(--text); font-size: 16px; font-weight: 750; text-anchor: middle; letter-spacing: 0.02em; }
+.dv-caption { fill: var(--muted); font-size: 13px; font-weight: 600; text-anchor: middle; }
+@media (max-width: 560px) {
+  .diagrama-card { margin-inline: -0.25rem; padding: 0.45rem; }
+  .diagrama-svg { width: 560px; max-width: none; }
+}
+
+.diagrama-card { margin: 1.15rem 0 1.4rem; }
+.diagrama-caption {
+  padding: 0.55rem 0.35rem 0.1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+.dv-flow { animation: dv-march 1.2s linear infinite; }
+@keyframes dv-march { to { stroke-dashoffset: -32; } }
+
+
+/* ── Capa visual: laboratorio de aprendizaje ─────────────────── */
+:root {
+  --bg: #0b1220;
+  --panel: #121d2c;
+  --panel-2: #19283a;
+  --border: #2b3c50;
+  --text: #edf4fb;
+  --muted: #a7b7c8;
+  --accent: #ffc247;
+  --accent-2: #69b7ff;
+  --ok: #35c78a;
+  --ok-bg: #102b27;
+  --danger: #ff6b68;
+  --danger-bg: #351d27;
+  --warn: #f4bd55;
+  --warn-bg: #302817;
+  --radius: 14px;
+}
+body {
+  background:
+    radial-gradient(ellipse at 75% -15%, rgba(45, 103, 158, 0.18), transparent 42rem),
+    var(--bg);
+}
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(13, 23, 37, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom-color: rgba(111, 151, 190, 0.2);
+}
+.brand-mark { box-shadow: 0 8px 24px rgba(255,194,71,.18); }
+.vista { max-width: 1080px; width: 100%; }
+.sim > h2 { font-size: clamp(1.55rem, 3vw, 2.25rem); letter-spacing: -0.035em; }
+.sim-intro { max-width: 76ch; font-size: 1.02rem; line-height: 1.75; }
+.sim > .aviso-seguridad { box-shadow: inset 4px 0 0 var(--warn); }
+.sim .controles {
+  padding: 1rem;
+  background: linear-gradient(145deg, var(--panel), rgba(25,40,58,.72));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.sim input, .sim select {
+  min-height: 46px;
+  border-radius: 10px;
+  border-color: #40546b;
+}
+.sim button { min-height: 44px; cursor: pointer; }
+.sim button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.sim button:active { transform: translateY(0); }
+.diagrama-card {
+  border-color: #344a61;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(73,143,205,.12), transparent 60%),
+    linear-gradient(145deg, #142338, #101a29);
+  box-shadow: 0 16px 42px rgba(0,0,0,.22);
+}
+.diagrama-svg { min-height: 170px; }
+.dv-label { font-size: 17px; }
+.diagrama-caption { letter-spacing: .02em; }
+
+/* Misión de aprendizaje integrada a cada simulación */
+.mision-aprendizaje {
+  margin: 1.2rem 0 1.5rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid #3a5671;
+  border-radius: 18px;
+  background:
+    linear-gradient(125deg, rgba(36,91,137,.22), transparent 58%),
+    var(--panel);
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+}
+.mision-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  color: var(--accent);
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.mision-duracion {
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.mision-aprendizaje h3 {
+  margin: .55rem 0 .35rem;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+}
+.mision-pregunta { max-width: 78ch; margin: 0 0 1rem; color: var(--muted); }
+.mision-opciones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; }
+.mision-opcion {
+  min-height: 68px !important;
+  padding: .8rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--text);
+  text-align: left;
+  line-height: 1.45;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+.mision-opcion.is-selected { border-color: var(--accent-2); background: rgba(58,132,192,.18); }
+.mision-opcion.is-correcta { border-color: var(--ok); background: var(--ok-bg); }
+.mision-opcion.is-incorrecta { border-color: var(--danger); background: var(--danger-bg); }
+.mision-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: 1rem; }
+.mision-comprobar {
+  padding: .65rem 1rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #201707;
+  font-weight: 800;
+}
+.mision-pista {
+  padding: .65rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--accent-2);
+}
+.mision-estado { color: var(--muted); font-size: .86rem; }
+.mision-ayuda, .mision-explicacion {
+  margin: .85rem 0 0;
+  padding: .8rem 1rem;
+  border-radius: 10px;
+  line-height: 1.6;
+}
+.mision-ayuda { background: var(--warn-bg); border-left: 3px solid var(--warn); }
+.mision-explicacion { background: var(--ok-bg); border-left: 3px solid var(--ok); }
+.nav-toggle {
+  display: none;
+  width: 100%;
+  min-height: 42px;
+  margin: 0 0 .75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .sidebar { padding: .8rem 1rem; }
+  .nav-toggle { display: block; }
+  .sidebar--collapsed #nav-temario { display: none; }
+  .sidebar--collapsed { padding-bottom: .55rem; }
+  .mision-opciones { grid-template-columns: 1fr; }
+  .mision-opcion { min-height: 50px !important; }
+  .app-header { padding: .7rem 1rem; }
+  .brand h1 { font-size: 1.05rem; }
+  .subt { font-size: .75rem; }
+}
+@media (min-width: 761px) {
+  .nav-toggle { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sim button:hover, .mision-opcion { transition: none; }
+}
+
+.nota-modelo {
+  margin: .7rem 0 1rem;
+  padding: .65rem .85rem;
+  border-left: 3px solid var(--accent-2);
+  border-radius: 0 9px 9px 0;
+  background: rgba(58,132,192,.1);
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+
+/* ── Instrumentación del banco de trabajo ── */
+.wb-instrumentos { margin: 1rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(145deg, var(--panel), #111a24); }
+.wb-instrumentos-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+.wb-instrumentos-head h3 { margin:.15rem 0 0; font-size:1.05rem; }
+.wb-kicker { color:var(--accent-2); font-size:.7rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.wb-medida { min-width:150px; padding:.55rem .9rem; border:1px solid #42634a; border-radius:9px; background:#07140b; color:#8df59a; text-align:center; font:700 1.45rem ui-monospace,monospace; box-shadow:inset 0 0 18px rgba(80,220,110,.08); }
+.wb-instrumentos-controles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; margin-top:1rem; }
+.wb-instrumentos-controles label { display:flex; flex-direction:column; gap:.35rem; color:var(--muted); font-size:.82rem; }
+.wb-hint { color:var(--muted); font-size:.82rem; }
+.wb-edge--open { stroke:var(--danger)!important; stroke-dasharray:5 7!important; opacity:.55; }
+.wb-falla-activa { padding:.55rem .75rem; border-left:3px solid var(--warn); background:var(--warn-bg); color:var(--text); font-size:.85rem; }
+@media(max-width:650px) { .wb-instrumentos-controles { grid-template-columns:1fr; } .wb-instrumentos-head { align-items:flex-start; flex-direction:column; } .wb-medida { width:100%; } }
+
+
+/* Flujo eléctrico didáctico y fallas del banco */
+.wb-edge--energized { stroke: var(--warn); stroke-width: 4; stroke-dasharray: 7 7; animation: wb-flow 1s linear infinite; }
+.wb-edge--fault { stroke: var(--danger); stroke-width: 4.5; stroke-dasharray: 3 5; animation: wb-pulso .65s ease-in-out infinite; }
+.wb-edge--open { stroke: var(--danger)!important; stroke-dasharray: 4 7!important; opacity: .7; }
+.wb-instrumentos-controles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.wb-medida { display:block; font-variant-numeric: tabular-nums; }
+@media(max-width:900px) { .wb-instrumentos-controles { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:560px) { .wb-instrumentos-controles { grid-template-columns: 1fr; } }
+
+
+.wb-node--energized .wb-node-box { stroke: var(--ok); filter: drop-shadow(0 0 7px rgba(53,199,138,.35)); }
+.wb-node--conducting .wb-node-box { stroke: var(--ok); }
+.wb-node--tripped .wb-node-box { stroke: var(--danger); filter: drop-shadow(0 0 7px rgba(255,107,104,.28)); }
+.wb-load-glow { fill: #ffc247!important; stroke: #ffe5a0!important; filter: drop-shadow(0 0 7px rgba(255,194,71,.85)); }
+
+
+/* Interruptor general del banco de trabajo */
+.wb-power { border: 1px solid var(--border); font-weight: 700; }
+.wb-power--on { color: var(--ok); border-color: var(--ok); background: var(--ok-bg); }
+.wb-power--off { color: var(--muted); border-color: var(--border); background: var(--panel-2); }
+.wb-medida { font-variant-numeric: tabular-nums; }
+
+
+/* Diagnóstico guiado de fallas */
+.wb-diagnostico, .wb-diagnostico-vacio {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(145deg, var(--panel), #101a28);
+}
+.wb-diagnostico-vacio { color: var(--muted); }
+.wb-diagnostico-vacio strong { color: var(--text); }
+.wb-diagnostico-cab { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+.wb-diagnostico-progreso { color:var(--muted); font-size:.78rem; font-variant-numeric:tabular-nums; }
+.wb-diagnostico h3 { margin:.45rem 0; font-size:1.05rem; }
+.wb-diagnostico-contexto { color:var(--muted); margin:.35rem 0 .9rem; font-size:.9rem; line-height:1.6; }
+.wb-diagnostico-pregunta { margin:.75rem 0; font-weight:750; }
+.wb-diagnostico-opciones { display:grid; grid-template-columns:1fr; gap:.55rem; }
+.wb-diag-opcion {
+  min-height:48px; padding:.7rem .85rem; text-align:left;
+  border:1px solid var(--border); border-radius:10px;
+  background:var(--panel-2); color:var(--text);
+}
+.wb-diag-opcion.is-selected { border-color:var(--accent-2); background:rgba(58,132,192,.2); }
+.wb-diagnostico-feedback {
+  margin:.8rem 0 0; padding:.75rem .9rem; border-radius:9px;
+  border-left:3px solid var(--accent-2); background:rgba(58,132,192,.12);
+  color:var(--text); font-size:.88rem; line-height:1.55;
+}
+.wb-diagnostico-acciones { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:.85rem; }
+.wb-diagnostico-acciones button, .wb-diagnostico--ok button {
+  min-height:42px; padding:.55rem .85rem; border:1px solid var(--accent-2);
+  border-radius:9px; background:var(--accent-2); color:#071523; font-weight:750;
+}
+.wb-diagnostico-acciones button:disabled { opacity:.45; cursor:not-allowed; }
+.wb-diagnostico-acciones .wb-diag-secundario {
+  background:transparent; color:var(--muted); border-color:var(--border);
+}
+.wb-diagnostico--ok { border-color:var(--ok); background:var(--ok-bg); }
+.wb-diagnostico--ok p { color:var(--muted); line-height:1.6; }
+
+
+/* Panel de análisis eléctrico: resultados comparables y adaptables. */
+.wb-analisis { margin:1rem 0; padding:1rem; border:1px solid var(--border); border-radius:14px; background:var(--panel); }
+.wb-analisis-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.wb-analisis-head h3 { margin:.15rem 0 .8rem; font-size:1.08rem; }
+.wb-model-tag { border:1px solid var(--border); border-radius:999px; padding:.25rem .6rem; color:var(--muted); font-size:.72rem; }
+.wb-analisis-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.9rem; }
+.wb-analisis-card { min-width:0; padding:.9rem; border:1px solid var(--border); border-radius:11px; background:var(--panel-2); }
+.wb-analisis-card h4 { margin:0 0 .35rem; }
+.wb-analisis-card>p { color:var(--muted); font-size:.82rem; margin:.25rem 0 .8rem; }
+.wb-analisis-controles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; }
+.wb-analisis-card label { display:flex; flex-direction:column; gap:.3rem; color:var(--muted); font-size:.8rem; min-width:0; }
+.wb-analisis-card input,.wb-analisis-card select { width:100%; min-width:0; min-height:42px; padding:.55rem; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); }
+.wb-analisis-resultado { margin-top:.85rem; }
+.wb-analisis-metricas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.55rem; }
+.wb-analisis-metricas span { display:flex; flex-direction:column; gap:.2rem; padding:.65rem; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:.75rem; }
+.wb-analisis-metricas strong { color:var(--text); font-size:1.05rem; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.wb-analisis-nota,.wb-analisis-disclaimer { color:var(--muted); font-size:.78rem; line-height:1.55; }
+.wb-analisis-disclaimer { margin:.85rem 0 0; padding:.7rem; border-left:3px solid var(--warn); background:var(--warn-bg); }
+.wb-analisis-error { color:var(--danger); }
+.wb-cargas-lista { margin:.6rem 0; padding-left:1.2rem; color:var(--muted); font-size:.8rem; }
+@media(max-width:650px) { .wb-analisis-grid { grid-template-columns:1fr; } .wb-analisis-controles { grid-template-columns:1fr 1fr; } .wb-analisis-metricas { grid-template-columns:1fr 1fr; } }
+@media(max-width:380px) { .wb-analisis-controles,.wb-analisis-metricas { grid-template-columns:1fr; } }
+
+
+.wb-comparativa { margin-top:.8rem; }
+.wb-comparativa h5 { margin:.25rem 0 .5rem; font-size:.82rem; }
+.wb-tabla-scroll { max-width:100%; overflow-x:auto; border:1px solid var(--border); border-radius:9px; }
+.wb-tabla { width:100%; border-collapse:collapse; font-size:.76rem; font-variant-numeric:tabular-nums; }
+.wb-tabla th,.wb-tabla td { padding:.55rem .6rem; text-align:left; white-space:nowrap; border-bottom:1px solid var(--border); }
+.wb-tabla th { color:var(--muted); font-weight:600; background:var(--panel); }
+.wb-tabla tr:last-child td { border-bottom:0; }
+.wb-tabla tr.is-selected td { background:var(--accent-soft,rgba(65,130,220,.12)); font-weight:650; }
+@media(max-width:380px) { .wb-tabla { font-size:.7rem; } .wb-tabla th,.wb-tabla td { padding:.45rem .4rem; } }

@@ -1,0 +1,151 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { calcularLectura, crearEscenarioFalla, medirEntreBornes, medirResistenciaEntreBornes, evaluarBloqueoMedicion } from "../js/workbench/instrumentos.js";
+
+const nodes = [{ tipo: "fuente" }, { tipo: "carga" }];
+test("multímetro mide tensión nominal ideal en la fuente", () => {
+  assert.equal(calcularLectura({ estado: "incompleto" }, "tension", "fuente", nodes).valor, "220,0 V~");
+});
+test("multímetro no muestra tensión en carga con circuito abierto", () => {
+  assert.equal(calcularLectura({ estado: "incompleto" }, "tension", "carga", nodes).valor, "0,0 V~");
+});
+test("corriente indica cero cuando no hay camino", () => {
+  assert.equal(calcularLectura({ estado: "incompleto", I: 0 }, "corriente", "circuito", nodes).valor, "0,0 A");
+});
+test("corriente muestra estimación del modelo cuando energizado", () => {
+  assert.equal(calcularLectura({ estado: "seguro", I: 14 }, "corriente", "circuito", nodes).valor, "14,0 A");
+});
+test("continuidad distingue camino y circuito abierto", () => {
+  assert.equal(calcularLectura({ estado: "seguro", edgesActivos: ["e1"] }, "continuidad", "circuito", nodes).valor, "CONTINUIDAD");
+  assert.equal(calcularLectura({ estado: "incompleto", edgesActivos: [] }, "continuidad", "circuito", nodes).valor, "ABIERTO");
+});
+test("térmica disparada informa corriente previa y no tensión en carga", () => {
+  const result = { estado: "salta", I: 20, edgesActivos: ["e1"] };
+  assert.equal(calcularLectura(result, "corriente", "circuito", nodes).valor, "20,0 A");
+  assert.equal(calcularLectura(result, "tension", "carga", nodes).valor, "0,0 V~");
+});
+
+test("inyectar conductor abierto corta el tramo activo sin modificar el original", () => {
+  const nodes = [{ id: "f1", tipo: "fuente", props: {}, ports: [] }, { id: "c1", tipo: "carga", props: {}, ports: [] }];
+  const edges = [{ id: "e1", desde: "f1:F", hasta: "c1:F", mm2: 2.5, capacidadA: 16 }];
+  const escenario = crearEscenarioFalla(nodes, edges, "conductor-abierto", () => ({ edgesActivos: ["e1"] }));
+  assert.equal(escenario.edges.length, 0);
+  assert.equal(escenario.edgeAbierto, "e1");
+  assert.equal(edges.length, 1);
+});
+test("inyectar puente agrega una derivación de fase sin alterar el circuito original", () => {
+  const nodes = [{ id: "f1", tipo: "fuente", props: {}, ports: [] }, { id: "t1", tipo: "termica", props: {}, ports: [] }, { id: "c1", tipo: "carga", props: {}, ports: [] }];
+  const edges = [{ id: "e1", desde: "f1:F", hasta: "t1:in", mm2: 2.5, capacidadA: 16 }];
+  const escenario = crearEscenarioFalla(nodes, edges, "puente-termica", () => ({ edgesActivos: [] }));
+  assert.equal(escenario.edges.length, 2);
+  assert.equal(escenario.edges[1].desde, "f1:F");
+  assert.equal(escenario.edges[1].hasta, "c1:F");
+  assert.equal(edges.length, 1);
+});
+
+test("multímetro mide 220 V entre fase y neutro con circuito conectado", () => {
+  const nodes = [
+    { id: "f", tipo: "fuente", props: {}, ports: [] },
+    { id: "t", tipo: "termica", props: {}, ports: [] },
+    { id: "c", tipo: "carga", props: {}, ports: [] },
+  ];
+  const edges = [
+    { id: "e1", desde: "f:F", hasta: "t:in" },
+    { id: "e2", desde: "t:out", hasta: "c:F" },
+    { id: "e3", desde: "c:N", hasta: "f:N" },
+  ];
+  const m = medirEntreBornes(nodes, edges, "f:F", "f:N");
+  assert.equal(m.tension, "220,0 V~");
+  assert.equal(m.continuidad, "ABIERTO");
+});
+test("multímetro reconoce continuidad entre bornes del mismo nodo conectado", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }];
+  const edges = [{ id: "e1", desde: "f:F", hasta: "x:F" }];
+  const m = medirEntreBornes(nodes, edges, "f:F", "x:F");
+  assert.equal(m.continuidad, "CONTINUIDAD");
+  assert.equal(m.tension, "0,0 V~");
+});
+test("multímetro muestra OL en una punta flotante", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }];
+  const m = medirEntreBornes(nodes, [], "f:F", "x:N");
+  assert.equal(m.tension, "OL");
+});
+test("abrir conductor elimina la lectura de tensión a través del corte", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }, { id: "c", tipo: "carga", props: {}, ports: [] }];
+  const edges = []; // el tramo se retiró al inyectar la falla
+  const m = medirEntreBornes(nodes, edges, "f:F", "c:F");
+  assert.equal(m.tension, "OL");
+  assert.equal(m.continuidad, "ABIERTO");
+});
+
+
+test("cortocircuito fase-neutro se inyecta en una copia y queda identificado", () => {
+  const nodes = [{ id: "f1", tipo: "fuente", props: {}, ports: [] }, { id: "c1", tipo: "carga", props: {}, ports: [] }];
+  const edges = [];
+  const escenario = crearEscenarioFalla(nodes, edges, "corto-fase-neutro", () => ({}));
+  assert.equal(escenario.cortoDetectado, true);
+  assert.equal(escenario.edges[0].id, "falla-corto-fn");
+  assert.equal(escenario.edges[0].desde, "f1:F");
+  assert.equal(escenario.edges[0].hasta, "f1:N");
+  assert.equal(edges.length, 0);
+});
+
+test("el multímetro no inventa corriente de cortocircuito", () => {
+  const lectura = calcularLectura({ estado: "corto", I: 14 }, "corriente", "circuito", nodes);
+  assert.equal(lectura.valor, "Icc: no modelada");
+  assert.match(lectura.detalle, /impedancia/);
+});
+
+
+test("continuidad queda bloqueada cuando la fuente está energizada", () => {
+  assert.match(evaluarBloqueoMedicion("continuidad", true), /Desconectá la fuente/);
+  assert.equal(evaluarBloqueoMedicion("tension", true), "");
+  assert.equal(evaluarBloqueoMedicion("corriente", true), "");
+});
+
+test("continuidad se habilita con la fuente desconectada", () => {
+  assert.equal(evaluarBloqueoMedicion("continuidad", false), "");
+});
+
+test("fuente desconectada elimina la lectura de tensión aunque exista continuidad topológica", () => {
+  const nodes = [{ id: "f", tipo: "fuente", props: {}, ports: [] }, { id: "c", tipo: "carga", props: {}, ports: [] }];
+  const edges = [{ id: "e1", desde: "f:F", hasta: "c:F" }];
+  const m = medirEntreBornes(nodes, edges, "f:F", "c:F", { energizada: false });
+  assert.equal(m.tension, "0,0 V~");
+  assert.equal(m.continuidad, "CONTINUIDAD");
+  assert.match(m.detalle, /Fuente desconectada/);
+});
+
+
+test("óhmetro calcula la resistencia equivalente nominal de una carga modelada", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  const m = medirResistenciaEntreBornes(ns, [], "c1:F", "c1:N", { energizada: false });
+  assert.equal(m.valor, "10,0 Ω");
+  assert.match(m.detalle, /equivalente nominal/);
+});
+
+test("óhmetro bloquea la medición con fuente energizada", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  assert.equal(medirResistenciaEntreBornes(ns, [], "c1:F", "c1:N").valor, "BLOQUEADO");
+  assert.match(evaluarBloqueoMedicion("resistencia", true), /Desconectá la fuente/);
+});
+
+test("óhmetro no inventa resistencia para bornes no modelados", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  assert.equal(medirResistenciaEntreBornes(ns, [], "c1:F", "otro:N", { energizada: false }).valor, "NO MODELADA");
+});
+
+test("óhmetro rechaza redes paralelas o un puente externo no resuelto", () => {
+  const ns = [{ id: "c1", tipo: "carga", props: { potencia: 4840 } }];
+  const es = [{ id: "e1", desde: "c1:F", hasta: "c1:N" }];
+  assert.equal(medirResistenciaEntreBornes(ns, es, "c1:F", "c1:N", { energizada: false }).valor, "NO MODELADA");
+});
+
+
+test("óhmetro indica circuito abierto cuando no hay camino entre bornes existentes", () => {
+  const ns = [
+    { id: "f1", tipo: "fuente", props: {}, ports: [{ id: "F" }, { id: "N" }] },
+    { id: "c1", tipo: "carga", props: { potencia: 4840 }, ports: [{ id: "F" }, { id: "N" }] },
+  ];
+  assert.equal(medirResistenciaEntreBornes(ns, [], "f1:F", "c1:F", { energizada: false }).valor, "OL");
+});

@@ -1,17 +1,14 @@
 // Simulador Cortocircuito vs. sobrecarga (spec 1.4).
-// Dos escenarios lado a lado que muestran que son fallas DISTINTAS y que la
-// térmica actúa por mecanismos distintos:
-//   - Sobrecarga: la corriente sube gradualmente → disparo TÉRMICO (tarda).
-//   - Cortocircuito: corriente altísima instantánea → disparo MAGNÉTICO (inmediato).
-// Idea a evitar: pensar que son "lo mismo pero más fuerte".
+// Animación conceptual de dos mecanismos distintos; no es una curva de disparo.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgFalla } from "../visuales.js";
 
-const NOMINAL_A = 10; // corriente nominal de la térmica del ejemplo
+const NOMINAL_A = 10;
 
 const RECORDATORIO_SEGURIDAD =
-  "La térmica protege al cable. Nunca la puentees ni la reemplaces por una de " +
-  "mayor corriente para 'que no salte': eso deja el cable sin protección.";
+  "La protección termomagnética debe coordinarse con los conductores y la instalación. " +
+  "Nunca la puentes ni la reemplaces por otra de mayor corriente para evitar disparos.";
 
 export function render(container) {
   container.innerHTML = `
@@ -22,22 +19,29 @@ export function render(container) {
 
       <h2>Simulador: Cortocircuito vs. sobrecarga</h2>
       <p class="sim-intro">
-        Son <strong>dos fallas distintas</strong>, no "la misma pero más fuerte". Provocá cada
-        una y observá cómo y cuándo corta la térmica (nominal ${NOMINAL_A} A).
+        Son <strong>dos fallas distintas</strong>. Observá la diferencia conceptual entre la respuesta
+        térmica ante una sobrecarga y la respuesta magnética ante una corriente de cortocircuito.
+        El ejemplo toma como referencia una protección nominal de ${NOMINAL_A} A.
+      </p>
+      <p class="nota-modelo">
+        Animación cualitativa: las magnitudes y la duración visual no representan corrientes,
+        tiempos ni curvas reales. La actuación efectiva depende de la curva del dispositivo,
+        la corriente de falla, la impedancia del lazo y las condiciones de instalación.
       </p>
 
+      ${svgFalla()}
+
       <div class="dos-escenarios">
-        ${escenarioHTML("sobrecarga", "Sobrecarga", "Se conectan demasiadas cargas al mismo circuito. La corriente sube por encima de lo normal, de a poco.")}
-        ${escenarioHTML("corto", "Cortocircuito", "Dos conductores (fase y neutro) se tocan directamente. Casi sin resistencia, la corriente se dispara al instante.")}
+        ${escenarioHTML("sobrecarga", "Sobrecarga", "Una corriente superior a la de servicio produce calentamiento acumulativo; el mecanismo térmico responde con retardo.") }
+        ${escenarioHTML("corto", "Cortocircuito", "Una falla de baja impedancia puede generar una corriente elevada; el mecanismo magnético puede actuar rápidamente.") }
       </div>
 
       <div class="comparacion">
         <h3>La diferencia clave</h3>
         <p>
-          La térmica tiene <strong>dos mecanismos</strong>: un bimetálico que se curva con el
-          calor (lento, para sobrecargas) y una bobina magnética que actúa por el pico de
-          corriente (instantánea, para cortocircuitos). Por eso la misma térmica reacciona
-          <em>distinto</em> a cada falla.
+          La protección termomagnética combina un mecanismo térmico, asociado a sobrecargas,
+          y uno magnético, asociado a corrientes elevadas de cortocircuito. No existe un tiempo
+          único de disparo: debe consultarse la curva tiempo-corriente y la documentación del fabricante.
         </p>
       </div>
 
@@ -59,12 +63,12 @@ export function render(container) {
       timer = null;
       barra.style.width = "0%";
       barra.className = "corr-fill";
-      lectI.textContent = `${NOMINAL_A} A`;
-      cron.textContent = "0 ms";
+      lectI.textContent = "Sin magnitud calculada";
+      cron.textContent = "En espera";
       estado.textContent = "En espera";
       estado.className = "corr-estado";
       btn.disabled = false;
-      btn.textContent = tipo === "corto" ? "Provocar cortocircuito" : "Provocar sobrecarga";
+      btn.textContent = tipo === "corto" ? "Ver respuesta magnética" : "Ver respuesta térmica";
     }
 
     function disparo(msg) {
@@ -83,29 +87,23 @@ export function render(container) {
         return;
       }
       btn.disabled = true;
-      estado.textContent = "Falla en curso…";
+      estado.textContent = "Representación conceptual en curso…";
       estado.className = "corr-estado corr-estado--activo";
 
       if (tipo === "corto") {
-        // Cortocircuito: pico instantáneo, disparo magnético (<20 ms).
-        const pico = NOMINAL_A * 50;
-        lectI.textContent = `${pico} A`;
+        lectI.textContent = "Corriente elevada (no calculada)";
         barra.style.width = "100%";
-        cron.textContent = "≈ 15 ms";
-        setTimeout(() => disparo("Disparo MAGNÉTICO inmediato (< 20 ms)"), 450);
+        cron.textContent = "Respuesta rápida (conceptual)";
+        setTimeout(() => disparo("Mecanismo MAGNÉTICO: respuesta rápida en el modelo"), 450);
       } else {
-        // Sobrecarga: sube gradual y el bimetálico tarda (curva térmica).
-        const objetivo = Math.round(NOMINAL_A * 1.6); // 16 A ≈ 160 %
-        const tripMs = 4000; // el bimetálico tarda unos segundos
+        lectI.textContent = "Sobrecorriente (sin escala real)";
+        const tripMs = 4000;
         const t0 = performance.now();
         timer = setInterval(() => {
-          const t = performance.now() - t0;
-          const prog = Math.min(t / tripMs, 1);
-          const iAhora = Math.round(NOMINAL_A + (objetivo - NOMINAL_A) * Math.min(prog * 1.4, 1));
-          lectI.textContent = `${iAhora} A`;
-          barra.style.width = `${40 + prog * 60}%`;
-          cron.textContent = `${(t / 1000).toFixed(1)} s`;
-          if (prog >= 1) disparo("Disparo TÉRMICO tras la sobrecarga (curva térmica)");
+          const prog = Math.min((performance.now() - t0) / tripMs, 1);
+          barra.style.width = `${prog * 100}%`;
+          cron.textContent = "Progreso visual, no tiempo de disparo";
+          if (prog >= 1) disparo("Mecanismo TÉRMICO: respuesta retardada en el modelo");
         }, 100);
       }
     });
@@ -120,8 +118,8 @@ function escenarioHTML(id, titulo, desc) {
       <h3>${titulo}</h3>
       <p class="escenario-desc">${desc}</p>
       <div class="corr-medida">
-        <span class="corr-valor">${NOMINAL_A} A</span>
-        <span class="corr-cron">0 ms</span>
+        <span class="corr-valor">Sin magnitud calculada</span>
+        <span class="corr-cron">En espera</span>
       </div>
       <div class="corr-barra"><div class="corr-fill"></div></div>
       <p class="corr-estado">En espera</p>

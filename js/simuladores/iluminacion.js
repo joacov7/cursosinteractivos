@@ -1,12 +1,11 @@
 // Simulador Iluminación (spec 2.5).
-// Tipos de lámpara (incandescente vs LED) y su consumo real. El alumno arma un
-// circuito de iluminación con varias bocas y verifica que entre en la térmica
-// de 10 A (cable de 1.5 mm²).
+// Compara potencias nominales y estima corriente en un escenario didáctico.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgIluminacion } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
-  "El circuito de iluminación se protege con térmica de 10 A y cable de 1.5 mm². " +
+  "La protección y la sección del conductor deben calcularse para la instalación real. " +
   "No cuelgues tomas de fuerza del circuito de luces.";
 
 const V = 220;
@@ -28,9 +27,11 @@ export function render(container) {
 
       <h2>Simulador: Iluminación</h2>
       <p class="sim-intro">
-        Mismo nivel de luz, distinto consumo: una LED de 9 W ilumina como una incandescente de 60 W.
-        Armá un circuito de iluminación y fijate cuántas bocas entran en la térmica de ${LIMITE_A} A.
+        Compará el consumo nominal de lámparas LED e incandescentes. La equivalencia de iluminación
+        depende del flujo luminoso (lúmenes) y la eficacia de cada modelo, no solo de los watts.
       </p>
+
+      ${svgIluminacion()}
 
       <div class="controles">
         <label>
@@ -46,6 +47,7 @@ export function render(container) {
         </label>
       </div>
 
+      <p class="nota-modelo">Modelo ideal a 220 V: suma watts nominales y calcula I = P/V. El límite de 10 A es solo un supuesto didáctico; no vincula automáticamente una térmica con 1,5 mm² ni contempla factor de potencia, corriente de arranque, temperatura, método de instalación o reglamentación. Para comparar luz, revisar lúmenes y especificaciones del fabricante.</p>\n      <p class="nota-modelo">Modelo ideal a 220 V: suma watts nominales y calcula I = P/V. El límite de 10 A es solo un supuesto didáctico; no vincula automáticamente una térmica con 1,5 mm² ni contempla factor de potencia, corriente de arranque, temperatura, método de instalación o reglamentación. Para comparar luz, revisá los lúmenes y las especificaciones del fabricante.</p>
       <div id="ilum-resultado" class="resultado" aria-live="polite"></div>
 
       <div class="comparacion">
@@ -80,8 +82,8 @@ export function render(container) {
       <div class="resultado-cabecera">
         <span class="badge">${sobre ? "✖ Supera la térmica" : "✔ Entra en el circuito"}</span>
         <p>${sobre
-          ? `Con ${bocas} bocas ${TIPOS[tipo].nombre} el circuito pide ${corriente.toFixed(1)} A y la térmica de ${LIMITE_A} A cortará. Máximo con esta lámpara: ${maxBocas} bocas.`
-          : `${bocas} bocas ${TIPOS[tipo].nombre} consumen ${corriente.toFixed(1)} A: entran holgado. Con esta lámpara entran hasta ${maxBocas} bocas.`}</p>
+          ? `Con ${bocas} bocas ${TIPOS[tipo].nombre} la corriente ideal estimada es ${corriente.toFixed(1)} A, por encima del límite supuesto de ${LIMITE_A} A en este ejercicio. No se calcula el tiempo de actuación de una protección real.`
+          : `${bocas} bocas ${TIPOS[tipo].nombre} representan ${corriente.toFixed(1)} A en el modelo ideal, por debajo del límite supuesto. Esto no valida la cantidad de bocas ni el dimensionamiento real.`}</p>
       </div>
       <div class="valores">
         <span>Potencia total: <strong>${potencia} W</strong></span>

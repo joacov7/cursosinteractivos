@@ -5,6 +5,7 @@
 // protección actúe.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgTierra } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Toda carcasa metálica de un artefacto debe estar conectada a tierra. Ante " +
@@ -23,6 +24,8 @@ export function render(container) {
         carcasa metálica y la deja energizada. Probá qué pasa con y sin puesta a tierra.
       </p>
 
+      ${svgTierra()}
+
       <label class="switch-tierra">
         <input type="checkbox" id="chk-tierra" />
         <span>Conectar puesta a tierra en el artefacto</span>
@@ -37,17 +40,17 @@ export function render(container) {
         <div class="tierra-camino" id="camino"></div>
       </div>
 
-      <button type="button" id="btn-tocar" class="btn-primario">Tocar la carcasa</button>
+      <button type="button" id="btn-tocar" class="btn-primario">Simular contacto accidental</button>
 
       <div id="tierra-resultado" class="resultado" aria-live="polite" hidden></div>
 
       <div class="comparacion">
         <h3>La idea central</h3>
         <p>
-          La tierra <strong>no evita</strong> la falla de aislación: la falla sigue ahí. Lo que hace
-          es dar un <strong>camino seguro</strong> a la corriente de falla, para que la protección
-          (térmica y, sobre todo, el diferencial) la detecte y corte antes de que una persona
-          sea el camino a tierra.
+          La tierra <strong>no evita</strong> la falla de aislación. El PE proporciona una trayectoria
+          para la corriente de falla; la desconexión automática depende del esquema de puesta a tierra,
+          la impedancia del lazo, las protecciones y sus tiempos de actuación. No se debe asumir seguridad
+          sin ensayos y mediciones.
         </p>
       </div>
 
@@ -64,11 +67,11 @@ export function render(container) {
   function actualizarEscena() {
     const conTierra = chk.checked;
     carcasa.classList.toggle("tierra-carcasa--energizada", !conTierra);
-    carcasa.classList.toggle("tierra-carcasa--segura", conTierra);
-    tensionCarcasa.textContent = conTierra ? "≈ 0 V" : "220 V";
+    carcasa.classList.toggle("tierra-carcasa--con-pe", conTierra);
+    tensionCarcasa.textContent = conTierra ? "Falla derivada por PE" : "Masa potencialmente energizada";
     camino.textContent = conTierra
-      ? "Corriente de falla → cable de tierra → la protección corta"
-      : "Sin camino a tierra: la carcasa queda a 220 V";
+      ? "Camino de falla por PE → verificar actuación y tiempo de desconexión"
+      : "Sin PE: la masa puede quedar a potencial peligroso";
     camino.className = `tierra-camino ${conTierra ? "tierra-camino--ok" : "tierra-camino--peligro"}`;
     resultado.hidden = true;
   }
@@ -80,18 +83,19 @@ export function render(container) {
       resultado.className = "resultado resultado--ok";
       resultado.innerHTML = `
         <div class="resultado-cabecera">
-          <span class="badge">✔ Protegido</span>
-          <p>La corriente de falla ya circuló por el cable de tierra y la protección
-          cortó. La carcasa está a ≈ 0 V: tocarla es seguro.</p>
+          <span class="badge">Camino de falla disponible</span>
+          <p>El PE ofrece una trayectoria para la corriente de falla y puede facilitar la desconexión
+          automática si el sistema de puesta a tierra y las protecciones están correctamente diseñados
+          y verificados. Esta animación no demuestra una tensión de contacto segura ni un tiempo de corte.</p>
         </div>`;
     } else {
       resultado.className = "resultado resultado--falla";
       resultado.innerHTML = `
         <div class="resultado-cabecera">
-          <span class="badge">✖ Riesgo de electrocución</span>
-          <p>Sin puesta a tierra, la carcasa está a 220 V. Al tocarla, tu cuerpo se
-          vuelve el camino a tierra y circula corriente por vos. La térmica sola no
-          se entera (no es una sobrecarga): por eso hace falta también un diferencial.</p>
+          <span class="badge">Riesgo de contacto eléctrico</span>
+          <p>Sin PE, una falla de aislación puede dejar la masa a un potencial peligroso.
+          Una persona podría convertirse en parte del camino de corriente. No realices esta prueba
+          en una instalación real: se requieren verificaciones instrumentales y protecciones adecuadas.</p>
         </div>`;
     }
   });

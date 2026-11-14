@@ -3,6 +3,7 @@
 // resistencia, y calcula la corriente (I = V/R) y la potencia (P = V·I).
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgOhm } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Medir tensión con el multímetro se hace con el circuito energizado y mucho " +
@@ -47,6 +48,8 @@ export function render(container) {
         Un circuito resistivo simple: una fuente y una resistencia. Medí con el
         multímetro la tensión y la resistencia, y calculá la corriente y la potencia.
       </p>
+
+      ${svgOhm()}
 
       <div class="ohm-circuito" aria-hidden="true">
         <span class="ohm-fuente">⎓ Fuente</span>

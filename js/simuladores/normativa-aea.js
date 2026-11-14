@@ -4,6 +4,7 @@
 // la reglamentación como referencia.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgNormativa } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "La reglamentación existe para que las instalaciones sean seguras. Ante la duda, " +
@@ -60,6 +61,8 @@ export function render(container) {
           referencia para instalaciones eléctricas. No hay que memorizar el articulado, sí saber
           <strong>cuándo consultarla</strong>. Decidí en cada situación.
         </p>
+
+      ${svgNormativa()}
 
         <div class="aea-progreso">Situación ${i + 1} de ${SITUACIONES.length}</div>
         <div class="diag-sintoma">${s.texto}</div>

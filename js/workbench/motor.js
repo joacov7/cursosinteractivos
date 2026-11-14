@@ -1,105 +1,146 @@
-// Motor de cálculo eléctrico del banco de trabajo.
-// Reutiliza las reglas del simulador Cable + Térmica (I = P/V, ampacidad del
-// cable, dimensionamiento de la térmica) sobre el grafo Node/Port/Edge.
-//
-// Estados posibles del circuito:
-//   incompleto  - no hay un lazo fuente → carga → fuente
-//   seguro      - la carga entra en el cable y la protección es correcta
-//   sobrecarga  - la corriente supera la capacidad del cable (se calienta/humea)
-//   salta       - la térmica corta antes (protege) porque I supera su corriente
+// Motor didáctico del banco de trabajo.
+// Evalúa caminos eléctricos en un grafo de bornes. El modelo representa una
+// fuente monofásica, cargas y térmicas ideales; no reemplaza un cálculo normativo.
 
 import { TENSION, idGlobalPuerto } from "./modelo.js";
 
-// Construye la lista de adyacencia entre bornes (grafo no dirigido).
-function adyacencia(nodes, edges) {
+function adyacencia(nodes, edges, termicaExcluida = null) {
   const ady = new Map();
-  const add = (a, b) => {
-    if (!ady.has(a)) ady.set(a, new Set());
-    ady.get(a).add(b);
+  const add = (a, b, dato) => {
+    if (!ady.has(a)) ady.set(a, []);
+    ady.get(a).push({ to: b, ...dato });
   };
-  // Conexiones dibujadas (cables).
+
   for (const e of edges) {
-    add(e.desde, e.hasta);
-    add(e.hasta, e.desde);
+    add(e.desde, e.hasta, { edgeId: e.id, capacidadA: e.capacidadA });
+    add(e.hasta, e.desde, { edgeId: e.id, capacidadA: e.capacidadA });
   }
-  // Paso interno de la térmica: la corriente atraviesa de "in" a "out".
+
   for (const n of nodes) {
-    if (n.tipo === "termica") {
-      const gin = idGlobalPuerto(n.id, "in");
-      const gout = idGlobalPuerto(n.id, "out");
-      add(gin, gout);
-      add(gout, gin);
-    }
+    if (n.tipo !== "termica" || n.id === termicaExcluida) continue;
+    const gin = idGlobalPuerto(n.id, "in");
+    const gout = idGlobalPuerto(n.id, "out");
+    add(gin, gout, { thermalId: n.id });
+    add(gout, gin, { thermalId: n.id });
   }
   return ady;
 }
 
-function alcanzables(ady, origen) {
-  const visto = new Set([origen]);
+function camino(ady, origen, destino) {
   const cola = [origen];
+  const previo = new Map([[origen, null]]);
   while (cola.length) {
     const actual = cola.shift();
-    for (const sig of ady.get(actual) || []) {
-      if (!visto.has(sig)) {
-        visto.add(sig);
-        cola.push(sig);
+    if (actual === destino) break;
+    for (const paso of ady.get(actual) || []) {
+      if (!previo.has(paso.to)) {
+        previo.set(paso.to, { desde: actual, ...paso });
+        cola.push(paso.to);
       }
     }
   }
-  return visto;
+  if (!previo.has(destino)) return null;
+  const pasos = [];
+  let actual = destino;
+  while (actual !== origen) {
+    const p = previo.get(actual);
+    pasos.push(p);
+    actual = p.desde;
+  }
+  return pasos.reverse();
+}
+
+function termicaEnSerie(nodes, edges, origen, destino, termicas) {
+  const base = adyacencia(nodes, edges);
+  const caminoBase = camino(base, origen, destino);
+  if (!caminoBase) return [];
+  return termicas.filter((t) => {
+    const sinTermica = adyacencia(nodes, edges, t.id);
+    return camino(sinTermica, origen, destino) === null;
+  });
 }
 
 /**
- * Evalúa el circuito armado.
- * @param {Node[]} nodes
- * @param {Edge[]} edges
- * @returns {{estado:string, I:number, capCable:number|null, breaker:number|null,
- *            warnings:string[], edgesActivos:string[], termicasActivas:string[]}}
+ * Resultado:
+ * incompleto | seguro | inseguro | sobrecarga | salta
+ *
+ * Las capacidades de CABLES son valores didácticos simplificados. No consideran
+ * método de instalación, material, aislación, temperatura, agrupamiento ni caída.
  */
 export function evaluarCircuito(nodes, edges) {
   const fuente = nodes.find((n) => n.tipo === "fuente");
   const cargas = nodes.filter((n) => n.tipo === "carga");
-  const base = { estado: "incompleto", I: 0, capCable: null, breaker: null, warnings: [], edgesActivos: [], termicasActivas: [] };
+  const base = {
+    estado: "incompleto", I: 0, capCable: null, breaker: null,
+    warnings: [], edgesActivos: [], termicasActivas: [],
+    potenciaTotalW: 0, cargasConectadas: [],
+  };
+  if (!fuente || !cargas.length || !edges.length) return base;
 
-  if (!fuente || cargas.length === 0 || edges.length === 0) return base;
-
-  const ady = adyacencia(nodes, edges);
   const fF = idGlobalPuerto(fuente.id, "F");
   const fN = idGlobalPuerto(fuente.id, "N");
-  const desdeF = alcanzables(ady, fF);
-  const desdeN = alcanzables(ady, fN);
+  const termicas = nodes.filter((n) => n.tipo === "termica");
+  const edgesPorId = new Map(edges.map((e) => [e.id, e]));
+  const caminosCarga = [];
 
-  // Cargas energizadas: su F llega a la fase de la fuente y su N al neutro.
-  const energizadas = cargas.filter(
-    (c) => desdeF.has(idGlobalPuerto(c.id, "F")) && desdeN.has(idGlobalPuerto(c.id, "N"))
-  );
-  if (energizadas.length === 0) return base;
+  for (const carga of cargas) {
+    const cF = idGlobalPuerto(carga.id, "F");
+    const cN = idGlobalPuerto(carga.id, "N");
+    const fase = camino(adyacencia(nodes, edges), fF, cF);
+    const neutro = camino(adyacencia(nodes, edges), cN, fN);
+    if (!fase || !neutro) continue;
+    const protecciones = termicaEnSerie(nodes, edges, fF, cF, termicas);
+    caminosCarga.push({ carga, fase, neutro, protecciones });
+  }
 
-  const I = energizadas.reduce((acc, c) => acc + c.props.potencia / TENSION, 0);
+  if (!caminosCarga.length) return base;
 
-  // Cable limitante: la menor ampacidad entre los tramos dibujados.
-  const capCable = Math.min(...edges.map((e) => e.capacidadA));
+  const I = caminosCarga.reduce((s, x) => s + Number(x.carga.props.potencia || 0) / TENSION, 0);
+  const activos = new Set();
+  const termicasActivas = new Set();
+  let capCable = Infinity;
+  let breaker = Infinity;
+  let sinProteccionSerie = false;
 
-  // Térmica en la fase: aquella cuyos bornes in/out están en el lado de la fase.
-  const termicasActivas = nodes
-    .filter((n) => n.tipo === "termica")
-    .filter((n) => desdeF.has(idGlobalPuerto(n.id, "in")) && desdeF.has(idGlobalPuerto(n.id, "out")));
-  const breaker = termicasActivas.length
-    ? Math.min(...termicasActivas.map((t) => t.props.corriente))
-    : null;
+  for (const x of caminosCarga) {
+    for (const paso of [...x.fase, ...x.neutro]) {
+      if (paso.edgeId) {
+        activos.add(paso.edgeId);
+        const edge = edgesPorId.get(paso.edgeId);
+        if (edge && Number.isFinite(edge.capacidadA)) capCable = Math.min(capCable, edge.capacidadA);
+      }
+    }
+    if (!x.protecciones.length) {
+      sinProteccionSerie = true;
+    } else {
+      for (const t of x.protecciones) {
+        termicasActivas.add(t.id);
+        breaker = Math.min(breaker, Number(t.props.corriente));
+      }
+    }
+  }
+
+  if (!Number.isFinite(capCable)) capCable = null;
+  if (!Number.isFinite(breaker)) breaker = null;
 
   const warnings = [];
-  if (breaker === null) warnings.push("No hay térmica protegiendo el circuito.");
-  else if (breaker > capCable)
-    warnings.push(`La térmica (${breaker} A) es mayor que la capacidad del cable (${capCable} A): no lo protege.`);
+  if (sinProteccionSerie || breaker === null) {
+    warnings.push("No hay una térmica en serie que proteja la fase de todas las cargas.");
+  }
+  if (breaker !== null && capCable !== null && breaker > capCable) {
+    warnings.push(`La térmica (${breaker} A) supera la capacidad del cable (${capCable} A): no lo protege.`);
+  }
 
-  let estado;
-  if (breaker !== null && I > breaker) estado = "salta";
-  else if (I > capCable) estado = "sobrecarga";
-  else estado = "seguro";
-
-  // Tramos "activos": los que conducen (todos los del lazo, MVP: todos).
-  const edgesActivos = edges.map((e) => e.id);
+  let estado = "seguro";
+  if (capCable === null) {
+    estado = "incompleto";
+  } else if (I > capCable && (sinProteccionSerie || breaker === null || breaker > capCable)) {
+    estado = "sobrecarga";
+  } else if (breaker !== null && I > breaker) {
+    estado = "salta";
+  } else if (sinProteccionSerie || breaker === null || breaker > capCable) {
+    estado = "inseguro";
+  }
 
   return {
     estado,
@@ -107,7 +148,9 @@ export function evaluarCircuito(nodes, edges) {
     capCable,
     breaker,
     warnings,
-    edgesActivos,
-    termicasActivas: termicasActivas.map((t) => t.id),
+    edgesActivos: [...activos],
+    termicasActivas: [...termicasActivas],
+    potenciaTotalW: caminosCarga.reduce((s, x) => s + Math.max(0, Number(x.carga.props.potencia) || 0), 0),
+    cargasConectadas: caminosCarga.map((x) => ({ id: x.carga.id, nombre: x.carga.props.nombre || "Carga", potenciaW: Math.max(0, Number(x.carga.props.potencia) || 0) })),
   };
 }
