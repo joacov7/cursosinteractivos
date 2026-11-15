@@ -22,6 +22,12 @@ function adyacencia(nodes, edges, termicaExcluida = null) {
     const gout = idGlobalPuerto(n.id, "out");
     add(gin, gout, { thermalId: n.id });
     add(gout, gin, { thermalId: n.id });
+    if (n.props?.polos === 2) {
+      const ginN = idGlobalPuerto(n.id, "inN");
+      const goutN = idGlobalPuerto(n.id, "outN");
+      add(ginN, goutN, { thermalId: n.id });
+      add(goutN, ginN, { thermalId: n.id });
+    }
   }
   return ady;
 }
@@ -56,7 +62,14 @@ function termicaEnSerie(nodes, edges, origen, destino, termicas) {
   if (!caminoBase) return [];
   return termicas.filter((t) => {
     const sinTermica = adyacencia(nodes, edges, t.id);
-    return camino(sinTermica, origen, destino) === null;
+    if (camino(sinTermica, origen, destino) !== null) return false;
+    if (t.props?.polos === 2) {
+      const neutro = nodes.find((n) => n.tipo === "fuente");
+      const carga = nodes.find((n) => n.tipo === "carga");
+      if (!neutro || !carga) return false;
+      return camino(sinTermica, idGlobalPuerto(carga.id, "N"), idGlobalPuerto(neutro.id, "N")) === null;
+    }
+    return true;
   });
 }
 
