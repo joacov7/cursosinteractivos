@@ -56,8 +56,10 @@ const PUERTOS = {
     { id: "N", tipo: "N", dx: NODO_W, dy: NODO_H * 0.7 },
   ],
   termica: [
-    { id: "in", tipo: "F", dx: 0, dy: NODO_H / 2 },
-    { id: "out", tipo: "F", dx: NODO_W, dy: NODO_H / 2 },
+    { id: "in", tipo: "F", dx: 0, dy: NODO_H * 0.33 },
+    { id: "out", tipo: "F", dx: NODO_W, dy: NODO_H * 0.33 },
+    { id: "inN", tipo: "N", dx: 0, dy: NODO_H * 0.7 },
+    { id: "outN", tipo: "N", dx: NODO_W, dy: NODO_H * 0.7 },
   ],
   carga: [
     { id: "F", tipo: "F", dx: 0, dy: NODO_H * 0.33 },
@@ -67,7 +69,7 @@ const PUERTOS = {
 
 const PROPS_DEFAULT = {
   fuente: { tension: TENSION },
-  termica: { corriente: 16 },
+  termica: { corriente: 16, polos: 1 },
   carga: { potencia: CARGAS[2].potencia, nombre: CARGAS[2].nombre },
 };
 
@@ -89,7 +91,7 @@ export function crearNodo(tipo, x, y) {
     x: snap(x),
     y: snap(y),
     props: { ...PROPS_DEFAULT[tipo] },
-    ports: PUERTOS[tipo].map((p) => ({ ...p })),
+    ports: PUERTOS[tipo].filter((p) => tipo !== "termica" || p.tipo === "F" || PROPS_DEFAULT[tipo].polos === 2).map((p) => ({ ...p })),
   };
 }
 
