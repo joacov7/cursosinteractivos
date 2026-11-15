@@ -1,11 +1,11 @@
 // Simulador Cable + Térmica (spec 1.2 y 1.3).
 // El alumno elige una carga, una sección de cable y una térmica, y comprueba
 // las tres reglas de falla:
-//   - load > capacidad_cable        → el cable se calienta / humea
-//   - breaker < load                → la térmica corta apenas se usa (falla "chica")
-//   - breaker > capacidad_cable     → la térmica no protege al cable (falla "grande")
+//   - compara la corriente de carga con ampacidades asumidas en este escenario
+//   - identifica incompatibilidades didácticas sin calcular temperatura ni curva de disparo
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgCableBreaker } from "../visuales.js";
 
 // Cargas típicas (corriente aproximada a 220 V).
 const CARGAS = [
@@ -17,7 +17,7 @@ const CARGAS = [
   { id: "cocina", nombre: "Anafe/horno eléctrico", corriente_A: 30 },
 ];
 
-// Cables disponibles: sección → capacidad de corriente (ampacidad).
+// Valores de ampacidad supuestos para el escenario didáctico; no son una tabla normativa universal.
 const CABLES = [
   { seccion_mm2: 1.5, capacidad_A: 10 },
   { seccion_mm2: 2.5, capacidad_A: 16 },
@@ -30,8 +30,7 @@ const CABLES = [
 const BREAKERS = [6, 10, 16, 20, 25, 32, 40];
 
 const RECORDATORIO_SEGURIDAD =
-  "En la vida real, antes de intervenir un circuito: cortá la llave general y " +
-  "verificá ausencia de tensión con el buscapolos. Usá herramientas aisladas.";
+  "Antes de intervenir: aislá todas las fuentes, evitá la reconexión y verificá ausencia de tensión con un instrumento adecuado y comprobado. Usá herramientas y EPP apropiados.";
 
 function evaluar(loadA, capacidadCableA, breakerA) {
   const problemas = [];
@@ -41,10 +40,10 @@ function evaluar(loadA, capacidadCableA, breakerA) {
     problemas.push({
       tipo: "cable",
       severidad: "peligro",
-      titulo: "El cable se sobrecalienta",
+      titulo: "La carga supera la capacidad supuesta del conductor",
       detalle:
         `La carga (${loadA} A) supera la capacidad del cable (${capacidadCableA} A). ` +
-        "El conductor se calienta, la aislación se degrada y puede humear o iniciar fuego.",
+        "La combinación excede la capacidad de corriente asumida en este ejercicio. El modelo no calcula temperatura, degradación de aislación ni riesgo de incendio real.",
     });
   }
 
@@ -53,10 +52,10 @@ function evaluar(loadA, capacidadCableA, breakerA) {
     problemas.push({
       tipo: "breaker_chico",
       severidad: "molesto",
-      titulo: "La térmica corta apenas se usa el circuito",
+      titulo: "La corriente de carga supera la corriente nominal de la térmica",
       detalle:
         `La térmica (${breakerA} A) es menor que la carga (${loadA} A), así que ` +
-        "dispara ni bien la carga entra en régimen. No es peligroso, pero el circuito es inutilizable.",
+        "puede provocar una actuación ante una sobrecorriente sostenida. El tiempo de disparo depende de la curva, la temperatura y el dispositivo real; no es necesariamente instantáneo.",
     });
   }
 
@@ -65,11 +64,10 @@ function evaluar(loadA, capacidadCableA, breakerA) {
     problemas.push({
       tipo: "breaker_grande",
       severidad: "peligro",
-      titulo: "La térmica no protege al cable",
+      titulo: "La protección nominal supera la capacidad supuesta del conductor",
       detalle:
         `La térmica (${breakerA} A) es mayor que la capacidad del cable (${capacidadCableA} A). ` +
-        "Ante una sobrecarga, el cable llega a temperatura peligrosa antes de que la térmica dispare. " +
-        "La térmica se dimensiona en relación al cable, nunca por encima de su capacidad.",
+        "La coordinación entre protección y conductor no cumple la regla simplificada de este ejercicio. La evaluación real requiere capacidad admisible corregida, corriente de diseño y características del dispositivo.",
     });
   }
 
@@ -78,7 +76,7 @@ function evaluar(loadA, capacidadCableA, breakerA) {
     ok,
     problemas,
     resumen: ok
-      ? "Combinación correcta: la carga entra en el cable y la térmica protege al cable sin cortar de más."
+      ? "Combinación compatible con los supuestos del ejercicio. No valida una instalación real."
       : "Combinación inválida. Revisá las observaciones.",
   };
 }
@@ -96,10 +94,13 @@ export function render(container) {
 
       <h2>Simulador: Cable + Térmica</h2>
       <p class="sim-intro">
-        Elegí la carga del circuito, la sección del cable y la térmica. El objetivo es que
-        <strong>la carga entre en el cable</strong> y que <strong>la térmica proteja al cable</strong>
-        (dimensionada en relación al cable, no a la carga).
+        Elegí una carga, una sección de conductor y una protección. Compará la corriente de carga
+        con los valores supuestos del escenario; la actividad no dimensiona una instalación real.
       </p>
+
+      ${svgCableBreaker()}
+
+      <p class="nota-modelo"><strong>Modelo didáctico:</strong> las capacidades asignadas a cada sección son valores simplificados del escenario. La ampacidad real depende del material, aislación, método de instalación, temperatura, agrupamiento, cantidad de conductores cargados y otras condiciones. No uses esta tabla para elegir cables o térmicas en una instalación.</p>
 
       <div class="controles">
         <label>
@@ -157,7 +158,7 @@ export function render(container) {
     resultado.className = `resultado ${r.ok ? "resultado--ok" : "resultado--falla"}`;
     resultado.innerHTML = `
       <div class="resultado-cabecera">
-        <span class="badge">${r.ok ? "✔ Correcto" : "✖ Falla"}</span>
+        <span class="badge">${r.ok ? "✔ Compatible en el modelo" : "✖ Revisar combinación"}</span>
         <p>${r.resumen}</p>
       </div>
       <div class="valores">

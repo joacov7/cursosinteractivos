@@ -3,6 +3,7 @@
 // componente en falla: capacitor de arranque, relé de arranque o protector térmico.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgCompresor } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Antes de tocar un compresor: cortá la alimentación y descargá el capacitor " +
@@ -61,6 +62,8 @@ export function render(container) {
         <p class="sim-intro">
           Un compresor no arranca. Leé los síntomas y diagnosticá qué componente está fallando.
         </p>
+
+      ${svgCompresor()}
 
         <div class="diag-sintoma">
           <strong>Síntomas:</strong> ${escenario.sintoma}

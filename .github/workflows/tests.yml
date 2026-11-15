@@ -1,0 +1,15 @@
+name: Tests
+on:
+  push:
+    branches: [improve/ux-visual-audit]
+  pull_request:
+    branches: [claude/new-session-gjpwc5]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm test

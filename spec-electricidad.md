@@ -166,14 +166,28 @@ Regla de diseño: la seguridad no es un módulo aparte, es un elemento presente 
 
 ---
 
-## 6. Estado actual vs. pendiente
+## 6. Estado actual
 
-**Ya construido (prototipo funcional):**
-- Simulador de cable + térmica con las 3 reglas de falla (1.2 y 1.3)
+La currícula educativa de las secciones 1, 2 y 3 está implementada en la rama `improve/ux-visual-audit`:
 
-**Pendiente de construir (este documento es la spec):**
-- Resto de simulaciones de 1.1, 1.4, 1.5, 1.6 (básico)
-- Todo el intermedio y avanzado
-- Catálogo de componentes como base de datos consultable dentro de la app
-- Sistema de quiz de cierre por tema
-- Certificado al completar los 3 niveles
+- 16 temas distribuidos en los niveles básico, intermedio y avanzado.
+- 15 simuladores: Cable + Térmica cubre los temas 1.2 y 1.3.
+- Quizzes de cierre por tema, con explicaciones y umbral de aprobación.
+- Catálogo de componentes, progreso local y certificado educativo imprimible.
+- Banco de trabajo interactivo con retos, instrumentos virtuales, diagnósticos y análisis didáctico.
+- Diagramas SVG, navegación móvil y mejoras de accesibilidad.
+- Suite automatizada con 58 pruebas aprobadas en la última ejecución registrada para esta rama.
+
+### Límites que deben permanecer explícitos
+
+Las simulaciones son modelos educativos simplificados. No certifican dimensionamiento, coordinación de protecciones, tiempos de disparo, impedancia de cortocircuito, seguridad de contacto ni cumplimiento normativo. El progreso y el certificado se guardan localmente y no son verificables en un servidor.
+
+### Criterios pendientes antes del cierre educativo
+
+1. Recorrido manual de los 16 temas, quizzes, progreso y certificado en escritorio y móvil.
+2. Prueba táctil real del banco de trabajo en un dispositivo móvil, además de teclado y lector de pantalla.
+3. Revisión por electricista matriculado de los valores, supuestos, ejemplos, instrucciones de seguridad y referencias AEA/IRAM.
+4. Corregir hallazgos y volver a ejecutar todas las pruebas automatizadas.
+5. Revisar que README, interfaz y documentación no presenten los resultados didácticos como cálculos normativos o garantías de seguridad.
+
+Autenticación, pagos, sincronización de progreso y certificados verificables quedan fuera de esta versión educativa y se abordarán como una etapa comercial independiente.

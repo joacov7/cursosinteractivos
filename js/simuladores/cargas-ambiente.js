@@ -4,16 +4,17 @@
 // meter toda la casa en un solo circuito y sobrecargarlo.
 
 import { AVISO_EDUCATIVO } from "../../data/curricula.js";
+import { svgCargas } from "../visuales.js";
 
 const RECORDATORIO_SEGURIDAD =
   "Repartir la carga en circuitos separados no es opcional: evita sobrecargas, " +
   "acota las fallas y permite cortar un sector sin dejar toda la casa a oscuras.";
 
-// Circuitos disponibles y su límite práctico de corriente (según térmica/cable).
+// Límites de corriente supuestos para este ejercicio; no son valores de diseño.
 const CIRCUITOS = [
-  { id: "ilum", nombre: "Iluminación (10 A · 1.5 mm²)", limite: 10 },
-  { id: "tomas", nombre: "Tomas uso general (16 A · 2.5 mm²)", limite: 16 },
-  { id: "especial", nombre: "Uso especial AC/cocina (20 A · 4 mm²)", limite: 20 },
+  { id: "ilum", nombre: "Iluminación (límite didáctico 10 A)", limite: 10 },
+  { id: "tomas", nombre: "Tomas uso general (límite didáctico 16 A)", limite: 16 },
+  { id: "especial", nombre: "Uso especial AC/cocina (límite didáctico 20 A)", limite: 20 },
 ];
 
 // Artefactos de la vivienda (corriente aproximada a 220 V) y a qué tipo pertenecen.
@@ -40,8 +41,10 @@ export function render(container) {
       <h2>Simulador: Cálculo de cargas por ambiente</h2>
       <p class="sim-intro">
         Asigná cada artefacto a un circuito. La idea es <strong>no meter todo en uno</strong>:
-        separá iluminación, tomas de uso general y cargas especiales, y que ninguno supere su límite.
+        separá iluminación, tomas de uso general y cargas especiales, y compará la suma con el límite supuesto de cada circuito.
       </p>
+
+      ${svgCargas()}\n\n      <p class="nota-modelo"><strong>Modelo didáctico:</strong> las corrientes y los límites de cada circuito son supuestos de este ejercicio. No representan consumos medidos ni vinculan automáticamente una corriente con una sección de cable o una térmica. El diseño real requiere cálculo de demanda, conductores y protecciones según las condiciones de instalación y la reglamentación vigente.</p>
 
       <div class="cargas-grid">
         <div class="cargas-artefactos">
@@ -118,14 +121,14 @@ export function render(container) {
         sev: "peligro",
         t: "Circuito sobrecargado",
         d: sobrecargados.map((c) => `${c.nombre.split(" (")[0]} (${tot[c.id]} A > ${c.limite} A)`).join("; ") +
-          ". La térmica cortará o el cable se recalienta.",
+          ". El escenario supera el límite supuesto; esta simulación no calcula el disparo de la térmica ni la temperatura del conductor.",
       });
     if (malTipo.length)
       problemas.push({
         sev: "molesto",
         t: "Agrupamiento poco prolijo",
         d: "Conviene separar por tipo: " + malTipo.map((a) => a.nombre).join(", ") +
-          " no está en el circuito que le corresponde.",
+          " no está en el circuito sugerido para este ejercicio.",
       });
 
     const ok = problemas.length === 0;
@@ -133,7 +136,7 @@ export function render(container) {
     resultado.innerHTML = `
       <div class="resultado-cabecera">
         <span class="badge">${ok ? "✔ Diseño válido" : "✖ Revisá el diseño"}</span>
-        <p>${ok ? "Cargas repartidas y ningún circuito supera su límite. Así se dimensiona una instalación." : "Hay cosas para corregir."}</p>
+        <p>${ok ? "Cargas repartidas y ningún circuito supera los límites supuestos de esta actividad. Esto no dimensiona una instalación real." : "Hay cosas para corregir."}</p>
       </div>
       ${ok ? "" : `<ul class="problemas">${problemas
         .map((p) => `<li class="problema problema--${p.sev}"><span class="problema-titulo">${p.t}</span><span class="problema-detalle">${p.d}</span></li>`)

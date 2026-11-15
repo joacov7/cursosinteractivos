@@ -39,7 +39,7 @@ export function render(container, { onCambioProgreso } = {}) {
       <div class="controles cert-controles">
         <label>
           Nombre y apellido
-          <input type="text" id="cert-nombre" value="${nombre.replace(/"/g, "&quot;")}" placeholder="Tu nombre" />
+          <input type="text" id="cert-nombre" maxlength="100" autocomplete="name" placeholder="Tu nombre" />
         </label>
         <button type="button" id="cert-imprimir" class="btn-primario">Imprimir / Guardar PDF</button>
       </div>
@@ -49,7 +49,7 @@ export function render(container, { onCambioProgreso } = {}) {
           <p class="cert-encabezado">Cursos Interactivos · Módulo Electricidad</p>
           <p class="cert-titulo">Certificado de finalización</p>
           <p class="cert-otorga">Se certifica que</p>
-          <p class="cert-alumno" id="cert-alumno">${nombre || "—"}</p>
+          <p class="cert-alumno" id="cert-alumno">—</p>
           <p class="cert-detalle">
             completó satisfactoriamente el curso de <strong>Electricidad</strong>, aprobando los quizzes
             de los niveles <strong>Básico</strong>, <strong>Intermedio</strong> y <strong>Avanzado</strong>.
@@ -71,6 +71,8 @@ export function render(container, { onCambioProgreso } = {}) {
 
   const inputNombre = container.querySelector("#cert-nombre");
   const alumno = container.querySelector("#cert-alumno");
+  inputNombre.value = nombre;
+  alumno.textContent = nombre || "—";
 
   inputNombre.addEventListener("input", () => {
     const v = inputNombre.value.trim();
