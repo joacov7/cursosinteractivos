@@ -91,7 +91,10 @@ export function medirEntreBornes(nodes, edges, borneA, borneB, { energizada = tr
   const union = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent.set(ra, rb); };
   for (const e of edges) union(e.desde, e.hasta);
   for (const n of nodes) {
-    if (n.tipo === "termica") union(`${n.id}:in`, `${n.id}:out`);
+    if (n.tipo === "termica") {
+      union(`${n.id}:in`, `${n.id}:out`);
+      if (n.props?.polos === 2) union(`${n.id}:inN`, `${n.id}:outN`);
+    }
   }
   const a = find(borneA), b = find(borneB);
   const fuente = nodes.find((n) => n.tipo === "fuente");
@@ -137,7 +140,10 @@ export function medirResistenciaEntreBornes(nodes, edges, borneA, borneB, { ener
     };
     for (const e of edges) { addAbierta(e.desde, e.hasta); addAbierta(e.hasta, e.desde); }
     for (const n of nodes) {
-      if (n.tipo === "termica") { addAbierta(`${n.id}:in`, `${n.id}:out`); addAbierta(`${n.id}:out`, `${n.id}:in`); }
+      if (n.tipo === "termica") {
+        addAbierta(`${n.id}:in`, `${n.id}:out`); addAbierta(`${n.id}:out`, `${n.id}:in`);
+        if (n.props?.polos === 2) { addAbierta(`${n.id}:inN`, `${n.id}:outN`); addAbierta(`${n.id}:outN`, `${n.id}:inN`); }
+      }
     }
     const vistosAbierta = new Set([borneA]), colaAbierta = [borneA];
     while (colaAbierta.length) {
@@ -160,7 +166,10 @@ export function medirResistenciaEntreBornes(nodes, edges, borneA, borneB, { ener
   };
   for (const e of edges) { add(e.desde, e.hasta); add(e.hasta, e.desde); }
   for (const n of nodes) {
-    if (n.tipo === "termica") { add(`${n.id}:in`, `${n.id}:out`); add(`${n.id}:out`, `${n.id}:in`); }
+    if (n.tipo === "termica") {
+      add(`${n.id}:in`, `${n.id}:out`); add(`${n.id}:out`, `${n.id}:in`);
+      if (n.props?.polos === 2) { add(`${n.id}:inN`, `${n.id}:outN`); add(`${n.id}:outN`, `${n.id}:inN`); }
+    }
   }
   const vistos = new Set([inicio]), cola = [inicio];
   while (cola.length) {
