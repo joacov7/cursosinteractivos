@@ -91,7 +91,7 @@ export function crearNodo(tipo, x, y) {
     x: snap(x),
     y: snap(y),
     props: { ...PROPS_DEFAULT[tipo] },
-    ports: PUERTOS[tipo].filter((p) => tipo !== "termica" || p.tipo === "F" || PROPS_DEFAULT[tipo].polos === 2).map((p) => ({ ...p })),
+    ports: PUERTOS[tipo].map((p) => ({ ...p })),
   };
 }
 
