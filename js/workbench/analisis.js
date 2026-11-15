@@ -28,6 +28,7 @@ export function diagnosticarCargasConectadas(nodes = [], edges = [], tensionV = 
   for (const e of edges) { add(e.desde,e.hasta); add(e.hasta,e.desde); }
   for (const n of nodes) if (n.tipo === "termica") {
     add(`${n.id}:in`,`${n.id}:out`); add(`${n.id}:out`,`${n.id}:in`);
+    if (n.props?.polos === 2) { add(`${n.id}:inN`,`${n.id}:outN`); add(`${n.id}:outN`,`${n.id}:inN`); }
   }
   const alcanza = (origen,destino) => {
     const vistos = new Set([origen]), cola = [origen];
