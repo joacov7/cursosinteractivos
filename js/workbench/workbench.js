@@ -52,7 +52,7 @@ export function render(container) {
 
       <div class="wb-toolbar">
         <button type="button" data-add="fuente">+ Fuente 220V</button>
-        <button type="button" data-add="termica">+ Térmica</button>
+        <button type="button" data-add="termica">+ Térmica 1P</button>
         <button type="button" data-add="carga">+ Carga</button>
         <button type="button" id="wb-ejemplo">Cargar ejemplo</button>
         <button type="button" id="wb-limpiar">Limpiar</button>
@@ -172,9 +172,9 @@ export function render(container) {
     const hasta = container.querySelector("#wb-hasta");
     if (!desde || !hasta) return;
     const anteriorDesde = desde.value, anteriorHasta = hasta.value;
-    const opciones = estado.nodes.flatMap((n) => n.ports.map((p) => ({
+    const opciones = estado.nodes.flatMap((n) => n.ports.filter((p) => n.tipo !== "termica" || p.tipo === "F" || n.props.polos === 2).map((p) => ({
       value: idGlobalPuerto(n.id, p.id),
-      label: (n.tipo === "fuente" ? "Fuente " : n.tipo === "termica" ? "Térmica " : "Carga ") +
+      label: (n.tipo === "fuente" ? "Fuente " : n.tipo === "termica" ? `Térmica ${n.props.polos || 1}P ` : "Carga ") +
         n.id + " · " + (p.tipo === "F" ? "Fase" : "Neutro") + " · " + p.id,
     })));
     const html = opciones.map((o) => '<option value="' + o.value + '">' + o.label + '</option>').join("");
@@ -484,9 +484,10 @@ export function render(container) {
     const conducting = fuenteActiva && n.tipo === "termica" && r.termicasActivas.includes(n.id) && !tripped;
     const nombre =
       n.tipo === "fuente" ? (fuenteActiva ? "Fuente 220 V · ON" : "Fuente · OFF") :
-      n.tipo === "termica" ? "Térmica" : (n.props.nombre || "Carga");
+      n.tipo === "termica" ? `Térmica ${n.props.polos || 1}P` : (n.props.nombre || "Carga");
 
     const ports = n.ports
+      .filter((p) => n.tipo !== "termica" || p.tipo === "F" || n.props.polos === 2)
       .map((p) => {
         const pos = posPuerto(n, p);
         return `<circle class="wb-port wb-port--${p.tipo}" cx="${pos.x}" cy="${pos.y}" r="7"
@@ -554,8 +555,8 @@ export function render(container) {
       const n = nodo(seleccion.id);
       if (!n) { seleccion = null; return pintarProps(); }
       if (n.tipo === "termica") {
-        campos = selectHTML("Corriente de la térmica", "prop-termica",
-          TERMICAS.map((a) => [a, `${a} A`]), n.props.corriente);
+        campos = selectHTML("Polos", "prop-polos", [[1, "Unipolar (1P)"], [2, "Bipolar (2P)"]], n.props.polos || 1) +
+          selectHTML("Corriente nominal", "prop-termica", TERMICAS.map((a) => [a, `${a} A`]), n.props.corriente);
       } else if (n.tipo === "carga") {
         campos = selectHTML("Carga", "prop-carga",
           CARGAS.map((c) => [c.potencia, `${c.nombre} — ${(c.potencia / 220).toFixed(1)} A`]), n.props.potencia);
@@ -573,13 +574,15 @@ export function render(container) {
         <button type="button" id="wb-eliminar">Eliminar</button>
       </div>`;
 
-    const sel = panelProps.querySelector("select");
-    if (sel) sel.addEventListener("change", () => aplicarProp(sel.dataset.k, Number(sel.value)));
+    panelProps.querySelectorAll("select").forEach((sel) =>
+      sel.addEventListener("change", () => aplicarProp(sel.dataset.k, Number(sel.value)))
+    );
     panelProps.querySelector("#wb-eliminar").addEventListener("click", eliminarSeleccion);
   }
 
   function aplicarProp(k, valor) {
     if (k === "prop-termica") nodo(seleccion.id).props.corriente = valor;
+    if (k === "prop-polos") nodo(seleccion.id).props.polos = valor;
     if (k === "prop-carga") {
       const n = nodo(seleccion.id);
       const c = CARGAS.find((x) => x.potencia === valor);
